@@ -38,9 +38,9 @@
  * UART devices
  */
 #include <dev/usartmcf5.h>
-#define DEV_UART0       devUartMcf5_0
-#define DEV_UART1       devUartMcf5_1
-#define DEV_UART2       devUartMcf5_2
+#define DEV_UART0       devUartOldMcf5_0
+#define DEV_UART1       devUartOldMcf5_1
+#define DEV_UART2       devUartOldMcf5_2
 
 /*
  * Debug device.

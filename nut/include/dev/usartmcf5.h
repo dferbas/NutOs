@@ -44,4 +44,8 @@ extern NUTDEVICE devUartMcf5_0;
 extern NUTDEVICE devUartMcf5_1;
 extern NUTDEVICE devUartMcf5_2;
 
+extern NUTDEVICE devUartOldMcf5_0;
+extern NUTDEVICE devUartOldMcf5_1;
+extern NUTDEVICE devUartOldMcf5_2;
+
 #endif /* _USARTMCF5_H_ */

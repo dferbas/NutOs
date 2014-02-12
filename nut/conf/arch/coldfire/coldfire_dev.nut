@@ -970,4 +970,46 @@ nutarch_m68k_coldfire_devices =
             },
         },
     },
+
+    --
+    -- Old Usart0 Interface
+    --
+    {
+        name = "nutarch_m68k_coldfire_devices_old_uart0",
+        brief = "UART0 Driver Old",
+        description = "Hardware specific USART driver. Implements hardware "..
+                      "functions for the generic driver framework.\n\n"..
+                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
+        requires = { "HW_UART_COLDFIRE", "HW_UART0" },
+        provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
+        sources = { "m68k/coldfire/dev/common/mcf5_old_uart0.c" }
+    },
+    
+    --
+    -- Old Usart1 Interface
+    --
+    {
+        name = "nutarch_m68k_coldfire_devices_old_uart1",
+        brief = "UART1 Driver Old",
+        description = "Hardware specific USART driver. Implements hardware "..
+                      "functions for the generic driver framework.\n\n"..
+                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
+        requires = { "HW_UART_COLDFIRE", "HW_UART1" },
+        provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
+        sources = { "m68k/coldfire/dev/common/mcf5_old_uart1.c" }
+    },
+    
+    --
+    -- Old Usart2 Interface
+    --
+    {
+        name = "nutarch_m68k_coldfire_devices_old_uart2",
+        brief = "UART2 Driver Old",
+        description = "Hardware specific USART driver. Implements hardware "..
+                      "functions for the generic driver framework.\n\n"..
+                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
+        requires = { "HW_UART_COLDFIRE", "HW_UART2" },
+        provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
+        sources = { "m68k/coldfire/dev/common/mcf5_old_uart2.c" }
+    },
 }
