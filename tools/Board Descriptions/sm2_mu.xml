@@ -1,0 +1,40 @@
+﻿<?xml version="1.0"?>
+<!DOCTYPE board SYSTEM "board.dtd">
+<board>
+  <properties>
+    <description>
+      Board:	Solar Monitor 2
+	  CPU:		5225x
+    </description>
+    <property name="core">
+      v2
+    </property>
+    <property name="system-clock">
+      48MHz
+    </property>
+  </properties>
+  <feature name="coldfire.5225x.registers">
+    <space annex="cf-ctrl" name="cf_ctrl">
+      <!-- These offsets are the MOVEC address multiplied by 4 so
+           that the resulting address can be treated as a byte address.
+           -->
+      <reg bitsize="32" name="VBR" offset="0x2004"/>
+      <reg bitsize="32" name="FLASHBAR" offset="0x3010"/>
+      <reg bitsize="32" name="RAMBAR" offset="0x3014"/>
+    </space>
+  </feature>
+  <initialize>
+    <write-register address="VBR" value="0x00000000"/>
+    <write-register address="FLASHBAR" value="0x00000021"/>
+    <write-register address="RAMBAR1" value="0x20000021"/>
+    <write-memory address="0x40100074" value="0x0F" bits="8"/>
+  </initialize>
+  <memory-map>
+    <memory-device address="0x00000000" size="512K" type="flash" device="cfm">
+    	<property name="page-size">4K</property>
+    </memory-device>
+    <memory-device address="0x20000000" size="64K" type="ram" />
+    <memory-device address="0x40000000" size="2M" type="rom" />
+    <memory-device address="0x80000000" size="512K" type="ram" />
+  </memory-map>
+</board>

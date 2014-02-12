@@ -1,0 +1,35 @@
+
+OK .. rezignuju, revision se psat nebude. Takže jen historie.
+
+Jak tahle verze NutOS vznikla:
+
+  - vzala se stabilni verze nut_5.0
+  - na teto verzi se vyvynul Solar Monitor 2
+  - vyvoj byl rychly, takze se trochu prasilo
+
+  - chteli jsme zdrojaky commitnout na SourceForge primo do Nut/OS a tak vznikla nova vetev kodu
+    - Harald nam udelal branche z verze 5.0.5
+    - upravila se struktura konfiguraku tak, aby bylo mozne pridat vice procesoru
+    - postupne se pridavaly drivery
+    - cele se to nedodelalo, protoze prisla jina prioritnejsi prace
+    - po nejakem case Harald nas brange zakomponoval do hlavni vyvojove vetve
+
+  - prisel projekt bke
+    - jiny procesor nez Solar Monitor 2
+    - takze jsme to rozjeli na tom branchi od Haralda, protoze ten uz byl pripraveny pro vic procesoru
+    - zase se spechalo, takze se prasilo a kod se nepsal tak, aby se mohl dat na SourceForge
+    - dali jsme to do naseho SVNka pod jmenem nut_bke
+    - pak uz to nejak tunil David s Dusanem
+      - hacky do Nut/OS
+        - kriticke sekce nekompatibilni s Nut/OS
+        - multiwatchdog hacky
+        - prepisovani velikosti zasobniku
+        - mozna i dalsi .. vic uz jsem to nekontroloval a revision se nikdo neobtezoval psat
+
+  - chteli jsme sloucit ty nase dve verze nutu
+    - vzal jsem nut_bke a commitnul ho jako nut_5.0.5
+    - pouzil jsem novy konfigurator z instalatoru Nut/OS 5.2.2 - opravuje nejake chybky
+    - do toho jsem namergoval veci z nut_5.0 (Solar Monitor 2)
+
+A vysledkem je tohle.
+

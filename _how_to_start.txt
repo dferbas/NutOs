@@ -1,0 +1,113 @@
+----------------------------------------------------------------------------
+                                  Jak zacit
+----------------------------------------------------------------------------
+1) nainstalovat Eclipse verzi Indigo
+2) do Eclipsu nainstalovat plugin subclipse
+	- Eclipse -> Help/Install New Software
+	- Work with: Subclipse - http://subclipse.tigris.org/update_1.8.x
+3) stahni si zdrojaky a projekt z SVNka pomoci eclipsu 
+	- je v nem nastaveni C/C++ Indexeru
+4) nainstalovat toolchain
+	- pouzivame od Code Sourcery (Mentor Graphics) - Lite verzi
+		- http://www.mentor.com/embedded-software/codesourcery
+			- binarka: elf, platforma: m68k (freescale-coldfire-2011.09-21-m68k-elf.exe)
+		- tato verze neumi behem debugovani nahravat binarku do desky (pro nahrani je mozne pouzit aplikaci "tools/CF Flasher")
+		- nebo je mozne si stahnout mesicni plnou verzi Code Sourcery, ktera to umi.  
+		- u tehle varianty je potreba nainstalovat a alespon jednou spustit jejich eclipse (Code Bench) a zvalidovat licenci
+----------------------------------------------------------------------------	 
+5) nastavit windows path do adresare, kde je toolchain 
+	- napr. C:\Program Files\CodeSourcery\Sourcery_CodeBench_Lite_for_ColdFire_ELF\bin
+----------------------------------------------------------------------------
+6) konfigurace Nut/OS
+	- spust aplikaci ethernut_5\nutconf.exe, VSECHNY NASLEDUJICI KROKY SE DELAJI V TETO APLIKACI !!  
+	- po spusteni vyskoci okno pro nacteni konfigurace, vyber jednu z nasledujicich
+		- sm2_mu.conf .. pro desku SIM2
+	- nastavit toolchain
+		- Edit/Settings -> zalozka "Build" -> parametr "Platform" nastav na "m68k-gccdbg"
+	- vygenerovat adresar nutbld
+		- Build/Build NutOS
+	- vygenerovat adresar nutapp
+		- Build/Create Sample Directory
+----------------------------------------------------------------------------
+7) kompilace aplikaci a ethernutu
+	- nastav si Path do adresare kde jsou ethernutovske utility
+		- D:\workspace\ethernut_5\nut\tools\win32\
+	- spust Eclipse (verze Indigo)
+	- pro kompilaci aplikaci a Nut/OS jsou v eclipsu pripraveny MakeTargets 
+		- zobraz si je takto: Window/ShowView/MakeTargets
+			- spust target "ethernut - build & install"
+			- v konzoli (Window/ShowView/Console) by mel byt videt prubeh kompilace 
+			- spust target "simple - rebuild"
+			- v konzoli by mel byt opet videt prubeh kompilace, mela by se vytvorit binarka simple.elf
+----------------------------------------------------------------------------
+8) debugovani
+	- Lite verze nepodporuje nahravani kodu do zarizeni (gdb prikaz: load), 
+	  proto je potreba ho pred debugovanim nahrat napr. pomoci CF Flasheru
+	- nakopirovat následující konfiguraèní soubory do toolchainu
+		z  ethernut_5\tools\Board Descriptions\*
+		do C:\Program Files\CodeSourcery\Sourcery_CodeBench_Lite_for_ColdFire_ELF\m68k-elf\lib\boards
+	- nainstalovat Debugovaci plugin do eclipsu
+	- Help/Install New Software
+		- Work with: Indigo - http://download.eclipse.org/releases/indigo
+			- Mobile and Device Developement
+				- C/C++ GDB Hardware Debugging
+	- Run/Debug Configurations/GDB Hardware Debugging
+		- Mely by zde byt dve predpripravene konfigurace
+			- NutApp - Load and Run
+				- napali kod a spusti debugovani
+				- vyzaduje aby toolchain podporoval nahravani kodu, takze je potreba plna verze Code Sourcery (30 denni demo) 
+			- NutApp - Run
+				- pouze spusti debugovani
+				- funguje i s Lite verzi
+				- pred spustenim je potreba napalit kod pomoci "tools/CF Flasher"
+			- v obou pripadech je potreba pred spustenim nastavit spravnou adresu BDMka
+				- spust si ve woknech konzoli (windows start/run/cmd)
+					- m68k-elf-sprite -i
+						- pokud je BDM pripojene a funkcni, mel by se nekde obevit tento radek:
+							- pe://USBMultilink/PE6011819 - USB1 : USB-ML-CF Rev C (PE6011819)
+						- pe://USBMultilink/PE6011819 je adresa BDMka
+						- adresa se nastavuje zalozce Startup -> sekce Initialization Commands
+				- target remote | m68k-elf-sprite -q 'pe://USBMultilink/PE5655057' 'sm2_mu'
+	- Pokud debugovani nefunguje, tak over:
+		1) ze je spravne adresa BDMka (viz bod(5))
+			- pe://ParallelPortCable:1 = BDMko pripojene pres LPT
+			- pe://USBMultilink/PE6011819 = BDMko pripojene pres USB
+			- dostupna BDMka lze zjistit prikazem m68k-elf-sprite -i
+		2) ze je v adresari "ethernut_5\tools\Board Descriptions\" configuracni soubor pro desku "sm2_mu" (ten co je pouzity v prikazu target remote | m68k-elf-sprite -q 'pe://USBMultilink/PE5655057' 'sm2_mu')
+		3) ze je v zarizeni nahrany aktualni kod (musi se tam nahrat CF Flasherem)
+----------------------------------------------------------------------------
+9) vypis registru pomoci pluginu EmbSys Register View
+	- nainstalovat plugin do eclipsu
+	- Help/Install New Software
+		- Work with: EmbSysRegView - http://embsysregview.sourceforge.net/update
+	- nakopirovat následující konfiguraèní soubory do pluginu
+		z  ethernut_5\tools\EmbSysRegView\*
+		do eclipse\plugins\org.eclipse.cdt.embsysregview_0.1.9\
+	- nakonfigurovat plugin
+		- Window/Preferences/ C/C++Debug / EmbSys Register View
+			- Architecture: m68k
+			- Vendor: Freescale
+			- Chip: MCF5225X
+	- plugin je starsi nez Eclipse Indigo a neni uplne kompatibilni, takze je potreba upravit konfiguraci debugovani
+		- Window/Preferences/ Bun/Debug / Lunching / Default Lunchers
+			- GDB Hardware Debugging
+				- Debug
+					- "GDB(DSF) Hardware Debugging Launcher" zmenit na "Standard GDB Hardware Debugging Launcher"
+	- po spusteni debugovani se plugin spusti nasledovne
+		- zobraz si je takto: Window/ShowView/Other.. Debug/EmbSys Registers
+		- v okne by mel byt videt neuplny seznam registru procesoru
+	- aby se zobrazila hodnota registru, je potreba na nej dvojkliknout (aby zezelenal)
+	- doplneni novych registru:
+		- v konfiguraku zatim nejsou popsany vsechny registry
+		- nove lze pridat jeho editaci v souboru
+			- eclipse\plugins\org.eclipse.cdt.embsysregview_0.1.9\data\m68k\Freescale\MCF5225X.xml  
+----------------------------------------------------------------------------
+10) seriova konzole
+	- nainstalovat pluginy do eclipsu
+		- Help/Install New Software
+			- Work with: Indigo - http://download.eclipse.org/releases/indigo
+				- Mobile and Device Developement
+					- Target Management Terminal
+		- Work with: Seriova konzole - http://rxtx.qbang.org/eclipse
+	- zobraz si je takto: Window/ShowView/Other... Terminal 	
+----------------------------------------------------------------------------

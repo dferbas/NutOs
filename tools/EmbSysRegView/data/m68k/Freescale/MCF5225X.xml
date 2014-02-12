@@ -1,0 +1,706 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE model SYSTEM "embsysregview.dtd">
+<model chipname="MCF2552X">
+<chip_description>
+TODO
+</chip_description>
+<group name="Clock" description="Clock Module">
+    <registergroup name="Clock" description="">
+    	<register name="SYNCR"    description="Synthesizer Control Register              " address="0x40120000" resetvalue="0x1002" size="2" access="rw">
+            <field bitoffset="0" bitlength="1" name="PLLEN" description="" />
+            <field bitoffset="1" bitlength="1" name="PLLMODE" description="" />
+            <field bitoffset="2" bitlength="1" name="CLKSRC" description="" />
+            <field bitoffset="5" bitlength="1" name="FWKUP" description="" />
+            <field bitoffset="6" bitlength="1" name="DISCLK" description="" />
+            <field bitoffset="7" bitlength="1" name="LOCEN" description="" />
+            <field bitoffset="8" bitlength="1" name="RFD0" description="" />
+            <field bitoffset="9" bitlength="1" name="RFD1" description="" />
+            <field bitoffset="10" bitlength="1" name="RFD2" description="" />
+            <field bitoffset="11" bitlength="1" name="LOCRE" description="" />
+            <field bitoffset="12" bitlength="1" name="MFD0" description="" />
+            <field bitoffset="13" bitlength="1" name="MFD1" description="" />
+            <field bitoffset="14" bitlength="1" name="MFD2" description="" />
+            <field bitoffset="15" bitlength="1" name="LOLRE" description="" />
+        </register>
+    	<register name="SYNSR"    description="Synthesizer Status Register               " address="0x40120002" resetvalue="0x00"   size="1" access="r" >
+            <field bitoffset="2" bitlength="1" name="LOCS" description="" />
+            <field bitoffset="3" bitlength="1" name="LOCK" description="" />
+            <field bitoffset="4" bitlength="1" name="LOCKS" description="" />
+            <field bitoffset="5" bitlength="1" name="CRYOSC" description="" />
+            <field bitoffset="6" bitlength="1" name="OCOSC" description="" />
+            <field bitoffset="7" bitlength="1" name="EXTOCS" description="" />
+        </register>
+    	<register name="ROCR "    description="Relaxation Oscillator Control Register    " address="0x40120004"                     size="2" access="rw">
+            <field bitoffset="0" bitlength="10" name="TRIM" description="" />
+        </register>
+    	<register name="LPDR "    description="Low Power Divider Register                " address="0x40120007" resetvalue="0x00"   size="1" access="rw">
+            <field bitoffset="0" bitlength="4" name="LPD" description="" />
+        </register>
+    	<register name="CCHR "    description="Clock Control High Register               " address="0x40120008" resetvalue="0x05"   size="1" access="rw">
+            <field bitoffset="0" bitlength="3" name="CCHR" description="" />
+        </register>
+    	<register name="CCLR "    description="Clock Control Low Register                " address="0x40120009"                     size="1" access="rw">
+            <field bitoffset="6" bitlength="1" name="OSCSEL0" description="" />
+            <field bitoffset="7" bitlength="1" name="OSCSEL1" description="" />
+        </register>
+    	<register name="OCHR "    description="Oscillator Control High Register          " address="0x4012000A"                     size="1" access="rw">
+            <field bitoffset="0" bitlength="1" name="STBY" description="" />
+            <field bitoffset="0" bitlength="1" name="OCOEN" description="" />
+        </register>
+    	<register name="OCLR "    description="Oscillator Control Low Register           " address="0x4012000B"                     size="1" access="rw">
+            <field bitoffset="4" bitlength="1" name="RANGE" description="" />
+            <field bitoffset="5" bitlength="1" name="LPEN" description="" />
+            <field bitoffset="6" bitlength="1" name="REFS" description="" />
+            <field bitoffset="7" bitlength="1" name="OSCEN" description="" />
+        </register>
+    	<register name="RTCCR"    description="Real Time Clock Control Register          " address="0x40120012" resetvalue="0x00"   size="1" access="rw">
+            <field bitoffset="0" bitlength="1" name="RTCSEL" description="" />
+            <field bitoffset="1" bitlength="1" name="LPEN" description="" />
+            <field bitoffset="2" bitlength="1" name="REFS" description="" />
+            <field bitoffset="3" bitlength="1" name="KHZEN" description="" />
+            <field bitoffset="4" bitlength="1" name="OSCEN" description="" />
+            <field bitoffset="6" bitlength="1" name="EXTALEN" description="" />
+        </register>
+    	<register name="BWCR "    description="Backup Watchdog Timer Control Register    " address="0x40120013"                     size="1" access="rw">
+            <field bitoffset="0" bitlength="1" name="BWDSEL" description="" />
+            <field bitoffset="1" bitlength="1" name="BWDSTOP" description="" />
+        </register>
+    	<register name="PPMRH"    description="Peripheral Power Management Register High " address="0x4000000C" resetvalue="0x00"   size="4" access="rw">
+            <field bitoffset="1" bitlength="1" name="GlobalSpace" description="" />
+            <field bitoffset="3" bitlength="1" name="MiniFlexbus" description="" />
+            <field bitoffset="4" bitlength="1" name="DMA" description="" />
+            <field bitoffset="5" bitlength="1" name="UART0" description="" />
+            <field bitoffset="6" bitlength="1" name="UART1" description="" />
+            <field bitoffset="7" bitlength="1" name="UART2" description="" />
+            <field bitoffset="9" bitlength="1" name="I2C0" description="" />
+            <field bitoffset="10" bitlength="1" name="QSPI" description="" />
+            <field bitoffset="11" bitlength="1" name="I2C1" description="" />
+            <field bitoffset="13" bitlength="1" name="DMA_Timer0" description="" />
+            <field bitoffset="14" bitlength="1" name="DMA_Timer1" description="" />
+            <field bitoffset="15" bitlength="1" name="DMA_Timer2" description="" />
+            <field bitoffset="16" bitlength="1" name="DMA_Timer3" description="" />
+            <field bitoffset="17" bitlength="1" name="INTC0" description="" />
+            <field bitoffset="18" bitlength="1" name="INTC1" description="" />
+            <field bitoffset="21" bitlength="1" name="FEC" description="" />
+        </register>
+    	<register name="PPMRL"    description="Peripheral Power Management Register Low  " address="0x40000018" resetvalue="0x01"   size="4" access="rw">
+            <field bitoffset="0" bitlength="1" name="GPIO" description="" />
+            <field bitoffset="1" bitlength="1" name="EDGE" description="" />
+            <field bitoffset="3" bitlength="1" name="PIT0" description="" />
+            <field bitoffset="4" bitlength="1" name="PIT1" description="" />
+            <field bitoffset="7" bitlength="1" name="ADC" description="" />
+            <field bitoffset="8" bitlength="1" name="GPT" description="" />
+            <field bitoffset="9" bitlength="1" name="PWM" description="" />
+            <field bitoffset="10" bitlength="1" name="FlexCAN" description="" />
+            <field bitoffset="11" bitlength="1" name="CFM" description="" />
+            <field bitoffset="14" bitlength="1" name="RTC" description="" />
+        </register>
+    </registergroup>
+</group>
+<group name="FBCS" description="Mini-FlexBus">
+	<registergroup name="CS0" description="">
+		<register name="CSAR0"   	description="Chip-Select Address Register		" address="0x40000080" resetvalue="0x00000000" access="rw"></register>
+		<register name="CSMR0"   	description="Chip-Select Mask Register			" address="0x40000084" resetvalue="0x00000000" access="rw"></register>
+		<register name="CSCR0"   	description="Chip-Select Control Register		" address="0x40000088" resetvalue="0x003FFD40" access="rw"></register>
+	</registergroup>
+	<registergroup name="CS1" description="">
+		<register name="CSAR1"   	description="Chip-Select Address Register		" address="0x4000008C" resetvalue="0x00000000" access="rw"></register>
+		<register name="CSMR1"   	description="Chip-Select Mask Register			" address="0x40000090" resetvalue="0x00000000" access="rw"></register>
+		<register name="CSCR1"   	description="Chip-Select Control Register		" address="0x40000094" resetvalue="0x00000000" access="rw"></register>
+	</registergroup>
+</group>
+<group name="FEC" description="Fast Ethernet Controller">
+  <registergroup name="FEC0" description="">
+	<register name="EIR"   description="Interrupt Event Register 					" address="0x40001004" resetvalue="0x00000000" access="rw">
+		<field bitoffset="19" bitlength="1" name="UN" description="" />
+		<field bitoffset="20" bitlength="1" name="RL" description="" />
+		<field bitoffset="21" bitlength="1" name="LC" description="" />
+		<field bitoffset="22" bitlength="1" name="EBERR" description="" />
+		<field bitoffset="23" bitlength="1" name="MII" description="" />
+		<field bitoffset="24" bitlength="1" name="RXB" description="" />
+		<field bitoffset="25" bitlength="1" name="RXF" description="" />
+		<field bitoffset="26" bitlength="1" name="TXB" description="" />
+		<field bitoffset="27" bitlength="1" name="TXF" description="" />
+		<field bitoffset="28" bitlength="1" name="GRA" description="" />
+		<field bitoffset="29" bitlength="1" name="BABT" description="" />
+		<field bitoffset="30" bitlength="1" name="BABR" description="" />
+		<field bitoffset="31" bitlength="1" name="HBERR" description="" />
+	</register>
+	<register name="EIMR"  description="Interrupt Mask Register 					" address="0x40001008" resetvalue="0x00000000" access="rw">
+		<field bitoffset="19" bitlength="1" name="UN" description="" />
+		<field bitoffset="20" bitlength="1" name="RL" description="" />
+		<field bitoffset="21" bitlength="1" name="LC" description="" />
+		<field bitoffset="22" bitlength="1" name="EBERR" description="" />
+		<field bitoffset="23" bitlength="1" name="MII" description="" />
+		<field bitoffset="24" bitlength="1" name="RXB" description="" />
+		<field bitoffset="25" bitlength="1" name="RXF" description="" />
+		<field bitoffset="26" bitlength="1" name="TXB" description="" />
+		<field bitoffset="27" bitlength="1" name="TXF" description="" />
+		<field bitoffset="28" bitlength="1" name="GRA" description="" />
+		<field bitoffset="29" bitlength="1" name="BABT" description="" />
+		<field bitoffset="30" bitlength="1" name="BABR" description="" />
+		<field bitoffset="31" bitlength="1" name="HBERR" description="" />
+	</register>
+	<register name="RDAR"  description="Receive Descriptor Active Register  		" address="0x40001010" resetvalue="0x00000000" access="rw">
+		<field bitoffset="24" bitlength="1" name="RDAR" description="Gogo" />
+	</register>
+	<register name="TDAR"  description="Transmit Descriptor Active Register  		" address="0x40001014" resetvalue="0x00000000" access="rw">
+		<field bitoffset="24" bitlength="1" name="TDAR" description="Gogo" />
+	</register>
+	<register name="ECR"   description="Ethernet Control Register  					" address="0x40001024" resetvalue="0xF0000000" access="rw">
+		<field bitoffset="0" bitlength="1" name="RESET" description="" />
+		<field bitoffset="1" bitlength="1" name="ETHER_EN" description="" />
+	</register>
+	<register name="MMFR"  description="MII Management Frame Register  				" address="0x40001040" resetvalue="" 		   access="rw">
+	    <field bitoffset="0" bitlength="15" name="DATA" description="" />
+	    <field bitoffset="16" bitlength="2" name="TA" description="" />
+	    <field bitoffset="18" bitlength="5" name="RA" description="" />
+	    <field bitoffset="23" bitlength="5" name="PA" description="" />
+	    <field bitoffset="28" bitlength="2" name="OP" description="" />
+	    <field bitoffset="30" bitlength="2" name="ST" description="" />
+	</register>
+	<register name="MSCR"  description="MII Speed Control Register  				" address="0x40001044" resetvalue="0x00000000" access="rw">
+		<field bitoffset="1" bitlength="5" name="MII_SPEED" description="" />
+		<field bitoffset="7" bitlength="1" name="DIS_PRE" description="" />
+	</register>
+	<register name="MIBC"  description="MIB Control/Status Register  				" address="0x40001064" resetvalue="0x00000000" access="rw">
+		<field bitoffset="30" bitlength="1" name="MIB_IDLE" description="" />
+		<field bitoffset="31" bitlength="1" name="MIB_DIS" description="" />
+	</register>
+	<register name="RCR"   description="Receive Control Register  					" address="0x40001084" resetvalue="0x05EE0001" access="rw">
+	    <field bitoffset="0" bitlength="1" name="LOOP" description="" />
+	    <field bitoffset="1" bitlength="1" name="DRT" description="" />
+	    <field bitoffset="2" bitlength="1" name="MII_MODE" description="" />
+	    <field bitoffset="3" bitlength="1" name="PROM" description="" />
+	    <field bitoffset="4" bitlength="1" name="BC_REJ" description="" />
+	    <field bitoffset="5" bitlength="1" name="FCE" description="" />
+	    <field bitoffset="16" bitlength="11" name="MAX_FL" description="" />
+	</register>
+	<register name="TCR"   description="Transmit Control Register 					" address="0x400010C4" resetvalue="0x00000000" access="rw">
+	    <field bitoffset="0" bitlength="1" name="GTS" description="" />
+	    <field bitoffset="1" bitlength="1" name="HBC" description="" />
+	    <field bitoffset="2" bitlength="1" name="FDEN" description="" />
+	    <field bitoffset="3" bitlength="1" name="TFC_PAUSE" description="" />
+  	    <field bitoffset="4" bitlength="1" name="RFC_PAUSECE" description="" />
+	</register>
+	<register name="PALR"  description="Physical Address Low Register 				" address="0x400010E4" resetvalue="" 		   access="rw"></register>
+	<register name="PAUR"  description="Physical Address High Register  			" address="0x400010E8" resetvalue=""           access="rw">
+   	    <field bitoffset="0" bitlength="15" name="TYPE" description="" />
+  	    <field bitoffset="16" bitlength="15" name="PADDR_HI" description="" />
+	</register>
+	<register name="OPD"   description="Opcode/Pause Duration 						" address="0x400010EC" resetvalue="" 		   access="rw">
+   	    <field bitoffset="0" bitlength="15" name="PAUSE_DUR" description="" />
+  	    <field bitoffset="16" bitlength="15" name="OPCODE" description="" />
+	</register>
+	<register name="IAUR"  description="Descriptor Individual Upper Address Register" address="0x40001118" resetvalue=""  		   access="rw"></register>
+	<register name="IALR"  description="Descriptor Individual Lower Address Register" address="0x4000111C" resetvalue=""  		   access="rw"></register>
+	<register name="GAUR"  description="Descriptor Group Upper Address Register  	" address="0x40001120" resetvalue=""  		   access="rw"></register>
+	<register name="GALR"  description="Descriptor Group Lower Address Register 	" address="0x40001124" resetvalue=""  		   access="rw"></register>
+	<register name="TFWR"  description="Transmit FIFO Watermark 					" address="0x40001144" resetvalue="0x00000000" access="rw">
+	    <field bitoffset="0" bitlength="2" name="TFWR" description="" />
+	</register>
+	<register name="FRBR"  description="FIFO Receive Bound Register  				" address="0x4000114C" resetvalue="0x00000600" access="r">
+	    <field bitoffset="2" bitlength="8" name="R_BOUND" description="" />
+	</register>
+	<register name="FRSR"  description="FIFO Receive FIFO Start Register  			" address="0x40001150" resetvalue="0x00000500" access="r">
+	    <field bitoffset="2" bitlength="8" name="R_FSTART" description="" />
+	</register>
+	<register name="ERDSR" description="Pointer to Receive Descriptor Ring  		" address="0x40001180" resetvalue="" 		   access="rw"></register>
+	<register name="ETDSR" description="Pointer to Transmit Descriptor Ring  		" address="0x40001184" resetvalue="" 		   access="rw"></register>
+	<register name="EMRBR" description="Maximum Receive Buffer Size  				" address="0x40001188" resetvalue="" 		   access="rw"></register>
+  </registergroup>
+</group>
+<group name="GPIO" description="General Purpose I/O Module">
+	<registergroup name="TE" description="">
+		<register name="PORTTE" description="Port Output Data Register    		" address="0x40100000" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="DDRTE " description="Port Data Direction Register 		" address="0x40100018" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETTE " description="Port Pin Data/Set Data Register	" address="0x40100030" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="CLRTE " description="Port Clear Output Data Register	" address="0x40100048" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PTEPAR" description="Pin Assignment Registers      		" address="0x40100060" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="TF" description="">
+		<register name="PORTTF" description="Port Output Data Register    		" address="0x40100001" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="DDRTF " description="Port Data Direction Register 		" address="0x40100019" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETTF " description="Port Pin Data/Set Data Register	" address="0x40100031" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="CLRTF " description="Port Clear Output Data Register	" address="0x40100049" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PTFPAR" description="Pin Assignment Registers      		" address="0x40100061" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="TG" description="">
+		<register name="PORTTG" description="Port Output Data Register    		" address="0x40100002" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="DDRTG " description="Port Data Direction Register 		" address="0x4010001A" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETTG " description="Port Pin Data/Set Data Register	" address="0x40100032" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="CLRTG " description="Port Clear Output Data Register	" address="0x4010004A" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PTGPAR" description="Pin Assignment Registers      		" address="0x40100062" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="TH" description="">
+		<register name="PORTTH" description="Port Output Data Register    		" address="0x40100003" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="DDRTH " description="Port Data Direction Register 		" address="0x4010001B" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETTH " description="Port Pin Data/Set Data Register	" address="0x40100033" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="CLRTH " description="Port Clear Output Data Register	" address="0x4010004B" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PTHPAR" description="Pin Assignment Registers      		" address="0x40100090" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="TI" description="">
+		<register name="PORTTI" description="Port Output Data Register    		" address="0x40100004" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="DDRTI " description="Port Data Direction Register 		" address="0x4010001C" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETTI " description="Port Pin Data/Set Data Register	" address="0x40100034" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="CLRTI " description="Port Clear Output Data Register	" address="0x4010004C" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PTIPAR" description="Pin Assignment Registers      		" address="0x40100064" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="TJ" description="">
+		<register name="PORTTJ" description="Port Output Data Register    		" address="0x40100006" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="DDRTJ " description="Port Data Direction Register 		" address="0x4010001E" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETTJ " description="Port Pin Data/Set Data Register	" address="0x40100036" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="CLRTJ " description="Port Clear Output Data Register	" address="0x4010004E" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PTJPAR" description="Pin Assignment Registers      		" address="0x40100066" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="NQ" description="">
+		<register name="PORTNQ" description="Port Output Data Register    		" address="0x40100008" resetvalue="0xFE" access="rw" size="1"></register>
+		<register name="DDRNQ " description="Port Data Direction Register 		" address="0x40100020" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETNQ " description="Port Pin Data/Set Data Register	" address="0x40100038" resetvalue="0xAA" access="rw" size="1"></register>
+		<register name="CLRNQ " description="Port Clear Output Data Register	" address="0x40100050" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PNQPAR" description="Pin Assignment Registers      		" address="0x40100068" resetvalue="0xA4AA" access="rw" size="2"></register>
+	</registergroup>
+	<registergroup name="AN" description="">
+		<register name="PORTAN" description="Port Output Data Register    		" address="0x4010000A" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="DDRAN " description="Port Data Direction Register 		" address="0x40100022" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETAN " description="Port Pin Data/Set Data Register	" address="0x4010003A" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="CLRAN " description="Port Clear Output Data Register	" address="0x40100052" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PANPAR" description="Pin Assignment Registers      		" address="0x4010006A" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="AS" description="">
+		<register name="PORTAS" description="Port Output Data Register    		" address="0x4010000B" resetvalue="0x07" access="rw" size="1"></register>
+		<register name="DDRAS " description="Port Data Direction Register 		" address="0x40100023" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETAS " description="Port Pin Data/Set Data Register	" address="0x4010003B" resetvalue="0x07" access="rw" size="1"></register>
+		<register name="CLRAS " description="Port Clear Output Data Register	" address="0x40100053" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PASPAR" description="Pin Assignment Registers      		" address="0x4010006B" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="QS" description="">
+		<register name="PORTQS" description="Port Output Data Register    		" address="0x4010000C" resetvalue="0x7F" access="rw" size="1"></register>
+		<register name="DDRQS " description="Port Data Direction Register 		" address="0x40100024" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETQS " description="Port Pin Data/Set Data Register	" address="0x4010003C" resetvalue="0x6F" access="rw" size="1"></register>
+		<register name="CLRQS " description="Port Clear Output Data Register	" address="0x40100054" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PQSPAR" description="Pin Assignment Registers      		" address="0x4010006C" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="TA" description="">
+		<register name="PORTTA" description="Port Output Data Register    		" address="0x4010000E" resetvalue="0x0F" access="rw" size="1"></register>
+		<register name="DDRTA " description="Port Data Direction Register 		" address="0x40100026" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETTA " description="Port Pin Data/Set Data Register	" address="0x4010003E" resetvalue="0x0F" access="rw" size="1"></register>
+		<register name="CLRTA " description="Port Clear Output Data Register	" address="0x40100056" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PTAPAR" description="Pin Assignment Registers      		" address="0x4010006E" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="TC" description="">
+		<register name="PORTTC" description="Port Output Data Register    		" address="0x4010000F" resetvalue="0x0F" access="rw" size="1"></register>
+		<register name="DDRTC " description="Port Data Direction Register 		" address="0x40100027" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETTC " description="Port Pin Data/Set Data Register	" address="0x4010003F" resetvalue="0x0F" access="rw" size="1"></register>
+		<register name="CLRTC " description="Port Clear Output Data Register	" address="0x40100057" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PTCPAR" description="Pin Assignment Registers      		" address="0x4010006F" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="UA" description="">
+		<register name="PORTUA" description="Port Output Data Register    		" address="0x40100011" resetvalue="0x0F" access="rw" size="1"></register>
+		<register name="DDRUA " description="Port Data Direction Register 		" address="0x40100029" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETUA " description="Port Pin Data/Set Data Register	" address="0x40100041" resetvalue="0x0F" access="rw" size="1"></register>
+		<register name="CLRUA " description="Port Clear Output Data Register	" address="0x40100059" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PUAPAR" description="Pin Assignment Registers      		" address="0x40100071" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="UB" description="">
+		<register name="PORTUB" description="Port Output Data Register    		" address="0x40100012" resetvalue="0x0F" access="rw" size="1"></register>
+		<register name="DDRUB " description="Port Data Direction Register 		" address="0x4010002A" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETUB " description="Port Pin Data/Set Data Register	" address="0x40100042" resetvalue="0x0F" access="rw" size="1"></register>
+		<register name="CLRUB " description="Port Clear Output Data Register	" address="0x4010005A" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PUBPAR" description="Pin Assignment Registers      		" address="0x40100072" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="UC" description="">
+		<register name="PORTUC" description="Port Output Data Register    		" address="0x40100013" resetvalue="0x0F" access="rw" size="1"></register>
+		<register name="DDRUC " description="Port Data Direction Register 		" address="0x4010002B" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETUC " description="Port Pin Data/Set Data Register	" address="0x40100043" resetvalue="0x0F" access="rw" size="1"></register>
+		<register name="CLRUC " description="Port Clear Output Data Register	" address="0x4010005B" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PUCPAR" description="Pin Assignment Registers      		" address="0x40100073" resetvalue="0x00" access="rw" size="1"></register>
+	</registergroup>
+	<registergroup name="DD" description="">
+		<register name="PORTDD" description="Port Output Data Register    		" address="0x40100014" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="DDRDD " description="Port Data Direction Register 		" address="0x4010002C" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="SETDD " description="Port Pin Data/Set Data Register	" address="0x40100044" resetvalue="0xFF" access="rw" size="1"></register>
+		<register name="CLRDD " description="Port Clear Output Data Register	" address="0x4010005C" resetvalue="0x00" access="rw" size="1"></register>
+		<register name="PDDPAR" description="Pin Assignment Registers      		" address="0x40100074" resetvalue="0x00" access="rw" size="1"></register>
+ 	</registergroup>
+</group>
+
+<group name="GPT" description="General Purpose Timer Module">
+	<registergroup name="GPT0-3" description="">
+        <register name="GPTIOS    " description="GPT IC/OC Select Register              " address="0x401A0000" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTCFORC  " description="GPT Compare Force Register             " address="0x401A0001" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTOC3M   " description="GPT Output Compare 3 Mask Register     " address="0x401A0002" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTOC3D   " description="GPT Output Compare 3 Data Register     " address="0x401A0003" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTCNTH   " description="GPT Counter Register High              " address="0x401A0004" resetvalue="0x00" access="r"  size="1"></register>
+        <register name="GPTCNTL   " description="GPT Counter Register Low               " address="0x401A0005" resetvalue="0x00" access="r"  size="1"></register>
+        <register name="GPTSCR1   " description="GPT System Control Register 1          " address="0x401A0006" resetvalue="0x00" access="rw" size="1">
+            <field bitoffset="4" bitlength="1" name="TFFCA" description="" />
+            <field bitoffset="7" bitlength="1" name="GPTEN" description="" />
+        </register>
+        <register name="GPTTOV    " description="GPT Toggle-on-Overflow Register        " address="0x401A0008" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTCTL1   " description="GPT Control Register 1                 " address="0x401A0009" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTCTL2   " description="GPT Control Register 2                 " address="0x401A000B" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTIE     " description="GPT Interrupt Enable Register          " address="0x401A000C" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTSCR2   " description="GPT System Control Register 2          " address="0x401A000D" resetvalue="0x00" access="rw" size="1">
+            <field bitoffset="0" bitlength="3" name="PR" description="" />
+            <field bitoffset="3" bitlength="1" name="TCRE" description="" />
+            <field bitoffset="4" bitlength="1" name="RDPT" description="" />
+            <field bitoffset="5" bitlength="1" name="PUPT" description="" />
+            <field bitoffset="7" bitlength="1" name="TOI" description="" />
+        </register>
+        <register name="GPTFLG1   " description="GPT Flag Register 1                    " address="0x401A000E" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTFLG2   " description="GPT Flag Register 2                    " address="0x401A000F" resetvalue="0x00" access="rw" size="1">
+            <field bitoffset="7" bitlength="1" name="TOF" description="" />
+        </register>
+        <register name="GPTC0H    " description="GPT Channel 0 Register High            " address="0x401A0010" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTC0L    " description="GPT Channel 0 Register Low             " address="0x401A0011" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTC1H    " description="GPT Channel 1 Register High            " address="0x401A0012" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTC1L    " description="GPT Channel 1 Register Low             " address="0x401A0013" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTC2H    " description="GPT Channel 2 Register High            " address="0x401A0014" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTC2L    " description="GPT Channel 2 Register Low             " address="0x401A0015" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTC3H    " description="GPT Channel 3 Register High            " address="0x401A0016" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTC3L    " description="GPT Channel 3 Register Low             " address="0x401A0017" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTPACTL  " description="Pulse Accumulator Control Register     " address="0x401A0018" resetvalue="0x00" access="rw" size="1">
+            <field bitoffset="0" bitlength="1" name="PAI" description="" />
+            <field bitoffset="1" bitlength="1" name="PAOVI" description="" />
+            <field bitoffset="2" bitlength="2" name="CLK" description="" />
+            <field bitoffset="4" bitlength="1" name="PEDGE" description="" />
+            <field bitoffset="5" bitlength="1" name="PAMOD" description="" />
+            <field bitoffset="6" bitlength="1" name="PAE" description="" />
+        </register>
+        <register name="GPTPAFLG  " description="Pulse Accumulator Flag Register        " address="0x401A0019" resetvalue="0x00" access="rw" size="1">
+            <field bitoffset="0" bitlength="1" name="PAIF" description="" />
+            <field bitoffset="1" bitlength="1" name="PAOVF" description="" />
+        </register>
+        <register name="GPTPACNTH " description="Pulse Accumulator Counter Register High" address="0x401A001A" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTPACNTL " description="Pulse Accumulator Counter Register Low " address="0x401A001B" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTPORT   " description="GPT Port Data Register                 " address="0x401A001D" resetvalue="0x00" access="rw" size="1"></register>
+        <register name="GPTDDR    " description="GPT Port Data Direction Register       " address="0x401A001E" resetvalue="0x00" access="rw" size="1"></register>
+ 	</registergroup>
+</group>
+<group name="I2C" description="I2C">
+	<registergroup name="I2C0" description="">
+		<register name="I2ADR" description="I2C Address Register			" address="0x40000300" resetvalue="0x00" access="rw"  size="1"></register>
+		<register name="I2FDR" description="I2C Frequency Divider Register	" address="0x40000304" resetvalue="0x00" access="rw"  size="1"></register>
+		<register name="I2CR " description="I2C Control Register			" address="0x40000308" resetvalue="0x00" access="rw"  size="1">
+			<field bitoffset="2" bitlength="1" name="RSTA" description="" />
+			<field bitoffset="3" bitlength="1" name="TXAK" description="" />
+			<field bitoffset="4" bitlength="1" name="MTX"  description="" />
+			<field bitoffset="5" bitlength="1" name="MSTA" description="" />
+			<field bitoffset="6" bitlength="1" name="IIEN" description="" />
+			<field bitoffset="7" bitlength="1" name="IEN"  description="" />
+ 		</register>
+		<register name="I2SR " description="I2C Status Register				" address="0x4000030C" resetvalue="0x81" access="rw"  size="1">
+			<field bitoffset="0" bitlength="1" name="RXAK" description="" />
+			<field bitoffset="1" bitlength="1" name="IIF" description="" />
+			<field bitoffset="2" bitlength="1" name="SRW" description="" />
+			<field bitoffset="4" bitlength="1" name="IAL" description="" />
+			<field bitoffset="5" bitlength="1" name="IBB"  description="" />
+			<field bitoffset="6" bitlength="1" name="IAAS" description="" />
+			<field bitoffset="7" bitlength="1" name="ICF" description="" />
+		</register>
+		<register name="I2DR " description="I2C Data I/O Register			" address="0x40000310" resetvalue="0x00" access="rw"  size="1"></register>
+	</registergroup>
+	<registergroup name="I2C1" description="">
+		<register name="I2ADR" description="I2C Address Register			" address="0x40000380" resetvalue="0x00" access="rw"  size="1"></register>
+		<register name="I2FDR" description="I2C Frequency Divider Register	" address="0x40000384" resetvalue="0x00" access="rw"  size="1"></register>
+		<register name="I2CR " description="I2C Control Register			" address="0x40000388" resetvalue="0x00" access="rw"  size="1">
+			<field bitoffset="2" bitlength="1" name="RSTA" description="" />
+			<field bitoffset="3" bitlength="1" name="TXAK" description="" />
+			<field bitoffset="4" bitlength="1" name="MTX"  description="" />
+			<field bitoffset="5" bitlength="1" name="MSTA" description="" />
+			<field bitoffset="6" bitlength="1" name="IIEN" description="" />
+			<field bitoffset="7" bitlength="1" name="IEN"  description="" />
+ 		</register>
+		<register name="I2SR " description="I2C Status Register				" address="0x4000038C" resetvalue="0x81" access="rw"  size="1">
+			<field bitoffset="0" bitlength="1" name="RXAK" description="" />
+			<field bitoffset="1" bitlength="1" name="IIF" description="" />
+			<field bitoffset="2" bitlength="1" name="SRW" description="" />
+			<field bitoffset="4" bitlength="1" name="IAL" description="" />
+			<field bitoffset="5" bitlength="1" name="IBB"  description="" />
+			<field bitoffset="6" bitlength="1" name="IAAS" description="" />
+			<field bitoffset="7" bitlength="1" name="ICF" description="" />
+		</register>
+		<register name="I2DR " description="I2C Data I/O Register			" address="0x40000390" resetvalue="0x00" access="rw"  size="1"></register>
+	</registergroup>
+</group>
+
+<group name="INTC" description="Interrupt Controller">
+	<registergroup name="INTC0" description="">
+		<register name="IPRH0" description="Interrupt Pending Register High					" address="0x40000C00" resetvalue="0x00000000" access="r"></register>
+		<register name="IPRL0" description="Interrupt Pending Register Low						" address="0x40000C04" resetvalue="0x00000000" access="r"></register>
+		<register name="IMRH0" description="Interrupt Mask Register High						" address="0x40000C08" resetvalue="0xFFFFFFFF" access="rw"></register>
+		<register name="IMRL0" description="Interrupt Mask Register Low 						" address="0x40000C0C" resetvalue="0xFFFFFFFF" access="rw"></register>
+		<register name="INTFRCH0" description="Interrupt Force Register High 						" address="0x40000C10" resetvalue="0x00000000" access="rw"></register>
+		<register name="INTFRCL0" description="Interrupt Force Register Low 						" address="0x40000C14" resetvalue="0x00000000" access="rw"></register>
+		<register name="IRLR0" description="Interrupt Request Level Register 					" address="0x40000C18" resetvalue="0x00" access="rw"></register>
+		<register name="IACKLPR0" description="Interrupt Acknowledge Level and Priority Register	" address="0x40000C19" resetvalue="0x00" access="w"> </register>
+	</registergroup>
+	<registergroup name="INTC1" description="">
+		<register name="IPRH1" description="Interrupt Pending Register High 					" address="0x40000D00" resetvalue="0x00000000" access="r"></register>
+		<register name="IPRL1" description="Interrupt Pending Register Low 					" address="0x40000D04" resetvalue="0x00000000" access="r"></register>
+		<register name="IMRH1" description="Interrupt Mask Register High 						" address="0x40000D08" resetvalue="0xFFFFFFFF" access="rw"></register>
+		<register name="IMRL1" description="Interrupt Mask Register Low 						" address="0x40000D0C" resetvalue="0xFFFFFFFF" access="rw"></register>
+		<register name="INTFRCH1" description="Interrupt Force Register High 						" address="0x40000D10" resetvalue="0x00000000" access="rw"></register>
+		<register name="INTFRCL1" description="Interrupt Force Register Low 						" address="0x40000D14" resetvalue="0x00000000" access="rw"></register>
+		<register name="IRLR1" description="Interrupt Request Level Register 					" address="0x40000D18" resetvalue="0x00" access="rw"></register>
+		<register name="IACKLPR1" description="Interrupt Acknowledge Level and Priority Register	" address="0x40000D19" resetvalue="0x00" access="w"> </register>
+	</registergroup>
+</group>
+<group name="MIB counters" description="MIB counters">
+    <registergroup name="RMON_T" description="">
+        <register name="RMON_T_DROP"        description="Count of frames not counted correctly"             address="0x40001200" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_PACKETS"     description="RMON Tx packet count"                              address="0x40001204" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_BC_PKT"      description="RMON Tx broadcast packets"                         address="0x40001208" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_MC_PKT"      description="RMON Tx multicast packets"                         address="0x4000120C" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_CRC_ALIGN"	description="RMON Tx packets with CRC/align error"              address="0x40001210" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_UNDERSIZE"	description="RMON Tx packets lower than 64 bytes, good CRC"     address="0x40001214" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_OVERSIZE"	description="RMON Tx packets greater than MAX_FL bytes, good CRC"  address="0x40001218" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_FRAG"        description="RMON Tx packets lower than 64 bytes, bad CRC"         address="0x4000121C" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_JAB"         description="RMON Tx packets greater than MAX_FL bytes, bad CRC"   address="0x40001220" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_COL"         description="RMON Tx collision count"                       	address="0x40001224" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_P64"         description="RMON Tx 64 byte packets"                       	address="0x40001228" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_P65TO127"    description="RMON Tx 65 to 127 byte packets"                    address="0x4000122C" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_P128TO255"   description="RMON Tx 128 to 255 byte packets"                   address="0x40001230" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_P256TO511"   description="RMON Tx 256 to 511 byte packets"                   address="0x40001234" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_P512TO1023"  description="RMON Tx 512 to 1023 byte packets"                  address="0x40001238" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_P1024TO2047" description="RMON Tx 1024 to 2047 byte packets"                 address="0x4000123C" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_P_GTE2048"   description="RMON Tx packets with > 2048 bytes"                 address="0x40001240" resetvalue="0x00000000" access="r" />
+        <register name="RMON_T_OCTETS"      description="RMON Tx Octets"                        	        address="0x40001244" resetvalue="0x00000000" access="r" />
+    </registergroup>
+    <registergroup name="IEEE_T" description="">
+        <register name="IEEE_T_DROP"        description="Count of transmitted frames not counted correctly" address="0x40001248" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_FRAME_OK"    description="Frames transmitted OK"                     	    address="0x4000124C" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_1COL"        description="Frames transmitted with single collision"          address="0x40001250" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_MCOL"        description="Frames transmitted with multiple collisions"       address="0x40001254" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_DEF"         description="Frames transmitted after deferral delay"           address="0x40001258" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_LCOL"        description="Frames transmitted with late collision"            address="0x4000125C" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_EXCOL"       description="Frames transmitted with excessive collisions"      address="0x40001260" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_MACERR"      description="Frames transmitted with Tx FIFO underrun"          address="0x40001264" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_CSERR"       description="Frames transmitted with carrier sense error"       address="0x40001268" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_SQE"         description="Frames transmitted with SQE error"                 address="0x4000126C" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_FDXFC"       description="Flow control pause frames transmitted"             address="0x40001270" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_T_OCTETS_OK"   description="Octet count for frames transmitted without error"  address="0x40001274" resetvalue="0x00000000" access="r" />
+    </registergroup>
+    <registergroup name="RMON_R" description="">
+        <register name="RMON_R_DROP"        description="Count of received frames not counted correctly"    address="0x40001280" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_PACKETS"     description="RMON Rx packet count"                              address="0x40001284" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_BC_PKT"      description="RMON Rx broadcast packets"                     	address="0x40001288" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_MC_PKT"      description="RMON Rx multicast packets"                     	address="0x4000128C" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_CRC_ALIGN"   description="RMON Rx packets with CRC/Align error"              address="0x40001290" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_UNDERSIZE"   description="RMON Rx packets lower than 64 bytes, good CRC"         address="0x40001294" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_OVERSIZE"    description="RMON Rx packets greater than MAX_FL bytes, good CRC"   address="0x40001298" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_FRAG"        description="RMON Rx packets lower than 64 bytes, bad CRC"          address="0x4000129C" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_JAB"         description="RMON Rx packets greater than MAX_FL bytes, bad CRC"    address="0x400012A0" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_P64"         description="RMON Rx 64 byte packets"                       	address="0x400012A8" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_P65TO127"    description="RMON Rx 65 to 127 byte packets"                    address="0x400012AC" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_P128TO255"   description="RMON Rx 128 to 255 byte packets"                   address="0x400012B0" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_P256TO511"   description="RMON Rx 256 to 511 byte packets"                   address="0x400012B4" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_P512TO1023"  description="RMON Rx 512 to 1023 byte packets"                  address="0x400012B8" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_P1024TO2047" description="RMON Rx 1024 to 2047 byte packets"                 address="0x400012BC" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_P_GTE2048"   description="RMON Rx packets with > 2048 bytes"                 address="0x400012C0" resetvalue="0x00000000" access="r" />
+        <register name="RMON_R_OCTETS"      description="RMON Rx octets"                                    address="0x400012C4" resetvalue="0x00000000" access="r" />
+    </registergroup>
+    <registergroup name="IEEE_R" description="">
+        <register name="IEEE_R_DROP"        description="Count of received frames not counted correctly"    address="0x400012C8" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_R_FRAME_OK"    description="Frames received OK"                        	    address="0x400012CC" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_R_CRC"         description="Frames received with CRC error"                    address="0x400012D0" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_R_ALIGN"       description="Frames received with alignment error"              address="0x400012D4" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_R_MACERR"      description="Receive FIFO overflow count"                       address="0x400012D8" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_R_FDXFC"       description="Flow control pause frames received"                address="0x400012DC" resetvalue="0x00000000" access="r" />
+        <register name="IEEE_R_OCTETS_OK"   description="Octet count for frames received without error"     address="0x400012E0" resetvalue="0x00000000" access="r" />
+    </registergroup>
+</group>
+<group name="PIT" description="QProgrammable Interrupt Timer">
+	<registergroup name="PIT0" description="">
+        <register name="PCSR"          description="PIT Control and Status Register" address="0x40150000" resetvalue="0x0000" size="2" access="rw" >
+            <field bitoffset="0" bitlength="1" name="EN" description="" />
+			<field bitoffset="1" bitlength="1" name="RLD" description="" />
+			<field bitoffset="2" bitlength="1" name="PIF" description="" />
+			<field bitoffset="3" bitlength="1" name="PIE" description="" />
+			<field bitoffset="4" bitlength="1" name="OVW" description="" />
+			<field bitoffset="5" bitlength="1" name="DBG" description="" />
+			<field bitoffset="6" bitlength="1" name="DOZE" description="" />
+			<field bitoffset="8" bitlength="4" name="PRE" description="" />
+        </register>
+        <register name="PMR"           description="IT Modulus Register            " address="0x40150002" resetvalue="0xFFFF" size="2" access="rw" />
+        <register name="PCNTR"         description="IT Count Register              " address="0x40150004" resetvalue="0xFFFF" size="2" access="r"  />
+    </registergroup>
+    <registergroup name="PIT1" description="">
+        <register name="PCSR"          description="PIT Control and Status Register" address="0x40160000" resetvalue="0x0000" size="2" access="rw" >
+            <field bitoffset="0" bitlength="1" name="EN" description="" />
+			<field bitoffset="1" bitlength="1" name="RLD" description="" />
+			<field bitoffset="2" bitlength="1" name="PIF" description="" />
+			<field bitoffset="3" bitlength="1" name="PIE" description="" />
+			<field bitoffset="4" bitlength="1" name="OVW" description="" />
+			<field bitoffset="5" bitlength="1" name="DBG" description="" />
+			<field bitoffset="6" bitlength="1" name="DOZE" description="" />
+			<field bitoffset="8" bitlength="4" name="PRE" description="" />
+        </register>
+        <register name="PMR"           description="IT Modulus Register            " address="0x40160002" resetvalue="0xFFFF" size="2" access="rw" />
+        <register name="PCNTR"         description="IT Count Register              " address="0x40160004" resetvalue="0xFFFF" size="2" access="r"  />
+    </registergroup>
+</group>
+<group name="QSPI" description="Queued Serial Peripheral Interface">
+	<registergroup name="QSPI0" description="">
+        <register name="QMR  " description="QSPI Mode Register		" address="0x40000340" resetvalue="0x0104" size="2" access="rw">
+        	<field bitoffset="0" bitlength="8" name="BAUD" description="" />
+			<field bitoffset="8" bitlength="1" name="CPHA" description="" />
+			<field bitoffset="9" bitlength="1" name="CPOL" description="" />
+			<field bitoffset="10" bitlength="4" name="BITS" description="" />
+			<field bitoffset="15" bitlength="1" name="MSTR" description="" />
+		</register>
+        <register name="QDLYR" description="QSPI Delay Register		" address="0x40000344" resetvalue="0x0404" size="2" access="rw">
+        	<field bitoffset="0" bitlength="8" name="DTL" description="" />
+			<field bitoffset="8" bitlength="7" name="QCD" description="" />
+			<field bitoffset="15" bitlength="1" name="SPE" description="" />
+		</register>
+        <register name="QWR  " description="QSPI Wrap Register		" address="0x40000348"                     size="2" access="rw">
+        	<field bitoffset="0" bitlength="4" name="NEWQP" description="" />
+			<field bitoffset="4" bitlength="4" name="CPTQP" description="" />
+			<field bitoffset="8" bitlength="4" name="ENDQP" description="" />
+			<field bitoffset="12" bitlength="1" name="CSIV" description="" />
+			<field bitoffset="13" bitlength="1" name="WRTO" description="" />
+			<field bitoffset="14" bitlength="1" name="WREN" description="" />
+			<field bitoffset="15" bitlength="1" name="HALT" description="" />
+		</register>
+        <register name="QIR  " description="QSPI Interrupt Register	" address="0x4000034C" resetvalue="0x0000" size="2" access="rw">
+			<field bitoffset="0" bitlength="1" name="SPIF" description="" />
+			<field bitoffset="2" bitlength="1" name="ABRT" description="" />
+			<field bitoffset="3" bitlength="1" name="WCEF" description="" />
+			<field bitoffset="8" bitlength="1" name="SPIFE" description="" />
+			<field bitoffset="10" bitlength="1" name="ABRTE" description="" />
+			<field bitoffset="11" bitlength="1" name="WCEFE" description="" />
+			<field bitoffset="12" bitlength="1" name="ABRTL" description="" />
+			<field bitoffset="14" bitlength="1" name="ABRTB" description="" />
+			<field bitoffset="15" bitlength="1" name="WCEFB" description="" />
+		</register>
+        <register name="QAR  " description="QSPI Address Register	" address="0x40000350" resetvalue="0x0000" size="2" access="rw">
+            <field bitoffset="0" bitlength="6" name="ADDR" description="" />
+		</register>
+        <register name="QDR  " description="QSPI Data Register		" address="0x40000354" resetvalue="0x0000" size="2" access="rw"></register>
+    </registergroup>  
+</group>
+<group name="UART" description="Universal Asynchronous Received/Transceiver">
+	<registergroup name="UART0" description="">
+		<register name="UMR1" description="UART Mode Register 1                       " address="0x40000200" resetvalue="0x00" size="1" access="rw">
+			<field bitoffset="0" bitlength="2" name="B/C" description="" />
+			<field bitoffset="2" bitlength="1" name="PT" description="" />
+			<field bitoffset="3" bitlength="2" name="PM" description="" />
+			<field bitoffset="5" bitlength="1" name="ERR" description="" />
+			<field bitoffset="6" bitlength="1" name="RXIRQ/FFULL" description="" />
+			<field bitoffset="7" bitlength="1" name="RXRTS" description="" />
+		</register>
+		<register name="UMR2" description="UART Mode Register 2                       " address="0x40000200" resetvalue="0x00" size="1" access="rw">
+			<field bitoffset="0" bitlength="4" name="SB" description="" />
+			<field bitoffset="4" bitlength="1" name="TXCTS" description="" />
+			<field bitoffset="5" bitlength="1" name="TXRTS" description="" />
+			<field bitoffset="6" bitlength="2" name="CM" description="" />
+		</register>
+		<register name="USR" description="UART Status Register                       " address="0x40000204" resetvalue="0x00" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="RXRDY" description="" />
+			<field bitoffset="1" bitlength="1" name="FFULL" description="" />
+			<field bitoffset="2" bitlength="1" name="TXRDY" description="" />
+			<field bitoffset="3" bitlength="1" name="TXEMP" description="" />
+			<field bitoffset="4" bitlength="1" name="OE" description="" />
+			<field bitoffset="5" bitlength="1" name="PE" description="" />
+			<field bitoffset="6" bitlength="1" name="FE" description="" />
+			<field bitoffset="7" bitlength="1" name="RB" description="" />
+		</register>
+		<register name="URB" description="UART Receive Buffer                        " address="0x4000020C" resetvalue="0xFF" size="1" access="r"></register>
+		<register name="UIPCR" description="UART Input Port Change Register            " address="0x40000210" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="CTS" description="" />
+			<field bitoffset="4" bitlength="1" name="COS" description="" />
+		</register>
+		<register name="UIMR" description="UART Interrupt Status Register             " address="0x40000214" resetvalue="0x00" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="TXRDY" description="" />
+			<field bitoffset="1" bitlength="1" name="FFULL/RXRDY" description="" />
+			<field bitoffset="2" bitlength="1" name="DB" description="" />
+			<field bitoffset="7" bitlength="1" name="COS" description="" />
+		</register>
+		<register name="UIP" description="UART Input Port Register                   " address="0x40000234" resetvalue="0xFF" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="CTS" description="" />
+		</register>
+	</registergroup>
+	<registergroup name="UART1" description="">
+		<register name="UMR1" description="UART Mode Register 1                       " address="0x40000240" resetvalue="0x00" size="1" access="rw">
+			<field bitoffset="0" bitlength="2" name="B/C" description="" />
+			<field bitoffset="2" bitlength="1" name="PT" description="" />
+			<field bitoffset="3" bitlength="2" name="PM" description="" />
+			<field bitoffset="5" bitlength="1" name="ERR" description="" />
+			<field bitoffset="6" bitlength="1" name="RXIRQ/FFULL" description="" />
+			<field bitoffset="7" bitlength="1" name="RXRTS" description="" />
+		</register>
+		<register name="UMR2" description="UART Mode Register 2                       " address="0x40000240" resetvalue="0x00" size="1" access="rw">
+			<field bitoffset="0" bitlength="4" name="SB" description="" />
+			<field bitoffset="4" bitlength="1" name="TXCTS" description="" />
+			<field bitoffset="5" bitlength="1" name="TXRTS" description="" />
+			<field bitoffset="6" bitlength="2" name="CM" description="" />
+		</register>
+		<register name="USR" description="UART Status Register                       " address="0x40000244" resetvalue="0x00" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="RXRDY" description="" />
+			<field bitoffset="1" bitlength="1" name="FFULL" description="" />
+			<field bitoffset="2" bitlength="1" name="TXRDY" description="" />
+			<field bitoffset="3" bitlength="1" name="TXEMP" description="" />
+			<field bitoffset="4" bitlength="1" name="OE" description="" />
+			<field bitoffset="5" bitlength="1" name="PE" description="" />
+			<field bitoffset="6" bitlength="1" name="FE" description="" />
+			<field bitoffset="7" bitlength="1" name="RB" description="" />
+		</register>
+		<register name="URB" description="UART Receive Buffer                        " address="0x4000024C" resetvalue="0xFF" size="1" access="r"></register>
+		<register name="UIPCR" description="UART Input Port Change Register            " address="0x40000250" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="CTS" description="" />
+			<field bitoffset="4" bitlength="1" name="COS" description="" />
+		</register>
+		<register name="UIMR" description="UART Interrupt Status Register             " address="0x40000254" resetvalue="0x00" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="TXRDY" description="" />
+			<field bitoffset="1" bitlength="1" name="FFULL/RXRDY" description="" />
+			<field bitoffset="2" bitlength="1" name="DB" description="" />
+			<field bitoffset="7" bitlength="1" name="COS" description="" />
+		</register>
+		<register name="UIP" description="UART Input Port Register                   " address="0x40000274" resetvalue="0xFF" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="CTS" description="" />
+		</register>
+	</registergroup>
+	<registergroup name="UART2" description="">
+		<register name="UMR1" description="UART Mode Register 1                       " address="0x40000280" resetvalue="0x00" size="1" access="rw">
+			<field bitoffset="0" bitlength="2" name="B/C" description="" />
+			<field bitoffset="2" bitlength="1" name="PT" description="" />
+			<field bitoffset="3" bitlength="2" name="PM" description="" />
+			<field bitoffset="5" bitlength="1" name="ERR" description="" />
+			<field bitoffset="6" bitlength="1" name="RXIRQ/FFULL" description="" />
+			<field bitoffset="7" bitlength="1" name="RXRTS" description="" />
+		</register>
+		<register name="UMR2" description="UART Mode Register 2                       " address="0x40000280" resetvalue="0x00" size="1" access="rw">
+			<field bitoffset="0" bitlength="4" name="SB" description="" />
+			<field bitoffset="4" bitlength="1" name="TXCTS" description="" />
+			<field bitoffset="5" bitlength="1" name="TXRTS" description="" />
+			<field bitoffset="6" bitlength="2" name="CM" description="" />
+		</register>
+		<register name="USR" description="UART Status Register                       " address="0x40000284" resetvalue="0x00" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="RXRDY" description="" />
+			<field bitoffset="1" bitlength="1" name="FFULL" description="" />
+			<field bitoffset="2" bitlength="1" name="TXRDY" description="" />
+			<field bitoffset="3" bitlength="1" name="TXEMP" description="" />
+			<field bitoffset="4" bitlength="1" name="OE" description="" />
+			<field bitoffset="5" bitlength="1" name="PE" description="" />
+			<field bitoffset="6" bitlength="1" name="FE" description="" />
+			<field bitoffset="7" bitlength="1" name="RB" description="" />
+		</register>
+		<register name="URB" description="UART Receive Buffer                        " address="0x4000028C" resetvalue="0xFF" size="1" access="r"></register>
+		<register name="UIPCR" description="UART Input Port Change Register            " address="0x40000290" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="CTS" description="" />
+			<field bitoffset="4" bitlength="1" name="COS" description="" />
+		</register>
+		<register name="UIMR" description="UART Interrupt Status Register             " address="0x40000294" resetvalue="0x00" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="TXRDY" description="" />
+			<field bitoffset="1" bitlength="1" name="FFULL/RXRDY" description="" />
+			<field bitoffset="2" bitlength="1" name="DB" description="" />
+			<field bitoffset="7" bitlength="1" name="COS" description="" />
+		</register>
+		<register name="UIP" description="UART Input Port Register                   " address="0x400002B4" resetvalue="0xFF" size="1" access="r">
+			<field bitoffset="0" bitlength="1" name="CTS" description="" />
+		</register>
+	</registergroup>
+</group>
+</model>
