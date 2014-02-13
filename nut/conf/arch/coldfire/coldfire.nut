@@ -26,8 +26,7 @@ nutarch_m68k_coldfire =
         brief = "Interrupt Handler",
         description = "CPU Interrupt handlers common for all Coldfire families.\n\n"..
                       "In addition, this package contains the default interrupt handler, which may be used by application to handle spurious interrupts.",
-        sources = { "m68k/coldfire/dev/common/ih_mcf5_default.c",
-        			"m68k/coldfire/dev/common/ih_mcf5_fec.c" }
+        sources = { "m68k/coldfire/dev/common/ih_mcf5_default.c" }
     },
 
     --

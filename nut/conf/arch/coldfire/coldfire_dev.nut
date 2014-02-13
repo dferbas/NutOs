@@ -7,7 +7,7 @@ nutarch_m68k_coldfire_devices =
         name = "nutarch_m68k_coldfire_mcf51cn_adc12",
         brief = "A/D Converter (ADC12)",
         description = "12-bit analog-to-digital converter.",
-        requires = { "HW_ADC12_COLDFIRE" },
+        requires = { "HW_ADC12_COLDFIRE", "DEV_IRQ_ADC" },
         sources = { "m68k/coldfire/dev/common/mcf5_adc12.c" },
     },    
     
@@ -20,13 +20,15 @@ nutarch_m68k_coldfire_devices =
         description = "Choose which I2C bus will be used as a default.\n"..
                       "TwiXxx() Macros will be reconfigured to use this bus.\n"..
                       "This is for compatibility with old Nut/OS.",
-        requires = { "DEV_TWI" },
+        requires = { "I2C_DEFAULT" },
+        provides = { "DEV_TWI" },
         options =
         {
             {
                 macro = "I2C0_AS_DEFAULT",
                 brief = "I2C Bus 0 Controller",
                 description = "TwiXxx() Macros will be reconfigured to use I2C Bus 0 Controller.",
+                requires = { "I2C_DEFAULT0" },
                 exclusivity = { "I2C0_AS_DEFAULT", "I2C1_AS_DEFAULT" },
                 flavor = "booldata",
                 file = "include/cfg/twi.h"
@@ -34,6 +36,7 @@ nutarch_m68k_coldfire_devices =
             {
                 macro = "I2C1_AS_DEFAULT",
                 brief = "I2C Bus 1 Controller",
+                requires = { "I2C_DEFAULT1" },
                 description = "TwiXxx() Macros will be reconfigured to use I2C Bus 1 Controller.",
                 exclusivity = { "I2C0_AS_DEFAULT", "I2C1_AS_DEFAULT" },
                 flavor = "booldata",
@@ -49,8 +52,8 @@ nutarch_m68k_coldfire_devices =
         name = "nutarch_m68k_coldfire_devices_i2c0",
         brief = "I2C Bus 0 Controller",
         description = "Coldfire hardware I2C support.",
-        requires = { "HW_I2C_COLDFIRE", "HW_I2C0" },
-        provides = { "DEV_TWI" },
+        requires = { "HW_I2C_COLDFIRE", "DEV_IRQ_I2C", "HW_I2C0" },
+        provides = { "DEV_TWI", "I2C_DEFAULT", "I2C_DEFAULT0" },
         sources = { "m68k/coldfire/dev/common/mcf5_i2c.c",
                     "m68k/coldfire/dev/common/mcf5_i2c0.c" },
         options =
@@ -94,37 +97,14 @@ nutarch_m68k_coldfire_devices =
     },
     
     --
-    -- Fast Ethernet Controller (FEC)
-    --
-    {
-        name = "nutarch_m68k_coldfire_devices_fec",
-        brief = "Fast Ethernet Controller (FEC)",
-        description = "Coldfire hardware FEC support.",
-        requires = { "NUT_EVENT", "NUT_TIMER" },
-        provides = { "NET_PHY" },
-        sources = { "m68k/coldfire/dev/common/mcf5_fec.c" },
-    },
-    
-    --
-    -- Internal Flash
-    --
-    {
-        name = "nutarch_m68k_coldfire_devices_intflash",
-        brief = "Internal Flash",
-        description = "Coldfire hardware Internal Flash support.",
-        provides = { "DEV_INT_FLASH" },
-        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_intflash.c" },
-    },
-    
-    --
     -- I2C Bus 1 Configuration
     --
     {
         name = "nutarch_m68k_coldfire_devices_i2c1",
         brief = "I2C Bus 1 Controller",
         description = "Coldfire hardware I2C support.",
-        requires = { "HW_I2C_COLDFIRE", "HW_I2C1" },
-        provides = { "DEV_TWI" },
+        requires = { "HW_I2C_COLDFIRE", "DEV_IRQ_I2C", "HW_I2C1" },
+        provides = { "DEV_TWI" , "I2C_DEFAULT", "I2C_DEFAULT1" },
         sources = { "m68k/coldfire/dev/common/mcf5_i2c.c",
                     "m68k/coldfire/dev/common/mcf5_i2c1.c" },
         options =
@@ -166,7 +146,7 @@ nutarch_m68k_coldfire_devices =
             },
         },
     },
-    
+
     --
     -- SCI Debug Output
     --
@@ -199,7 +179,7 @@ nutarch_m68k_coldfire_devices =
         description = "In current implementation the SCI (Serial Communication Interface) is used as an UART device only.\n\n"..
                       "Hardware specific UART driver. Implements hardware "..
                       "functions for the generic USART driver framework.",
-        requires = { "HW_SCI_COLDFIRE", "HW_SCI1" },
+        requires = { "HW_SCI_COLDFIRE", "DEV_IRQ_SCI", "HW_SCI1" },
         provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
 	    sources = { "m68k/coldfire/dev/common/mcf5_sci1.c" },
         options =
@@ -244,7 +224,7 @@ nutarch_m68k_coldfire_devices =
         description = "In current implementation the SCI (Serial Communication Interface) is used as an UART device only.\n\n"..
                       "Hardware specific UART driver. Implements hardware "..
                       "functions for the generic USART driver framework.",
-        requires = { "HW_SCI_COLDFIRE", "HW_SCI2" },
+        requires = { "HW_SCI_COLDFIRE", "DEV_IRQ_SCI", "HW_SCI2" },
         provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
         sources = { "m68k/coldfire/dev/common/mcf5_sci2.c" },
         options =
@@ -289,9 +269,9 @@ nutarch_m68k_coldfire_devices =
         description = "In current implementation the SCI (Serial Communication Interface) is used as an UART device only.\n\n"..
                       "Hardware specific UART driver. Implements hardware "..
                       "functions for the generic USART driver framework.",
-        requires = { "HW_SCI_COLDFIRE", "HW_SCI3" },
+        requires = { "HW_SCI_COLDFIRE", "DEV_IRQ_SCI", "HW_SCI3" },
         provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
---      sources = { "m68k/coldfire/dev/common/mcf5_sci3.c" },
+        sources = { "m68k/coldfire/dev/common/mcf5_sci3.c" },
         options =
         {
             {
@@ -355,7 +335,7 @@ nutarch_m68k_coldfire_devices =
         brief = "UART0 Driver",
         description = "Hardware specific UART driver. Implements hardware "..
                       "functions for the generic driver framework.",
-        requires = { "HW_UART_COLDFIRE", "HW_UART0" },
+        requires = { "HW_UART_COLDFIRE", "DEV_IRQ_UART", "HW_UART0" },
         provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
         sources = { "m68k/coldfire/dev/common/mcf5_uart0.c" },
         options =
@@ -563,7 +543,7 @@ nutarch_m68k_coldfire_devices =
         brief = "UART1 Driver",
         description = "Hardware specific UART driver. Implements hardware "..
                       "functions for the generic driver framework.",
-        requires = { "HW_UART_COLDFIRE", "HW_UART1" },
+        requires = { "HW_UART_COLDFIRE", "DEV_IRQ_UART", "HW_UART1" },
         provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
         sources = { "m68k/coldfire/dev/common/mcf5_uart1.c" },
         options =
@@ -771,7 +751,7 @@ nutarch_m68k_coldfire_devices =
         brief = "UART2 Driver",
         description = "Hardware specific UART driver. Implements hardware "..
                       "functions for the generic driver framework.",
-        requires = { "HW_UART_COLDFIRE", "HW_UART2" },
+        requires = { "HW_UART_COLDFIRE", "DEV_IRQ_UART", "HW_UART2" },
         provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
         sources = { "m68k/coldfire/dev/common/mcf5_uart2.c" },
         options =
@@ -969,47 +949,5 @@ nutarch_m68k_coldfire_devices =
                 file = "include/cfg/uart.h"
             },
         },
-    },
-
-    --
-    -- Old Usart0 Interface
-    --
-    {
-        name = "nutarch_m68k_coldfire_devices_old_uart0",
-        brief = "UART0 Driver Old",
-        description = "Hardware specific USART driver. Implements hardware "..
-                      "functions for the generic driver framework.\n\n"..
-                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
-        requires = { "HW_UART_COLDFIRE", "HW_UART0" },
-        provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
-        sources = { "m68k/coldfire/dev/common/mcf5_old_uart0.c" }
-    },
-    
-    --
-    -- Old Usart1 Interface
-    --
-    {
-        name = "nutarch_m68k_coldfire_devices_old_uart1",
-        brief = "UART1 Driver Old",
-        description = "Hardware specific USART driver. Implements hardware "..
-                      "functions for the generic driver framework.\n\n"..
-                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
-        requires = { "HW_UART_COLDFIRE", "HW_UART1" },
-        provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
-        sources = { "m68k/coldfire/dev/common/mcf5_old_uart1.c" }
-    },
-    
-    --
-    -- Old Usart2 Interface
-    --
-    {
-        name = "nutarch_m68k_coldfire_devices_old_uart2",
-        brief = "UART2 Driver Old",
-        description = "Hardware specific USART driver. Implements hardware "..
-                      "functions for the generic driver framework.\n\n"..
-                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
-        requires = { "HW_UART_COLDFIRE", "HW_UART2" },
-        provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
-        sources = { "m68k/coldfire/dev/common/mcf5_old_uart2.c" }
     },
 }

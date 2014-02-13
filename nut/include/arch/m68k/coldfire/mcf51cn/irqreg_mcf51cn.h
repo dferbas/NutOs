@@ -51,6 +51,8 @@ extern IRQ_HANDLER sig_SCI1_RX;
 extern IRQ_HANDLER sig_SCI1_TX;
 extern IRQ_HANDLER sig_SCI2_RX;
 extern IRQ_HANDLER sig_SCI2_TX;
+extern IRQ_HANDLER sig_SCI3_RX;
+extern IRQ_HANDLER sig_SCI3_TX;
 extern IRQ_HANDLER sig_FEC_RB;
 extern IRQ_HANDLER sig_FEC_RF;
 extern IRQ_HANDLER sig_FEC_TB;

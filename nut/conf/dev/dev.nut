@@ -4963,7 +4963,7 @@ nutdev =
         name = "nutarch_fm25l04b",
         brief = "FRAM FM25L04B",
         description = "FRAM FM25L04B - 4Kb SPI FRAM Memory",
-        requires = {"DEV_SPI" },
+        requires = {"DEV_SPI_MCF51CN_DEPRECATED" },
         sources = { "fm25l04b.c" },
     },
     
@@ -4974,7 +4974,7 @@ nutdev =
         name = "nutarch_flash_SST25VF020B",
         brief = "Flash SST25VF020B",
         description = "2 Mbit SPI Serial Flash SST25VF020B",
-        requires = {"DEV_SPI" },
+        requires = {"DEV_SPI_MCF51CN_DEPRECATED" },
         sources = { "flash_sst25vf020b.c" }
     },
 }

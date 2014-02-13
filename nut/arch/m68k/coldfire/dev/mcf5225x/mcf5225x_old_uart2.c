@@ -1,15 +1,7 @@
 
-#include <cfg/os.h>
-
-#include <string.h>
-
-#include <sys/atom.h>
-#include <sys/event.h>
-#include <sys/timer.h>
-
-#include <dev/irqreg.h>
-
-#include <dev/mcf5xxxx_usart.h>
+#include <cfg/arch.h>
+#include <dev/usart.h>
+#include <dev/gpio.h>
 
 /*
  * Local function prototypes.
@@ -34,7 +26,14 @@ static int McfUsartDeinit(void);
 /*
  * brief USART control structure used for write only registers.
  */
-static USART_CONTROL_REGISTER usartControlRegister;
+static struct _USART_CONTROL_REGISTER {
+    uint8_t uimr;   /* UISR/UIMR register, write from one, red from other => write only */
+    uint8_t ubg1;   /* Write only */
+    uint8_t ubg2;   /* Write only */
+    uint8_t umr1;   /* Write/ Read after RESET MODE REGISTER POINTER */
+    uint8_t umr2;   /* Write/ Read after Write/ Read from UMR1 register */
+
+} usartControlRegister ;
 
 /*!
  * \brief USART2 device control block structure.
@@ -101,26 +100,26 @@ NUTDEVICE devUsartOldMcf2 = {
 };
 
 
-/* USART2 Registers */
-#define MCF_UARTn_UMR1   MCF_UART2_UMR1
-#define MCF_UARTn_UMR2   MCF_UART2_UMR2
-#define MCF_UARTn_USR    MCF_UART2_USR
-#define MCF_UARTn_UCSR   MCF_UART2_UCSR
-#define MCF_UARTn_UCR    MCF_UART2_UCR
-#define MCF_UARTn_URB    MCF_UART2_URB
-#define MCF_UARTn_UTB    MCF_UART2_UTB
-#define MCF_UARTn_UIPCR  MCF_UART2_UIPCR
-#define MCF_UARTn_UACR   MCF_UART2_UACR
-#define MCF_UARTn_UIMR   MCF_UART2_UIMR
-#define MCF_UARTn_UISR   MCF_UART2_UISR
-#define MCF_UARTn_UBG1   MCF_UART2_UBG1
-#define MCF_UARTn_UBG2   MCF_UART2_UBG2
-#define MCF_UARTn_UIP    MCF_UART2_UIP
-#define MCF_UARTn_UOP1   MCF_UART2_UOP1
-#define MCF_UARTn_UOP0   MCF_UART2_UOP0
+/* USART0 Registers */
+#define MCF_UARTn_UMR1   MCF_UART_UMR(2)
+#define MCF_UARTn_UMR2   MCF_UART_UMR(2)
+#define MCF_UARTn_USR    MCF_UART_USR(2)
+#define MCF_UARTn_UCSR   MCF_UART_UCSR(2)
+#define MCF_UARTn_UCR    MCF_UART_UCR(2)
+#define MCF_UARTn_URB    MCF_UART_URB(2)
+#define MCF_UARTn_UTB    MCF_UART_UTB(2)
+#define MCF_UARTn_UIPCR  MCF_UART_UIPCR(2)
+#define MCF_UARTn_UACR   MCF_UART_UACR(2)
+#define MCF_UARTn_UIMR   MCF_UART_UIMR(2)
+#define MCF_UARTn_UISR   MCF_UART_UISR(2)
+#define MCF_UARTn_UBG1   MCF_UART_UBG1(2)
+#define MCF_UARTn_UBG2   MCF_UART_UBG2(2)
+#define MCF_UARTn_UIP    MCF_UART_UIP(2)
+#define MCF_UARTn_UOP1   MCF_UART_UOP1(2)
+#define MCF_UARTn_UOP0   MCF_UART_UOP0(2)
 
 /* USART2 Interrupt Handler */
-#define sig_USART	    sig_USART2
+#define sig_UART	    sig_UART2
 
 /* Define Interrupt Level */
 #define IH_USART_LEVEL 	IH_USART2_LEVEL
@@ -132,17 +131,24 @@ NUTDEVICE devUsartOldMcf2 = {
 /* USART2 device control structure */
 #define dcb_usart   dcb_usart2
 
+#define MCF_GPIO_PUCPAR_URXD2_URXD2          (0x4)
+#define MCF_GPIO_PUCPAR_UTXD2_UTXD2          (0x1)
+#define MCF_GPIO_DDRUC_DDRUC2                (0x4)
+#define MCF_GPIO_PORTUC_PORTUC2              (0x4)
+#define MCF_GPIO_PUCPAR_UCTS2_UCTS2          (0x40)
+
 /* GPIO */
-#define MCF_GPIO_PUnPAR		  MCF_GPIO_PUCPAR
+#define MCF_GPIO_PUnPAR		  MCF_GPIO_PAR8(PORTUC)
 #define MCF_GPIO_PUnPAR_URXDn MCF_GPIO_PUCPAR_URXD2_URXD2
 #define MCF_GPIO_PUnPAR_UTXDn MCF_GPIO_PUCPAR_UTXD2_UTXD2
+#define MCF_GPIO_PUCPAR_PUCPAR2(x)           (((x)&0x3)<<0x4)
 
 #define UART_RTS_BIT
 #define UART_CTS_BIT
 
-#define MCF_GPIO_RCTS_PAR		MCF_GPIO_PUCPAR
-#define MCF_GPIO_RCTS_DDR		MCF_GPIO_DDRUC
-#define MCF_GPIO_RCTS_PORT		MCF_GPIO_PORTUC
+#define MCF_GPIO_RCTS_PAR		MCF_GPIO_PAR8(PORTUC)
+#define MCF_GPIO_RCTS_DDR		MCF_GPIO_DDR(PORTUC)
+#define MCF_GPIO_RCTS_PORT		MCF_GPIO_PORT(PORTUC)
 
 #define MCF_GPIO_RCTS_PAR_RTS	MCF_GPIO_PUCPAR_PUCPAR2
 #define MCF_GPIO_RCTS_DDR_RTS	MCF_GPIO_DDRUC_DDRUC2
@@ -172,5 +178,5 @@ NUTDEVICE devUsartOldMcf2 = {
 #endif
 
 /* defined variables and macros for this include */
-#include "mcf5_old_uart.c"
+#include "mcf5225x_old_uart.c"
 

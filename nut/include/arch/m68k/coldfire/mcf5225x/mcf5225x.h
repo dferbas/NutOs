@@ -44,4 +44,3 @@
 #include "mcf5225x_scm.h"
 #include "mcf5225x_uart.h"
 
-#endif /* MCF5225X_H_ */

@@ -39,6 +39,9 @@ static int IrqCtl1_Tx(int cmd, void *param);
 static int IrqCtl2_Rx(int cmd, void *param);
 static int IrqCtl2_Tx(int cmd, void *param);
 
+static int IrqCtl3_Rx(int cmd, void *param);
+static int IrqCtl3_Tx(int cmd, void *param);
+
 IRQ_HANDLER sig_SCI1_RX = {
 #ifdef NUT_PERFMON
         0,
@@ -75,6 +78,24 @@ IRQ_HANDLER sig_SCI2_TX = {
         IrqCtl2_Tx
     };
 
+IRQ_HANDLER sig_SCI3_RX = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtl3_Rx
+    };
+
+IRQ_HANDLER sig_SCI3_TX = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtl3_Tx
+    };
+
 static int IrqCtl1_Rx(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_SCI1_RX, cmd, param, &MCF_SCI_C2(1), MCF_SCI_C2_TIE, 1);
@@ -95,6 +116,17 @@ static int IrqCtl2_Tx(int cmd, void *param)
     return IrqCtlCommon(&sig_SCI2_TX, cmd, param, &MCF_SCI_C2(2), MCF_SCI_C2_RIE, 1);
 }
 
+static int IrqCtl3_Rx(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_SCI3_RX, cmd, param, &MCF_SCI_C2(3), MCF_SCI_C2_TIE, 1);
+}
+
+static int IrqCtl3_Tx(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_SCI2_TX, cmd, param, &MCF_SCI_C2(3), MCF_SCI_C2_RIE, 1);
+}
+
+
 SIGNAL(IH_SCI1_RX)
 {
     CallHandler(&sig_SCI1_RX);
@@ -113,4 +145,14 @@ SIGNAL(IH_SCI2_RX)
 SIGNAL(IH_SCI2_TX)
 {
     CallHandler(&sig_SCI2_TX);
+}
+
+SIGNAL(IH_SCI3_RX)
+{
+    CallHandler(&sig_SCI3_RX);
+}
+
+SIGNAL(IH_SCI3_TX)
+{
+    CallHandler(&sig_SCI3_TX);
 }

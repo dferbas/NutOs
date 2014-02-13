@@ -1,11 +1,12 @@
 
+//#include <arch/m68k.h>
+//#include <cfg/arch.h>
+//#include <dev/irqreg.h>
 #include <sys/atom.h>
 #include <sys/event.h>
 #include <sys/timer.h>
-#include <cfg/arch.h>
 
-#include <dev/irqreg.h>
-#include <arch/m68k/mcf5225x.h>
+#define NutEnterCriticalLevel(...)   NutEnterCritical()        // TODO JS .. upravit podle SolarMonitoru
 
 #undef NUTTRACER    // TODO .. not portet yet
 //#define UART_NO_SW_FLOWCONTROL
@@ -62,9 +63,6 @@
 #define XOFF_SENT       0x40
 /* \brief XOFF received flag. */
 #define XOFF_RCVD       0x80
-
-extern USART_CONTROL_REGISTER usartControlRegister;
-extern USARTDCB dcb_usart;
 
 /*!
  * \brief Receiver error flags.
@@ -1084,7 +1082,7 @@ static int McfUsartInit(void)
     /* Disable all interrupts */
     CLR_ALL_INTERRUPT();
 
-    if (NutRegisterIrqHandler(&sig_USART, McfUsartInterrupts, &dcb_usart))
+    if (NutRegisterIrqHandler(&sig_UART, McfUsartInterrupts, &dcb_usart))
         return -1;
 
 
@@ -1150,7 +1148,7 @@ static int McfUsartInit(void)
 static int McfUsartDeinit(void)
 {
     /* Deregister receive and transmit interrupts. */
-    NutRegisterIrqHandler(&sig_USART, 0, 0);
+    NutRegisterIrqHandler(&sig_UART, 0, 0);
 
     /*
      * Disabling flow control shouldn't be required here, because it's up

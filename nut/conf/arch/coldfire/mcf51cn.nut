@@ -23,17 +23,17 @@ nutarch_m68k_coldfire_mcf51cn =
         name = "nutarch_m68k_coldfire_mcf51cn_family",
         brief = "Family",
         provides = {
-                "HW_MTIM_COLDFIRE",
-                "HW_IIC_COLDFIRE",
-                "HW_SCI_COLDFIRE",
-                "HW_GPIO_COLDFIRE",
-                "HW_COP_COLDFIRE",
                 "HW_ADC12_COLDFIRE",
---              "HW_SPI_COLDFIRE",
+                "HW_SCI_COLDFIRE",
+--              "HW_MTIM_COLDFIRE",
+--              "HW_IIC_COLDFIRE",
+--              "HW_GPIO_COLDFIRE",
+--              "HW_COP_COLDFIRE",
+--              "HW_FEC_COLDFIRE",
 --              "HW_RTC_COLDFIRE",
+--              "HW_SPI_COLDFIRE",
 --              "HW_TMP_COLDFIRE",
 --              "HW_KBI_COLDFIRE",
---              "HW_FEC_COLDFIRE",
 --              "HW_MFB_COLDFIRE",
         },
         options =
@@ -46,35 +46,35 @@ nutarch_m68k_coldfire_mcf51cn =
                 default = 1,
                 file = "include/cfg/arch.h"
             },
-            {
-                macro = "IIC1",
-                type = "integer",
-                default = 1,
-                provides = { "HW_IIC1" },
-                file = "include/cfg/peripherals.h"
-            },
-            {
-                macro = "IIC2",
-                type = "integer",
-                default = 1,
-                provides = { "HW_IIC2" },
-                file = "include/cfg/peripherals.h"
-            },
-            {
-                macro = "MTIM1",
-                type = "integer",
-                default = 1,
-                provides = { "HW_MTIM1" },
-                file = "include/cfg/peripherals.h"
-            },
-            {
-                macro = "MTIM2",
-                type = "integer",
-                default = 1,
-                provides = { "HW_MTIM2" },
-                file = "include/cfg/peripherals.h"
-            },
-            
+--          {
+--              macro = "IIC1",
+--              type = "integer",
+--              default = 1,
+--              provides = { "HW_IIC1" },
+--              file = "include/cfg/peripherals.h"
+--          },
+--          {
+--              macro = "IIC2",
+--              type = "integer",
+--              default = 1,
+--              provides = { "HW_IIC2" },
+--              file = "include/cfg/peripherals.h"
+--          },
+--          {
+--              macro = "MTIM1",
+--              type = "integer",
+--              default = 1,
+--              provides = { "HW_MTIM1" },
+--              file = "include/cfg/peripherals.h"
+--          },
+--          {
+--              macro = "MTIM2",
+--              type = "integer",
+--              default = 1,
+--              provides = { "HW_MTIM2" },
+--              file = "include/cfg/peripherals.h"
+--          },
+--          
             {
                 macro = "SCI1",
                 type = "integer",
@@ -152,6 +152,16 @@ nutarch_m68k_coldfire_mcf51cn =
         requires = { "TOOL_CC_M68K", "TOOL_GCC"},
     },    
 
+    --
+    -- Internal Flash
+    --
+    {
+        name = "nutarch_m68k_coldfire_devices_intflash",
+        brief = "Internal Flash",
+        description = "Code snippet for modiffying internal flash memory.",
+        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_intflash.c" },
+    },
+
     -- 
     -- Multipurpose Clock Generator
     --
@@ -172,7 +182,6 @@ nutarch_m68k_coldfire_mcf51cn =
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_gpio.c"}
     },
     
-
     --
     -- Interrupt Handler
     --
@@ -181,10 +190,14 @@ nutarch_m68k_coldfire_mcf51cn =
         brief = "Interrupt Handler",
         description = "Peripheral interrupt handlers for MCF51CN family.",
         provides = { 
-                     "DEV_IRQ_MTIM1",
-                     "DEV_IRQ_MTIM2",
-                     "DEV_IRQ_IIC1",
-                     "DEV_IRQ_IIC2",
+                    "DEV_IRQ_ADC",
+                    "DEV_IRQ_SCI",
+--                  "DEV_IRQ_MTIM",
+--                  "DEV_IRQ_IIC",
+--                  "DEV_IRQ_TPM",
+--                  "DEV_IRQ_RTC",
+--                  "DEV_IRQ_SPI",
+--                  "DEV_IRQ_FEC",
                    },
         sources = { "m68k/coldfire/dev/mcf51cn/ih_mcf51cn_common.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_mtim.c",
@@ -193,7 +206,8 @@ nutarch_m68k_coldfire_mcf51cn =
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_adc.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_rtc.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_spi.c",
-          			"m68k/coldfire/dev/common/ih_mcf5_sci.c",
+          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_fec.c",
+          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_sci.c",
         			},
     },
     
@@ -203,7 +217,6 @@ nutarch_m68k_coldfire_mcf51cn =
     {
         name = "nutarch_m68k_coldfire_mcf51cn_mtim",
         brief = "Modulo Timer",
-        provides = { "HW_MTIM_COLDFIRE" },
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_mtim.c" },
     },
     
@@ -213,7 +226,6 @@ nutarch_m68k_coldfire_mcf51cn =
     {
         name = "nutarch_m68k_coldfire_mcf51cn_tpm",
         brief = "Timer/PWM Module (TPM)",
-        provides = { "HW_TPM_COLDFIRE" },
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_tpm.c" },
     },
 
@@ -223,7 +235,6 @@ nutarch_m68k_coldfire_mcf51cn =
     {
         name = "nutarch_m68k_coldfire_mcf51cn_ostimer",
         brief = "System Timer",
-        requires = { "HW_MTIM_COLDFIRE", "DEV_IRQ_MTIM1" },
         provides = { "NUT_OSTIMER_DEV" },
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_ostimer.c" },
     },
@@ -234,7 +245,6 @@ nutarch_m68k_coldfire_mcf51cn =
     {
         name = "nutarch_m68k_coldfire_mcf51cn_cop",
         brief = "Watchdog (COP)",
-        requires = {"HW_COP_COLDFIRE" },
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_cop.c" },
         options =
         {
@@ -266,7 +276,6 @@ nutarch_m68k_coldfire_mcf51cn =
         name = "nutarch_m68k_coldfire_mcf51cn_rtc",
         brief = "Real-Time Counter (RTC)",
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_rtc.c" },
-        provides = { "DEV_RTC" },
     },
     
     --
@@ -275,7 +284,19 @@ nutarch_m68k_coldfire_mcf51cn =
     {
         name = "nutarch_m68k_coldfire_mcf51cn_spi",
         brief = "Serial Peripheral Interface (SPI)",
+        description = "Deprecated, non-standard SPI driver created during rapid developement. \n"..
+                      "It is used only by FRAM FM25L04B and by SPI Serial Flash SST25VF020B. \n\n"..
+                      "TODO: This driver must be recoded to use standard SPIBUS framework",
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_spi.c" },
-        provides = { "DEV_SPI" },
+        provides = { "DEV_SPI_MCF51CN_DEPRECATED" },
+    },
+    
+    --
+    -- Fast Ethernet Controller (FEC)
+    --
+    {
+        name = "nutarch_m68k_coldfire_mcf51cn_fec",
+        brief = "Fast Ethernet Controller (FEC)",
+        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_fec.c" },
     },
 }

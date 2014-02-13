@@ -47,12 +47,13 @@ nutarch_m68k_coldfire_mcf5225x =
         name = "nutarch_m68k_coldfire_mcf5225x_family",
         brief = "Family",
         provides = {
-                "HW_GPIO_COLDFIRE",
-	        	"HW_UART_COLDFIRE",
-	        	"HW_PIT_COLDFIRE",
-	        	"HW_CWD_COLDFIRE",
-	        	"HW_I2C_COLDFIRE",
-		},
+                "HW_I2C_COLDFIRE",
+                "HW_UART_COLDFIRE",
+--              "HW_GPIO_COLDFIRE",
+--              "HW_PIT_COLDFIRE",
+--              "HW_CWD_COLDFIRE",
+--              "HW_FEC_COLDFIRE",
+        },
         options =
         {
             {
@@ -63,20 +64,20 @@ nutarch_m68k_coldfire_mcf5225x =
                 default = 1,
                 file = "include/cfg/arch.h"
             },
-            {
-                macro = "PIT0",
-                type = "integer",
-                default = 1,
-                provides = { "HW_PIT0" },
-                file = "include/cfg/peripherals.h"
-            },
-            {
-                macro = "PIT1",
-                type = "integer",
-                default = 1,
-                provides = { "HW_PIT1" },
-                file = "include/cfg/peripherals.h"
-            },
+--          {
+--              macro = "PIT0",
+--              type = "integer",
+--              default = 1,
+--              provides = { "HW_PIT0" },
+--              file = "include/cfg/peripherals.h"
+--          },
+--          {
+--              macro = "PIT1",
+--              type = "integer",
+--              default = 1,
+--              provides = { "HW_PIT1" },
+--              file = "include/cfg/peripherals.h"
+--          },
             {
                 macro = "UART0",
                 type = "integer",
@@ -121,18 +122,18 @@ nutarch_m68k_coldfire_mcf5225x =
     {
         name = "nutarch_m68k_coldfire_mcf5225x_init",
         brief = "Initialization",
-		description = "System startup code for MCF5225X family MCUs:\n"..
-		              "  - Vector table\n"..
-		              "  - Memories\n"..
-		              "  - MCU\n"..
-		              "  - Peripherals",
+        description = "System startup code for MCF5225X family MCUs:\n"..
+                      "  - Vector table\n"..
+                      "  - Memories\n"..
+                      "  - MCU\n"..
+                      "  - Peripherals",
         sources = { 
 --                  "m68k/coldfire/init/crt_common.S",
 --                  "m68k/coldfire/init/crt_$(LDNAME).S",
 --                  "m68k/coldfire/init/crt_mcf5225x.S",
                     "m68k/coldfire/init/crt_common_c.c", 
-        			"m68k/coldfire/init/crt_mcf5225x_c.c",
-        		  },
+                    "m68k/coldfire/init/crt_mcf5225x_c.c",
+                  },
         targets = { 
 --                  "m68k/coldfire/init/crt_common.o",
 --                  "m68k/coldfire/init/crt_mcf5225x.o", 
@@ -175,7 +176,6 @@ nutarch_m68k_coldfire_mcf5225x =
         name = "nutarch_m68k_coldfire_mcf5225x_gpio",
         brief = "GPIO",
         description = "Generic port I/O API.",
-        requires = { "HW_GPIO_COLDFIRE" },
         sources = { "m68k/coldfire/dev/mcf5225x/mcf5225x_gpio.c"}
     },
     
@@ -186,20 +186,17 @@ nutarch_m68k_coldfire_mcf5225x =
         name = "nutarch_m68k_coldfire_mcf5225x_ihndlr",
         brief = "Interrupt Handler",
         description = "Peripheral interrupt handlers for MCF5225X family.",
-        provides = { "DEV_IRQ_PIT0",
-                     "DEV_IRQ_PIT1",
-                     "DEV_IRQ_CWD",
-                     "DEV_IRQ_I2C0",
-                     "DEV_IRQ_I2C1",
-                     "DEV_IRQ_UART0",
-                     "DEV_IRQ_UART1",
-                     "DEV_IRQ_UART2",
+        provides = { 
+                    "DEV_IRQ_I2C",
+                    "DEV_IRQ_UART",
+--                  "DEV_IRQ_PIT",
+--                  "DEV_IRQ_CWD",
                    },
         sources = { "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_common.c",
-        			"m68k/coldfire/dev/mcf5225x/ih_mcf5225x_pit.c",
-        			"m68k/coldfire/dev/mcf5225x/ih_mcf5225x_cwd.c",
-        			"m68k/coldfire/dev/mcf5225x/ih_mcf5225x_i2c.c",
-        			"m68k/coldfire/dev/mcf5225x/ih_mcf5225x_uart.c" },
+                    "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_pit.c",
+                    "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_cwd.c",
+                    "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_i2c.c",
+                    "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_uart.c" },
     },
 
     --
@@ -208,10 +205,10 @@ nutarch_m68k_coldfire_mcf5225x =
     {
         name = "nutarch_m68k_coldfire_mcf5225x_ostimer",
         brief = "System Timer",
-        requires = { "HW_PIT_COLDFIRE", "HW_PIT0", "DEV_IRQ_PIT0" },
         provides = { "NUT_OSTIMER_DEV" },
         sources = { "m68k/coldfire/dev/mcf5225x/mcf5225x_ostimer.c" },
     },
+    
     --
     -- Reset Controller
     --
@@ -220,13 +217,52 @@ nutarch_m68k_coldfire_mcf5225x =
         brief = "Reset Controller",
         sources = { "m68k/coldfire/dev/mcf5225x/mcf5225x_reset.c" },
     },
+    
     --
     -- Core Watchdog
     --
     {
         name = "nutarch_m68k_coldfire_mcf5225x_cwd",
         brief = "Core Watchdog",
-        requires = {"HW_CWD_COLDFIRE", "DEV_IRQ_CWD" },
         sources = { "m68k/coldfire/dev/mcf5225x/mcf5225x_cwd.c" }
+    },
+
+    --
+    -- Old Usart0 Interface
+    --
+    {
+        name = "nutarch_m68k_coldfire_devices_old_uart0",
+        brief = "UART0 Driver Old",
+        description = "Hardware specific USART driver. Implements hardware "..
+                      "functions for the generic driver framework.\n\n"..
+                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
+        provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
+        sources = { "m68k/coldfire/dev/mcf5225x/mcf5225x_old_uart0.c" }
+    },
+    
+    --
+    -- Old Usart1 Interface
+    --
+    {
+        name = "nutarch_m68k_coldfire_devices_old_uart1",
+        brief = "UART1 Driver Old",
+        description = "Hardware specific USART driver. Implements hardware "..
+                      "functions for the generic driver framework.\n\n"..
+                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
+        provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
+        sources = { "m68k/coldfire/dev/mcf5225x/mcf5225x_old_uart1.c" }
+    },
+    
+    --
+    -- Old Usart2 Interface
+    --
+    {
+        name = "nutarch_m68k_coldfire_devices_old_uart2",
+        brief = "UART2 Driver Old",
+        description = "Hardware specific USART driver. Implements hardware "..
+                      "functions for the generic driver framework.\n\n"..
+                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
+        provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
+        sources = { "m68k/coldfire/dev/mcf5225x/mcf5225x_old_uart2.c" }
     },
 }
