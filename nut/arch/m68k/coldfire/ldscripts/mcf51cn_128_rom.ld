@@ -33,7 +33,6 @@
 OUTPUT_ARCH(m68k)
 STARTUP(crt_common.o)
 INPUT(crt_mcf51cn.o)
-INPUT(libnutarch.a)     /* FIXME: Remove this temporary fix */
 INPUT(crt_mcf51cn_128_rom.o)
 ENTRY(_start)
 
