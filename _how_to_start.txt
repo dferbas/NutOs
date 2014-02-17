@@ -39,6 +39,15 @@
 			- v konzoli (Window/ShowView/Console) by mel byt videt prubeh kompilace 
 			- spust target "simple - rebuild"
 			- v konzoli by mel byt opet videt prubeh kompilace, mela by se vytvorit binarka simple.elf
+----------------------------------------------------------------------------			
+7A) sposteni managovanych aplikaci
+    - aplikace nedelame makefilove, ale managovane Eclipse
+    - u ethernut projektu (nut_bke, nut_5.0.5 a vyšší) se pouziva nasledujici 
+      mechanizmus pro nastavovani cest k Includum, Knihovnam, a Zdrojakum
+        - vsechny cesty jsou nastavene v nut projektech v Export Settings
+            - Properties > C/C++ General > Export Settings
+                - Pokud tam tu stránku nemáš, tak je potøeba ji povolit v Window > Preferences > C/C++ > Property Page Settings
+        - v pojektech se pak jenom nastavi reference v Properties > C/C++ General > Paths & Symbols > References  			
 ----------------------------------------------------------------------------
 8) debugovani
 	- Lite verze nepodporuje nahravani kodu do zarizeni (gdb prikaz: load), 
