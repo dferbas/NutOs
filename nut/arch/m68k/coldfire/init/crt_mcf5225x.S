@@ -184,9 +184,9 @@ vectorBF:   .long   IH_DEFAULT
     move.b	%d0,__ipsbar+0x100074
 
 //------------------------------------------------------------------------------
-// Section 12 - CPU and Peripherals Initialization (family dependant code)
+// Section 10 - CPU and Peripherals Initialization (family dependant code)
 //------------------------------------------------------------------------------
-    .section .init12,"ax",%progbits
+    .section .init10,"ax",%progbits
     jsr InitIntramAccess
     jsr InitClock
 
