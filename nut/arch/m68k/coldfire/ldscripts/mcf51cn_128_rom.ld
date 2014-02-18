@@ -44,7 +44,6 @@ MEMORY
     bootloader(r) : ORIGIN = 0x00000000, LENGTH = 0
     rom(rx)       : ORIGIN = 0x00000000 + LENGTH(bootloader), LENGTH = 128K - LENGTH(bootloader)
     intram(rwx)   : ORIGIN = 0x00800000, LENGTH = 24K
-    ipsbar(rw)    : ORIGIN = 0x40000000, LENGTH = 1024M
     extram(rwx)   : ORIGIN = 0x80000000, LENGTH = 0
 }
 
@@ -58,7 +57,6 @@ PROVIDE (__extram_size    = LENGTH(extram));
 
 PROVIDE (__rambar         = __intram_start);
 PROVIDE (__flashbar       = ORIGIN(bootloader));
-PROVIDE (__ipsbar         = ORIGIN(ipsbar));
 PROVIDE (__stack_init     = __intram_start + __intram_size);
 
 /*
