@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!DOCTYPE board SYSTEM "board.dtd">
+<!-- Description for Freescale MCF51CN128 (Lasko)
+
+     Version: Sourcery CodeBench 2012.03-32
+     Support: https://support.codesourcery.com/GNUToolchain/
+
+     Copyright (c) 2007, 2008, 2009, 2010 CodeSourcery, Inc.
+
+     THIS FILE CONTAINS PROPRIETARY, CONFIDENTIAL, AND TRADE SECRET
+     INFORMATION OF CODESOURCERY AND/OR ITS LICENSORS.
+
+     You may not use or distribute this file without the express written
+     permission of CodeSourcery or its authorized distributor.  This file is
+     licensed only for use with Sourcery CodeBench.  No other use is permitted.
+     -->
+<board>
+  <properties>
+    <description>
+      Board:	Freescale MCF51CN128 (Lasko)
+      CPU:	51cn
+    </description>
+    <property name="system-clock">
+      16742KHz
+    </property>
+    <property name="core">
+      v1
+    </property>
+  </properties>
+  <feature name="coldfire.51cn.registers">
+    <space annex="cf-ctrl" name="cf_ctrl">
+      <!-- These offsets are the MOVEC address multiplied by 4 so
+           that the resulting address can be treated as a byte address.
+           -->
+      <reg bitsize="32" name="VBR" offset="0x2004"/>
+    </space>
+  </feature>
+  <initialize>
+    <!-- disable the watchdog timer in SOPT1 -->
+    <write-memory address="0xffff8101" value="0x10" bits="8"/>
+    <!-- MCGTRM: TRIM:0x80 -->
+    <write-memory address="0xffff8242" value="0x80" bits="8"/>
+    <!-- Wait for FLL to lock on frequency -->
+    <delay time="300ms"/>
+  </initialize>
+  <memory-map>
+    <memory-device address="0x00000000" size="128K" type="flash" device="cfm">
+      <property name="ipsbar">
+	0xffff6ac0
+      </property>
+      <description>
+	128KBytes Flash
+      </description>
+    </memory-device>
+    <memory-device address="0x00800000" size="24K" type="ram">
+      <description>
+	24KBytes Internal RAM
+      </description>
+    </memory-device>
+    <memory-device address="0xffff8000" size="32K" type="ram">
+      <description>
+	32KBytes Peripherals
+      </description>
+    </memory-device>
+  </memory-map>
+</board>
+<!-- checksum: b6e7b86184f7d3cc3e092d2 -->
