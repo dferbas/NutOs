@@ -50,10 +50,9 @@
  * points to this structure.
  */
 typedef struct {
+    uint32_t sr;	 // status register
     uint32_t d[6];   // d2-d7 (NOTE: d0-d1, a0-a1 are working registers for C language)
     uint32_t a[4];	 // a2-a5
-    uint16_t pad; 	 // alignment to 32 bit
-    uint16_t sr;	 // status register
 } SWITCHFRAME;
 
 /*!
@@ -64,10 +63,9 @@ typedef struct {
 typedef struct {
     uint32_t fp_entry;	// value fp register
     uint32_t pc_entry;	// function NutThreadEntry
-    uint16_t pad; 	    // alignment to 32 bit
-    uint16_t sr;	    // status register
-    uint32_t d0;		// arg function
+    uint32_t sr;	    // status register
     uint32_t pc_fn;		// thread's entry function
+    uint32_t d0;		// arg function
 } ENTERFRAME;
 
 /*!
@@ -86,17 +84,19 @@ void NutThreadExitAndYield(void)
 void NutThreadEntry(void)
 {
     /* The thread's entry point ef->pc_fn to jsr */
-    __asm__ volatile("move.l    12(%sp), %a0");
-    /* Move sp and fp to save place in stack. */
+    __asm__ volatile("move.l    8(%sp), %a0");
+
+    /* Initialize sp and fp to stack start. */
     __asm__ volatile("add.l		#12, %sp");
     __asm__ volatile("move.l	%sp, %fp");
-    /* The thread's arg copy ef->d0 to use in sub rutine */
-    __asm__ volatile("move.l	-4(%sp), (%sp)");
+
     /* NutExitCritical - load sr */
     __asm__ volatile("move.l	-8(%sp), %d0");
     __asm__ volatile("move.w	%d0, %sr");
+
     /* Jump to thread's entry point ef->pc_fn */
     __asm__ volatile("jsr	 	(%a0)");
+
     /* If returned from subrutine terminate thread */
     NutThreadExitAndYield();
 }
@@ -118,9 +118,8 @@ void NutThreadSwitch(void)
     SWITCHFRAME sf;
 
     /* Save CPU context. */
-    __asm__ volatile("movem.l	%%d2-%%d7/%%a2-%%a5, %[sf_d0]":[sf_d0] "=m" (sf.d[0]));
-    __asm__ volatile("move.w	%sr,%d0");
-    __asm__ volatile("move.w	%%d0,%[sf_sr]" :[sf_sr] "=m" (sf.sr));
+    __asm__ volatile("move.w	%sr,%d1");
+    __asm__ volatile("movem.l	%%d1-%%d7/%%a2-%%a5, %[sf_sr]":[sf_sr] "=m" (sf.sr));
     __asm__ volatile("move.l	%%sp,%[td_sp]" :[td_sp] "=m" (runningThread->td_sp));
 
     /*
@@ -134,18 +133,16 @@ void NutThreadSwitch(void)
     runningThread = runQueue;
     runningThread->td_state = TDS_RUNNING;
 
-    /* Restore context. */
-    /* load stack pointer from NUTTHREADINFO */
+    // NOTE: Here the "sf" variable shows garbage in Eclipse's Variables View
+    //       because frame pointer is not configured yet
 
-    // NOTE: "sf" variable shows garbage in Eclipse Variables View (frame pointer is not configured yet)
+    /* Restore context (Stack Pointer, Frame Pointer, DA Registers, Status Register. */
     __asm__ volatile("move.l	%[td_sp],%%sp" ::[td_sp] "m" (runningThread->td_sp));
     __asm__ volatile("move.l	%sp,%a0");
     __asm__ volatile("adda.l	%[size],%%a0" ::[size] "i" (LOCAL_VARIABLES_SIZE));
     __asm__ volatile("move.l	%a0,%fp");
-    // now you can use the "sf" variable (local variables)
-    __asm__ volatile("move.w	%[sf_sr],%%d0" ::[sf_sr] "m" (sf.sr));
-    __asm__ volatile("move.w	%d0,%sr");
-    __asm__ volatile("movem.l	%[sf_d0], %%d2-%%d7/%%a2-%%a5"::[sf_d0] "m" (sf.d[0]));
+    __asm__ volatile("movem.l	%[sf_sr], %%d1-%%d7/%%a2-%%a5"::[sf_sr] "m" (sf.sr));
+    __asm__ volatile("move.w	%d1,%sr");
 }
 
 /*!
@@ -168,7 +165,7 @@ void NutThreadSwitch(void)
  */
 HANDLE NutThreadCreate(char * name, void(*fn)(void *), void *arg, size_t stackSize)
 {
-    uint8_t *threadMem;
+    uint8_t *threadMem = NULL;
     SWITCHFRAME *sf;
     ENTERFRAME *ef;
     NUTTHREADINFO *td;
@@ -201,13 +198,21 @@ HANDLE NutThreadCreate(char * name, void(*fn)(void *), void *arg, size_t stackSi
      *
      * Lower memory addresses.
      */
-    if ((threadMem = NutStackAlloc(stackSize + sizeof(NUTTHREADINFO))) == 0) {
-#ifdef NUTMEM_STACKHEAP
-        if ((threadMem = NutHeapAlloc(stackSize + sizeof(NUTTHREADINFO))) == 0) {
-            return 0;
-        }
+
+#if (NUTMEM_STACKHEAP_LIMIT > 0)
+    if (NutHeapFastMemAvailable() > (NUTMEM_STACKHEAP_LIMIT + stackSize + sizeof(NUTTHREADINFO)))
 #endif
-    }
+
+    threadMem = NutStackAlloc(stackSize + sizeof(NUTTHREADINFO));
+
+#ifdef NUTMEM_STACKHEAP
+    if (!threadMem)
+        threadMem = NutHeapAlloc(stackSize + sizeof(NUTTHREADINFO));
+#endif
+
+    if (!threadMem)
+        return 0;
+
     td = (NUTTHREADINFO *) (threadMem + stackSize);
     ef = (ENTERFRAME *) ((uintptr_t) td - sizeof(ENTERFRAME));
     sf = (SWITCHFRAME *) ((uintptr_t) ef - sizeof(SWITCHFRAME));
@@ -236,8 +241,8 @@ HANDLE NutThreadCreate(char * name, void(*fn)(void *), void *arg, size_t stackSi
     ef->fp_entry = (uintptr_t) &ef->pc_entry; // no local variables fp = sp
     ef->pc_entry = (uintptr_t) NutThreadEntry;
     ef->sr = 0x2000; // supervisor mode + allow all interrupts (exit critical section)
-    ef->d0 = (uintptr_t) arg;
     ef->pc_fn = (uintptr_t) fn;
+    ef->d0 = (uintptr_t) arg;
 
     /*
      * Setup the switch frame.
@@ -266,7 +271,6 @@ HANDLE NutThreadCreate(char * name, void(*fn)(void *), void *arg, size_t stackSi
      * If no thread is active, switch to new thread.
      */
     if (runningThread == NULL) {
-//      NutEnterCritical();
         asm volatile ("jmp thread_start\n\t"::);
         /* we will never come back here .. */
     }
@@ -284,19 +288,20 @@ HANDLE NutThreadCreate(char * name, void(*fn)(void *), void *arg, size_t stackSi
     return td;
 }
 
-extern NUTTHREADINFO * killedThread;
 void NutThreadDestroy(void)
 {
+    extern NUTTHREADINFO * killedThread;
+
     if (killedThread) {
 #ifdef NUTMEM_STACKHEAP
-		extern void *__stackmem_start;
-		extern void *__stackmem_size;
+		extern void *__fast_heap_start;
+		extern void *__fast_heap_size;
 
-		#define STACK_HEAP_START	&__stackmem_start
-		#define STACK_HEAP_SIZE		((uint32_t)&__stackmem_size)
+		#define FAST_HEAP_START	    &__fast_heap_start
+		#define FAST_HEAP_SIZE		((uint32_t)&__fast_heap_size)
 
-        if (((void *)killedThread->td_memory > (void *)(STACK_HEAP_START)) && ((void *)killedThread->td_memory < (void *)(STACK_HEAP_START + STACK_HEAP_SIZE))) {
-        	NutStackFree(killedThread->td_memory);
+        if (((void *)killedThread->td_memory > (void *)(FAST_HEAP_START)) && ((void *)killedThread->td_memory < (void *)(FAST_HEAP_START + FAST_HEAP_SIZE))) {
+            NutHeapFastMemFree(killedThread->td_memory);
         }
         else {
             NutHeapFree(killedThread->td_memory);

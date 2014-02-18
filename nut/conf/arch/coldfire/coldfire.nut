@@ -30,6 +30,28 @@ nutarch_m68k_coldfire =
     },
 
     --
+    -- Internal Memory
+    --
+    {
+        name = "nutarch_m68k_coldfire_int_mem",
+        brief = "Internal Memory",
+        description = "Internal memory (RAM)",
+        options =
+        {
+            {
+                macro = "NUTMEM_SPLIT_FAST",
+                brief = "Use internal RAM as 'fast heap'",
+                description = "If this option is enabled, free internal memory is used as a heap.\n\n"..
+                              "Some devices (e.g. FEC) are able to work only with internal memory.\n"..
+                              "They might use NutHeapFastMemAlloc() for allocating this memory.",
+                provides = { "NUTMEM_SPLIT_FAST" },
+                flavor = "booldata",
+                file = "include/cfg/memory.h"
+            },
+        }        
+    },
+
+    --
     -- Context Switching
     --
     {
@@ -43,13 +65,36 @@ nutarch_m68k_coldfire =
         {
             {
                 macro = "NUTMEM_STACKHEAP",
-                brief = "Separate heap for stack",
-                description = "This option enables use of a separate heap for stack.\n\n"..
+                brief = "Stack in 'fast heap'",
+                description = "This option enables use of a 'fast heap' for stack.\n\n"..
                               "When a thread is created with this option enabled, "..
-                              "it's stack is allocated on a special 'thread stack heap' "..
-                              "which is kept in faster internal memory \ninstead of using the 'standard heap' ".. 
+                              "it's stack is allocated on a 'fast heap' which is kept "..
+                              "in faster internal memory \ninstead of using the 'standard heap' ".. 
                               "which is typically located in slower external memory.",
+                requires = { "NUTMEM_SPLIT_FAST" },
+                provides = { "NUTMEM_STACKHEAP" },
                 flavor = "booldata",
+                file = "include/cfg/memory.h"
+            },
+            {
+                macro = "NUTMEM_STACKHEAP_ALLOW_EXTRAM",
+                brief = "Stack in 'slow heap'",
+                description = "This option enables use of 'slow heap' located in external "..
+                              "memory for stack after the internal 'fast heap' is exhousted.\n\n",
+                requires = { "NUTMEM_STACKHEAP" },
+                flavor = "booldata",
+                file = "include/cfg/memory.h"
+            },
+            {
+                macro = "NUTMEM_STACKHEAP_LIMIT",
+                brief = "Fast heap stack limit",
+                description = "This option disables to use all the 'fast heap' for stack.\n"..
+                              "It is usefull if there are other modules which also uses 'fast heap'\n\n."..
+                              "Set this number to amount of memory you want to protect. If there will "..
+                              "be less than 'Fast heap stack limit' free bytes in the 'fast heap', "..
+                              "then the allocation fails, or 'slow heap' will be used.",  
+                requires = { "NUTMEM_STACKHEAP" },
+                flavor = "integer",
                 file = "include/cfg/memory.h"
             },
         }

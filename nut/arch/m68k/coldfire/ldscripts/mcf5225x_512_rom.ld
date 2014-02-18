@@ -65,8 +65,8 @@ PROVIDE (__stack_init     = __intram_start + __intram_size);
 /*
  * Symbols required for Nut/OS initialization 
  */
-PROVIDE (__stack_heap_start = 0);
-PROVIDE (__stack_heap_size  = 0);
+PROVIDE (__fast_heap_start = 0);
+PROVIDE (__fast_heap_size  = 0);
 PROVIDE (__heap_start       = __bss_end);
 PROVIDE (__heap_size        = __intram_size - (__heap_start - __intram_start));
 PROVIDE (__heap2_start      = 0);
