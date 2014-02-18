@@ -976,18 +976,12 @@ static int FecOutput(NUTDEVICE * dev, NETBUF * nb)
  */
 static void FecIntTxF(FECINFO * ni)
 {
-	/* Clear interrupt flag */
-//	MCF_FEC_EIR = MCF_FEC_EIR_TXF;
-
 	/* Wakeup task waiting for empty TxBD */
 	NutEventPostFromIrq(&ni->tx_rdy);
 }
 
 static void FecIntRxF(FECINFO * ni)
 {
-	/* Clear interrupt flag */
-//	MCF_FEC_EIR = MCF_FEC_EIR_RXF;
-
 	/* Wakeup receive thread */
 	NutEventPostFromIrq(&ni->rx_rdy);
 }
