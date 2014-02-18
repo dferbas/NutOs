@@ -202,7 +202,6 @@ nutarch_m68k_coldfire_mcf51cn =
         sources = { "m68k/coldfire/dev/mcf51cn/ih_mcf51cn_common.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_mtim.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_tpm.c",
-          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_iic.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_adc.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_rtc.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_spi.c",
