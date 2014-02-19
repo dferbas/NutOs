@@ -21,7 +21,7 @@ nutarch_m68k_coldfire_mcf51cn =
     --
     {
         name = "nutarch_m68k_coldfire_mcf51cn_family",
-        brief = "Family",
+        brief = "MCU Family",
         provides = {
                 "HW_ADC12_COLDFIRE",
                 "HW_SCI_COLDFIRE",
@@ -100,79 +100,6 @@ nutarch_m68k_coldfire_mcf51cn =
     },
     
     --
-    -- Runtime Initialization
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf51cn_init",
-        brief = "Initialization",
-		description = "System startup code for MCF51cn family MCUs:\n"..
-		              "  - Vector table\n"..
-		              "  - Memories\n"..
-		              "  - MCU\n"..
-		              "  - Peripherals",
-        sources = { 
---                  "m68k/coldfire/init/crt_common.S",
---                  "m68k/coldfire/init/crt_$(LDNAME).S",
---                  "m68k/coldfire/init/crt_mcf51cn.S",
-                    "m68k/coldfire/init/crt_common_c.c", 
-        			"m68k/coldfire/init/crt_mcf51cn_c.c",
-        		  },
-        targets = { 
---                  "m68k/coldfire/init/crt_common.o",
---                  "m68k/coldfire/init/crt_mcf51cn.o", 
---                  "m68k/coldfire/init/crt_$(LDNAME).o",
-                  },
-        requires = { "TOOL_CC_M68K", "TOOL_GCC"},
-    },    
-
-    --
-    -- Runtime Initialization 2
-    -- FIXME: Initialization code is in two groups due to problems with Configurator.
-    --        If "targets" are used together with more than one .c sources, then 
-    --        the configurator crashes when building. 
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf51cn_init2",
-        brief = "Initialization",
-        description = "System startup code for MCF51CN family MCUs:\n"..
-                      "  - Vector table\n"..
-                      "  - Memories\n"..
-                      "  - MCU\n"..
-                      "  - Peripherals",
-        sources = { 
-                    "m68k/coldfire/init/crt_common.S",
-                    "m68k/coldfire/init/crt_$(LDNAME).S",
-                    "m68k/coldfire/init/crt_mcf51cn.S",
-                  },
-        targets = { 
-                    "m68k/coldfire/init/crt_common.o",
-                    "m68k/coldfire/init/crt_$(LDNAME).o",
-                    "m68k/coldfire/init/crt_mcf51cn.o", 
-                  },
-        requires = { "TOOL_CC_M68K", "TOOL_GCC"},
-    },    
-
-    --
-    -- Internal Flash
-    --
-    {
-        name = "nutarch_m68k_coldfire_devices_intflash",
-        brief = "Internal Flash",
-        description = "Code snippet for modiffying internal flash memory.",
-        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_intflash.c" },
-    },
-
-    -- 
-    -- Multipurpose Clock Generator
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf51cn_mcg",
-        brief = "Clock Setup",
-        description = "Multipurpose Clock Generator",
-        script = "arch/coldfire/mcf51cn_mcg.nut"
-    },
-    
-    --
     -- GPIO Interface
     --
     {
@@ -199,7 +126,7 @@ nutarch_m68k_coldfire_mcf51cn =
 --                  "DEV_IRQ_SPI",
 --                  "DEV_IRQ_FEC",
                    },
-        sources = { "m68k/coldfire/dev/mcf51cn/ih_mcf51cn_common.c",
+        sources = { 
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_mtim.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_tpm.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_adc.c",
@@ -207,7 +134,27 @@ nutarch_m68k_coldfire_mcf51cn =
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_spi.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_fec.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_sci.c",
-        			},
+        		  },
+    },
+
+    --
+    -- Internal Flash
+    --
+    {
+        name = "nutarch_m68k_coldfire_devices_intflash",
+        brief = "Internal Flash",
+        description = "Code snippet for modiffying internal flash memory.",
+        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_intflash.c" },
+    },
+
+    -- 
+    -- Multipurpose Clock Generator
+    --
+    {
+        name = "nutarch_m68k_coldfire_mcf51cn_mcg",
+        brief = "Clock Setup",
+        description = "Multipurpose Clock Generator",
+        script = "arch/coldfire/mcf51cn_mcg.nut"
     },
     
     --
@@ -238,27 +185,6 @@ nutarch_m68k_coldfire_mcf51cn =
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_ostimer.c" },
     },
 
-    --
-    -- Watchdog Timer(COP)
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf51cn_cop",
-        brief = "Watchdog (COP)",
-        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_cop.c" },
-        options =
-        {
-            {
-                macro = "NUT_WDT_ENABLE",
-                brief = "Enable watchdog",
-                description = "If enabled, the watchdog timer will be started during system initialization.\n\n"..
-                              "Once the watchdog is configured, it is not possible to re-configure the watchdog.\n"..
-                              "If enabled, NutWatchDogRestart() functiom must be called periodically from application.",
-                flavor = "booldata",
-                file = "include/cfg/clock.h"
-            }
-        }
-    },
-    
     --
     -- Reset Controller
     --

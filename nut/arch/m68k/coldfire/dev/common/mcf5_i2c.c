@@ -664,7 +664,6 @@ int NutRegisterTwiBus(NUTTWIBUS *bus, uint8_t sla)
     }
 
     /* Enable I2C Interrupts */
-    MCF_I2C_I2CR(bus->bus_base) |= MCF_I2C_I2CR_IIEN;
     if ((rc = NutIrqEnable(bus->bus_sig_ev))) {
         goto err;
     }

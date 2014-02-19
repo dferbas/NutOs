@@ -56,12 +56,18 @@ IRQ_HANDLER sig_PIT1 = {
 
 static int IrqCtl0(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_PIT0, cmd, param, &MCF_INTC_IMRH(0), &MCF_INTC_ICR55(0), MCF_INTC_IMRH_INT_MASK55, IPL_PIT0);
+    return IrqCtlCommon(&sig_PIT0, cmd, param,
+            &MCF_PIT_PCSR(0), MCF_PIT_PCSR_PIE, 2,
+            &MCF_INTC_IMRH(0), MCF_INTC_IMRH_INT_MASK55,
+            &MCF_INTC_ICR55(0), IPL_PIT0);
 }
 
 static int IrqCtl1(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_PIT1, cmd, param, &MCF_INTC_IMRH(0), &MCF_INTC_ICR56(0), MCF_INTC_IMRH_INT_MASK56, IPL_PIT1);
+    return IrqCtlCommon(&sig_PIT1, cmd, param,
+            &MCF_PIT_PCSR(1), MCF_PIT_PCSR_PIE, 2,
+            &MCF_INTC_IMRH(0), MCF_INTC_IMRH_INT_MASK56,
+            &MCF_INTC_ICR56(0), IPL_PIT1);
 }
 
 SIGNAL(IH_PIT0)

@@ -44,27 +44,3 @@
 #else
 #warning "Unknown Coldfire MCU Family defined"
 #endif
-
-/*
- * Exception Stack Frame Definition
- *
- *        3322222222221111 111111
- *        1098765432109876 5432109876543210
- *       +----------------+----------------+
- * A7--> |Fmt/FS/Vector/FS|      SR        |
- *       +----------------+----------------+
- * +0x04 |         Program Counter         |
- *       +----------------+----------------+
- */
-#define MCF5_RD_SF_FORMAT(PTR)   \
-    ((*((uint16_t *)(PTR)) >> 12) & 0x00FF)
-
-#define MCF5_RD_SF_VECTOR(PTR)   \
-    ((*((uint16_t *)(PTR)) >>  2) & 0x00FF)
-
-#define MCF5_RD_SF_FS(PTR)       \
-    ( ((*((uint16_t *)(PTR)) & 0x0C00) >> 8) | (*((uint16_t *)(PTR)) & 0x0003) )
-
-#define MCF5_SF_SR(PTR)  *((uint16_t *)(PTR)+1)
-#define MCF5_SF_PC(PTR)  *((uint32_t *)(PTR)+1)
-

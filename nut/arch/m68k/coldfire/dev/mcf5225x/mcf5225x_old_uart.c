@@ -21,6 +21,8 @@
 #include <sys/tracer.h>
 #endif
 
+#define PREVENT_SPURIOUS_INTERRUPT(code) {NutEnterCritical();{code;} NutExitCritical();}
+
 /* Enable Transmit Ready Interrupt. */
 #define SET_TXRDY_INTERRUPT() \
     {   \

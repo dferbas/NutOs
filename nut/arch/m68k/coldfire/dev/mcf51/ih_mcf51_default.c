@@ -30,74 +30,77 @@
  * For additional information see http://www.ethernut.de/
  */
 
+#include <arch/m68k.h>
 #include <dev/irqreg.h>
-#include <sys/atom.h>
+
+static int IrqCtl(int cmd, void *param);
+static void IrqHandler(void *arg);
+
+IRQ_HANDLER sig_DEFAULT = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        IrqHandler,
+        IrqCtl
+};
 
 /*!
- * \brief Common interrupt control.
+ * \brief Default interrupt entry.
+ */
+//NUTSIGNAL(IH_DEFAULT, sig_DEFAULT)
+
+__attribute__((interrupt_handler)) void IH_DEFAULT(void)
+{
+	CallHandler (&sig_DEFAULT);
+}
+
+/*!
+ * \brief Default interrupt handler.
+ */
+static void IrqHandler(void *arg)
+{
+    //  void Put(char ch)
+    //  {
+    //      #define DEVNUM 1
+    //
+    //      /* Wait until the Tx register is empty */
+    //      while ((MCF_SCI_S1(DEVNUM) & MCF_SCI_S1_TDRE) == 0)
+    //          ;
+    //
+    //      /* Send the character */
+    //      MCF_SCI_D(DEVNUM) = (uint8_t) ch;
+    //  }
+    //
+    //  int Write(const void *buffer, int len)
+    //  {
+    //      int c = len;
+    //      const char *cp = (const char *) buffer;
+    //
+    //      while (c--) {
+    //          Put(*cp++);
+    //      }
+    //
+    //      return len;
+    //  }
+    //
+    //  Write("gogo", 4);
+
+
+    while (1)
+        ;
+}
+
+/*!
+ * \brief Default interrupt control.
  *
  * \param cmd   Control command.
  *              - NUT_IRQCTL_INIT Initialize and disable interrupt.
- *              - NUT_IRQCTL_STATUS Query interrupt status.
- *              - NUT_IRQCTL_ENABLE Enable interrupt.
- *              - NUT_IRQCTL_DISABLE Disable interrupt.
- *              - NUT_IRQCTL_GETCOUNT Query and clear interrupt counter.
  * \param param Pointer to optional parameter.
  *
  * \return 0 on success, -1 otherwise.
  */
-int IrqCtlCommon(IRQ_HANDLER *sig_handler, int cmd, void *param, volatile uint32_t *reg_imr, volatile uint8_t *reg_icr,
-        uint32_t imr_mask, uint8_t ipl)
+static int IrqCtl(int cmd, void *param)
 {
-    int rc = 0;
-    unsigned int *ival = (unsigned int *) param;
-    uint16_t enabled = *reg_imr & imr_mask;
-
-    /*
-     * Disable interrupt.
-     */
-    if (enabled) {
-        PREVENT_SPURIOUS_INTERRUPT(*reg_imr |= imr_mask);
-    }
-
-    /*
-     * Process command.
-     */
-    switch (cmd) {
-    case NUT_IRQCTL_INIT:
-        *reg_icr = ipl; /* Configure interrupt level and priority */
-        enabled = 0;    /* Make sure the interrupt is disabled */
-        break;
-    case NUT_IRQCTL_STATUS:
-        if (enabled) {
-            *ival |= 1;
-        } else {
-            *ival &= ~1;
-        }
-        break;
-    case NUT_IRQCTL_ENABLE:
-        enabled = 1;
-        break;
-    case NUT_IRQCTL_DISABLE:
-        enabled = 0;
-        break;
-#ifdef NUT_PERFMON
-    case NUT_IRQCTL_GETCOUNT:
-        *ival = (unsigned int)sig_handler->ir_count;
-        sig_handler->ir_count = 0;
-        break;
-#endif
-    default:
-        rc = -1;
-        break;
-    }
-
-    /*
-     * Enable interrupt.
-     */
-    if (enabled) {
-        PREVENT_SPURIOUS_INTERRUPT(*reg_imr &= ~imr_mask);
-    }
-
-    return rc;
+    return (cmd == NUT_IRQCTL_INIT) ? 0 : -1;
 }

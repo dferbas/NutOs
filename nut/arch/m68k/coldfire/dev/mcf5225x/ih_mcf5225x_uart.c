@@ -67,17 +67,32 @@ IRQ_HANDLER sig_UART2 = {
 
 static int IrqCtl0(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_UART0, cmd, param, &MCF_INTC_IMRL(0), &MCF_INTC_ICR13(0), MCF_INTC_IMRL_INT_MASK13, IPL_UART0);
+    uint32_t   no_imr;
+
+    return IrqCtlCommon(&sig_UART0, cmd, param,
+            &no_imr, 0, 3,      /* there are four different mask bits - it is handled in uart driver */
+            &MCF_INTC_IMRL(0), MCF_INTC_IMRL_INT_MASK13,
+            &MCF_INTC_ICR13(0), IPL_UART0);
 }
 
 static int IrqCtl1(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_UART1, cmd, param, &MCF_INTC_IMRL(0), &MCF_INTC_ICR14(0), MCF_INTC_IMRL_INT_MASK14, IPL_UART1);
+    uint32_t   no_imr;
+
+    return IrqCtlCommon(&sig_UART1, cmd, param,
+            &no_imr, 0, 3,      /* there are four different mask bits - it is handled in uart driver */
+            &MCF_INTC_IMRL(0), MCF_INTC_IMRL_INT_MASK14,
+            &MCF_INTC_ICR14(0), IPL_UART1);
 }
 
 static int IrqCtl2(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_UART2, cmd, param, &MCF_INTC_IMRL(0), &MCF_INTC_ICR15(0), MCF_INTC_IMRL_INT_MASK15, IPL_UART2);
+    uint32_t   no_imr;
+
+    return IrqCtlCommon(&sig_UART2, cmd, param,
+            &no_imr, 0, 3,      /* there are four different mask bits - it is handled in uart driver */
+            &MCF_INTC_IMRL(0), MCF_INTC_IMRL_INT_MASK15,
+            &MCF_INTC_ICR15(0), IPL_UART2);
 }
 
 SIGNAL(IH_UART0)

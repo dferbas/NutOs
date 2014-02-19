@@ -109,13 +109,7 @@ void NutRegisterTimer(void (*handler) (void *))
 	/* Init Interrupt */
 	NutRegisterIrqHandler(&sig_PIT0, handler, NULL);
 
-	/*
-	 * Enable PIT interrup and clear interrupt flag
-	 * NOTE: Interrupt is still disabled by interrupt controller.
-	 */
-	MCF_PIT_PCSR(CHANEL) |= MCF_PIT_PCSR_PIE | MCF_PIT_PCSR_PIF;
-
-	/* Enable timer */
+	/* Enable timer | Stop timer in debug mode */
 	MCF_PIT_PCSR(CHANEL) |= MCF_PIT_PCSR_EN | MCF_PIT_PCSR_DBG;
 }
 

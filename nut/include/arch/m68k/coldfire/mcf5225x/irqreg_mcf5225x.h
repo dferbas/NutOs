@@ -63,6 +63,7 @@ extern IRQ_HANDLER sig_UART2;
 /*
  * Common Interrupt control
  */
-extern int IrqCtlCommon(IRQ_HANDLER *sig_handler, int cmd, void *param, volatile uint32_t *reg_imr, volatile uint8_t *reg_icr,
-        uint32_t imr_mask, uint8_t ipl);
-
+extern int IrqCtlCommon(IRQ_HANDLER *sig_handler, int cmd, void *param,
+        volatile void *reg_imr, uint32_t imr_mask, uint8_t imr_size,
+        volatile uint32_t *reg_imr_ic, uint32_t imr_mask_ic,
+        volatile uint8_t *reg_icr, uint8_t ipl);

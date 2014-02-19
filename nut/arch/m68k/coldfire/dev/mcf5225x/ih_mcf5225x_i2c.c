@@ -57,12 +57,18 @@ IRQ_HANDLER sig_I2C1 = {
 
 static int IrqCtl0(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_I2C0, cmd, param, &MCF_INTC_IMRL(0), &MCF_INTC_ICR17(0), MCF_INTC_IMRL_INT_MASK17, IPL_I2C0);
+    return IrqCtlCommon(&sig_I2C0, cmd, param,
+            &MCF_I2C_I2CR(0), MCF_I2C_I2CR_IIEN, 1,
+            &MCF_INTC_IMRL(0), MCF_INTC_IMRL_INT_MASK17,
+            &MCF_INTC_ICR17(0), IPL_I2C0);
 }
 
 static int IrqCtl1(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_I2C1, cmd, param, &MCF_INTC_IMRH(0), &MCF_INTC_ICR62(0), MCF_INTC_IMRH_INT_MASK62, IPL_I2C1);
+    return IrqCtlCommon(&sig_I2C1, cmd, param,
+            &MCF_I2C_I2CR(1), MCF_I2C_I2CR_IIEN, 1,
+            &MCF_INTC_IMRH(0), MCF_INTC_IMRH_INT_MASK62,
+            &MCF_INTC_ICR62(0), IPL_I2C1);
 }
 
 SIGNAL(IH_I2C0)

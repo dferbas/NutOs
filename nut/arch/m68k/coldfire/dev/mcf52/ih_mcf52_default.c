@@ -52,34 +52,7 @@ IRQ_HANDLER sig_DEFAULT = {
 
 __attribute__((interrupt_handler)) void IH_DEFAULT(void)
 {
-//	void Put(char ch)
-//	{
-//		#define DEVNUM 1
-//
-//	    /* Wait until the Tx register is empty */
-//	    while ((MCF_SCI_S1(DEVNUM) & MCF_SCI_S1_TDRE) == 0)
-//	        ;
-//
-//	    /* Send the character */
-//	    MCF_SCI_D(DEVNUM) = (uint8_t) ch;
-//	}
-//
-//	int Write(const void *buffer, int len)
-//	{
-//	    int c = len;
-//	    const char *cp = (const char *) buffer;
-//
-//	    while (c--) {
-//	        Put(*cp++);
-//	    }
-//
-//	    return len;
-//	}
-//
-//	Write("gogo", 4);
-
-	// TODO JS 1.. prin low to uart
-	CallHandler (&sig_DEFAULT);
+    CallHandler (&sig_DEFAULT);
 }
 
 /*!
@@ -87,6 +60,33 @@ __attribute__((interrupt_handler)) void IH_DEFAULT(void)
  */
 static void IrqHandler(void *arg)
 {
+    //  void Put(char ch)
+    //  {
+    //      #define DEVNUM 1
+    //
+    //      /* Wait until the Tx register is empty */
+    //      while ((MCF_SCI_S1(DEVNUM) & MCF_SCI_S1_TDRE) == 0)
+    //          ;
+    //
+    //      /* Send the character */
+    //      MCF_SCI_D(DEVNUM) = (uint8_t) ch;
+    //  }
+    //
+    //  int Write(const void *buffer, int len)
+    //  {
+    //      int c = len;
+    //      const char *cp = (const char *) buffer;
+    //
+    //      while (c--) {
+    //          Put(*cp++);
+    //      }
+    //
+    //      return len;
+    //  }
+    //
+    //  Write("gogo", 4);
+
+
     while (1)
         ;
 }
@@ -104,4 +104,3 @@ static int IrqCtl(int cmd, void *param)
 {
     return (cmd == NUT_IRQCTL_INIT) ? 0 : -1;
 }
-

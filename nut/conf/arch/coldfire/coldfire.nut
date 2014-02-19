@@ -5,7 +5,7 @@ nutarch_m68k_coldfire =
     --
     {
         name = "nutarch_m68k_coldfire_family",
-        brief = "Family",
+        brief = "MCU Family",
         options =
         {
             {
@@ -18,17 +18,6 @@ nutarch_m68k_coldfire =
         }
     },
     
-    --
-    -- Interrupt Handler
-    --
-    {
-        name = "nutarch_m68k_coldfire_ihndlr",
-        brief = "Interrupt Handler",
-        description = "CPU Interrupt handlers common for all Coldfire families.\n\n"..
-                      "In addition, this package contains the default interrupt handler, which may be used by application to handle spurious interrupts.",
-        sources = { "m68k/coldfire/dev/common/ih_mcf5_default.c" }
-    },
-
     --
     -- Internal Memory
     --
@@ -79,8 +68,7 @@ nutarch_m68k_coldfire =
             {
                 macro = "NUTMEM_STACKHEAP_ALLOW_EXTRAM",
                 brief = "Stack in 'slow heap'",
-                description = "This option enables use of 'slow heap' located in external "..
-                              "memory for stack after the internal 'fast heap' is exhousted.\n\n",
+                description = "This option enables to use of 'slow heap' for thread stack allocation in case there is not enough memory in the 'fast heap'.\n\n",
                 requires = { "NUTMEM_STACKHEAP" },
                 flavor = "booldata",
                 file = "include/cfg/memory.h"
@@ -88,11 +76,11 @@ nutarch_m68k_coldfire =
             {
                 macro = "NUTMEM_STACKHEAP_LIMIT",
                 brief = "Fast heap stack limit",
-                description = "This option disables to use all the 'fast heap' for stack.\n"..
-                              "It is usefull if there are other modules which also uses 'fast heap'\n\n."..
+                description = "This option disables to use whole 'fast heap' for stack.\n"..
+                              "This migh be useful if there are other modules which also uses 'fast heap'.\n\n"..
                               "Set this number to amount of memory you want to protect. If there will "..
                               "be less than 'Fast heap stack limit' free bytes in the 'fast heap', "..
-                              "then the allocation fails, or 'slow heap' will be used.",  
+                              "then the allocation fails, or 'slow heap' will be used if it is enabled.",  
                 requires = { "NUTMEM_STACKHEAP" },
                 flavor = "integer",
                 file = "include/cfg/memory.h"
@@ -101,21 +89,39 @@ nutarch_m68k_coldfire =
     },
     
     --
+    -- Coldfire CORE Directory
+    --
+    {
+        name = "nutarch_m68k_coldfire_mcf51",
+        brief = "Coldfire V1 Core",
+        requires = { "HW_MCU_COLDFIRE_V1" },
+        description = "Coldfire V1 Core",
+        script = "arch/coldfire/mcf51.nut"
+    },
+    {
+        name = "nutarch_m68k_coldfire_mcf52",
+        brief = "Coldfire V2 Core",
+        requires = { "HW_MCU_COLDFIRE_V2" },
+        description = "Coldfire V2 Core",
+        script = "arch/coldfire/mcf52.nut"
+    },
+
+    --
     -- Coldfire MCU Directory
     --
+    {
+        name = "nutarch_m68k_coldfire_mcf51cn",
+        brief = "MCF51CN Family",
+        requires = { "HW_MCU_MCF51CN" },
+        description = "MCF51CN family",
+        script = "arch/coldfire/mcf51cn.nut"
+    },
 	{
         name = "nutarch_m68k_coldfire_mcf5225x",
         brief = "MCF5225X Family",
         requires = { "HW_MCU_MCF5225X" },
         description = "MCF5225X family",
         script = "arch/coldfire/mcf5225x.nut"
-    },
-	{
-        name = "nutarch_m68k_coldfire_mcf51cn",
-        brief = "MCF51CN Family",
-        requires = { "HW_MCU_MCF51CN" },
-        description = "MCF51CN family",
-        script = "arch/coldfire/mcf51cn.nut"
     },
     
     --

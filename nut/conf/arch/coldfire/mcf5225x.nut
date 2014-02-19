@@ -45,7 +45,7 @@ nutarch_m68k_coldfire_mcf5225x =
     --
     {
         name = "nutarch_m68k_coldfire_mcf5225x_family",
-        brief = "Family",
+        brief = "MCU Family",
         provides = {
                 "HW_I2C_COLDFIRE",
                 "HW_UART_COLDFIRE",
@@ -117,59 +117,6 @@ nutarch_m68k_coldfire_mcf5225x =
     },
     
     --
-    -- Runtime Initialization
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf5225x_init",
-        brief = "Initialization",
-        description = "System startup code for MCF5225X family MCUs:\n"..
-                      "  - Vector table\n"..
-                      "  - Memories\n"..
-                      "  - MCU\n"..
-                      "  - Peripherals",
-        sources = { 
---                  "m68k/coldfire/init/crt_common.S",
---                  "m68k/coldfire/init/crt_$(LDNAME).S",
---                  "m68k/coldfire/init/crt_mcf5225x.S",
-                    "m68k/coldfire/init/crt_common_c.c", 
-                    "m68k/coldfire/init/crt_mcf5225x_c.c",
-                  },
-        targets = { 
---                  "m68k/coldfire/init/crt_common.o",
---                  "m68k/coldfire/init/crt_mcf5225x.o", 
---                  "m68k/coldfire/init/crt_$(LDNAME).o",
-                  },
-        requires = { "TOOL_CC_M68K", "TOOL_GCC"},
-    },    
-
-    --
-    -- Runtime Initialization 2
-    -- FIXME: Initialization code is in two groups due to problems with Configurator.
-    --        If "targets" are used together with more than one .c sources, then 
-    --        the configurator crashes when building. 
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf5225x_init2",
-        brief = "Initialization",
-        description = "System startup code for MCF5225X family MCUs:\n"..
-                      "  - Vector table\n"..
-                      "  - Memories\n"..
-                      "  - MCU\n"..
-                      "  - Peripherals",
-        sources = { 
-                    "m68k/coldfire/init/crt_common.S",
-                    "m68k/coldfire/init/crt_$(LDNAME).S",
-                    "m68k/coldfire/init/crt_mcf5225x.S",
-                  },
-        targets = { 
-                    "m68k/coldfire/init/crt_common.o",
-                    "m68k/coldfire/init/crt_$(LDNAME).o",
-                    "m68k/coldfire/init/crt_mcf5225x.o", 
-                  },
-        requires = { "TOOL_CC_M68K", "TOOL_GCC"},
-    },    
-
-    --
     -- GPIO Interface
     --
     {
@@ -192,11 +139,12 @@ nutarch_m68k_coldfire_mcf5225x =
 --                  "DEV_IRQ_PIT",
 --                  "DEV_IRQ_CWD",
                    },
-        sources = { "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_common.c",
+        sources = { 
                     "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_pit.c",
                     "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_cwd.c",
                     "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_i2c.c",
-                    "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_uart.c" },
+                    "m68k/coldfire/dev/mcf5225x/ih_mcf5225x_uart.c", 
+                  },
     },
 
     --

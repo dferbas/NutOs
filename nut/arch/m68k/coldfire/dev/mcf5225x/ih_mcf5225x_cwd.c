@@ -46,7 +46,12 @@ IRQ_HANDLER sig_CWD = {
 
 static int IrqCtl(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_CWD, cmd, param, &MCF_INTC_IMRL(0), &MCF_INTC_ICR08(0), MCF_INTC_IMRL_INT_MASK8, IPL_CWD);
+    uint32_t   no_imr;
+
+    return IrqCtlCommon(&sig_CWD, cmd, param,
+            &no_imr, 0, 3,
+            &MCF_INTC_IMRL(0), MCF_INTC_IMRL_INT_MASK8,
+            &MCF_INTC_ICR08(0), IPL_CWD);
 }
 
 SIGNAL(IH_CWD)
