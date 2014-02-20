@@ -158,7 +158,7 @@
 
 
 #define GpioPinGet(bank, bit)           ((MCF_GPIO_D(bank) >> bit) & 0x1)
-#define GpioPinSet(bank, bit, value)    (value) ? (GpioPinSetHigh(bank, bit)) : (GpioPinSetLow(bank, bit))
+#define GpioPinSet(bank, bit, value)    ((value) ? (GpioPinSetHigh(bank, bit)) : (GpioPinSetLow(bank, bit)))
 #define GpioPinSetHigh(bank, bit)       MCF_GPIO_D(bank) |= _BV(bit)
 #define GpioPinSetLow(bank, bit)        MCF_GPIO_D(bank) &= ~_BV(bit)
 

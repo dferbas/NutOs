@@ -81,7 +81,7 @@ static USARTDCB dcb_usart1 = {
  *
  * \showinitializer
  */
-NUTDEVICE devUsartOldMcf1 = {
+NUTDEVICE devUartOldMcf5_1 = {
     0,                          /* Pointer to next device, dev_next. */
     {'u', 'a', 'r', 't', '1', 0, 0, 0, 0},    /* Unique device name, dev_name. */
     IFTYP_CHAR,                 /* Type of device, dev_type. */

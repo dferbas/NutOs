@@ -223,7 +223,7 @@
 #define GPIO_CFG_PULLUP             0
 
 #define GpioPinGet(bank, bit)           ((MCF_GPIO_PIN(bank) >> bit) & 0x1)
-#define GpioPinSet(bank, bit, value)    (value) ? (GpioPinSetHigh(bank, bit)) : (GpioPinSetLow(bank, bit))
+#define GpioPinSet(bank, bit, value)    ((value) ? (GpioPinSetHigh(bank, bit)) : (GpioPinSetLow(bank, bit)))
 #define GpioPinSetHigh(bank, bit)       MCF_GPIO_SET(bank) = _BV(bit)
 #define GpioPinSetLow(bank, bit)        MCF_GPIO_CLR(bank) = _BV(bit)
 

@@ -42,6 +42,6 @@
 #define MCF_GPIO_SET(bank)   (*(volatile uint8_t *)(0x40100030 + (bank)))
 #define MCF_GPIO_CLR(bank)   (*(volatile uint8_t *)(0x40100048 + (bank)))
 #define MCF_GPIO_PAR8(bank)  (*(volatile uint8_t *)(0x40100060 + (bank)))
-#define MCF_GPIO_PAR16(bank) (*(volatile uint16_t *)(0x40100060 + (bank == 3) ? 0x30 : (bank)))
+#define MCF_GPIO_PAR16(bank) (*(volatile uint16_t *)(0x40100060 + ((bank == 3) ? 0x30 : (bank))))
 
 #endif /* MCF5225X_GPIO_H_ */
