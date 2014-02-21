@@ -48,3 +48,14 @@
 #ifndef DEV_DEBUG
 #define DEV_DEBUG		devDebug2
 #endif
+
+/*
+ * RTC chip
+ */
+#include <dev/rtc.h>
+extern NUTRTC rtcMcf5225;
+
+#ifndef RTC_CHIP0
+#define RTC_CHIP0 rtcMcf5225
+#endif
+

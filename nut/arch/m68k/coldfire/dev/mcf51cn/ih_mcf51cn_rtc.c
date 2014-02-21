@@ -53,6 +53,7 @@ static int IrqCtl(int cmd, void *param)
 
 SIGNAL(IH_RTC)
 {
+    MCF_RTC_SC |= MCF_RTC_SC_RTIF;
     CallHandler(&sig_RTC);
 }
 

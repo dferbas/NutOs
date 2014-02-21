@@ -61,15 +61,6 @@
 #define DEV_UART3_NAME  "sci3"
 
 /*
- * Ethernet device
- */
-extern NUTDEVICE devMcf51cnFec;
-
-#ifndef DEV_ETHER
-#define DEV_ETHER   devMcf51cnFec
-#endif
-
-/*
  * RTC chip
  */
 #include <dev/rtc.h>
@@ -77,4 +68,13 @@ extern NUTRTC rtcMcf51cn;
 
 #ifndef RTC_CHIP0
 #define RTC_CHIP0 rtcMcf51cn
+#endif
+
+/*
+ * Ethernet device
+ */
+extern NUTDEVICE devMcf51cnFec;
+
+#ifndef DEV_ETHER
+#define DEV_ETHER   devMcf51cnFec
 #endif
