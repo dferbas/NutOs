@@ -180,5 +180,5 @@ NUTDEVICE devUartOldMcf5_1 = {
 #define UART_HDX_BIT
 #endif
 
-#include "mcf5225x_old_uart.c"
+#include "mcf5225_old_uart.c"
 

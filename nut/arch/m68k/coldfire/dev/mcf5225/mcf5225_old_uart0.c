@@ -219,7 +219,7 @@ NUTDEVICE devUartOldMcf5_0 = {
 	#define UART_CTS_BIT
 #endif
 
-#include "mcf5225x_old_uart.c"
+#include "mcf5225_old_uart.c"
 
 int McfUsartResetRx0(void)
 {

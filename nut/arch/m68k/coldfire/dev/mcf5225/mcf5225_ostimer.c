@@ -37,7 +37,7 @@
 #include <sys/timer.h>
 
 /*!
- * \addtogroup xgNutArchM68kMCF5225XOsTimer
+ * \addtogroup xgNutArchM68kMCF5225OsTimer
  */
 /*@{*/
 

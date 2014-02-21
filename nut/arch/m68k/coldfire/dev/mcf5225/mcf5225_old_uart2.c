@@ -178,5 +178,5 @@ NUTDEVICE devUartOldMcf5_2 = {
 #endif
 
 /* defined variables and macros for this include */
-#include "mcf5225x_old_uart.c"
+#include "mcf5225_old_uart.c"
 

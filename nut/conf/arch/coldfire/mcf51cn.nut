@@ -195,11 +195,14 @@ nutarch_m68k_coldfire_mcf51cn =
     },
     
     --
-    -- Real-Time Counter
+    -- Real Time Counter
     --
     {
         name = "nutarch_m68k_coldfire_mcf51cn_rtc",
-        brief = "Real-Time Counter (RTC)",
+        brief = "Real Time Counter (RTC)",
+        description = "WARNING! This is not a real time CLOCK, but a real time COUNTER only.\n\n"..
+                      "It is only a timer/counter which uses different clock souce than the system "..
+                      "timer, so it runs even if system clock is halted.",
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_rtc.c" },
     },
     

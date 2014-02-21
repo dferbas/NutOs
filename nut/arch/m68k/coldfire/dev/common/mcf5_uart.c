@@ -30,9 +30,8 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#include <string.h>
-#include <arch/m68k.h>
 #include <dev/gpio.h>
+#include <string.h>
 #include <sys/atom.h>
 #include <sys/event.h>
 #include <sys/timer.h>

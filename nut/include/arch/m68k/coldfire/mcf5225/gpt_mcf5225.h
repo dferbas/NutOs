@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2014 by Embedded Technologies s.r.o
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,15 +30,16 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _DEV_GPIO_H_
-#error "Do not include this file directly. Use dev/gpio.h instead!"
-#endif
+#ifndef GPT_MCF5225_H_
+#define GPT_MCF5225_H_
 
-#if defined(MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/gpio_mcf5225.h>
-#elif defined(MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/gpio_mcf51cn.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
-#endif
+#include <stdint.h>
+#include <sys/types.h>
 
+void Mcf5225GptInitPA(HANDLE *pae_handler);
+void Mcf5225GptStartPA(void);
+void Mcf5225GptStopPA(void);
+void Mcf5225GptClearPACounter(void);
+uint16_t Mcf5225GptGetPACounter(void);
+
+#endif  /* GPT_MCF5225_H_ */

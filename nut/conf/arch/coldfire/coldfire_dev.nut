@@ -53,11 +53,11 @@ nutarch_m68k_coldfire_devices =
                 type = "enumerated",
                 description =
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_i2c0_scl_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_i2c0_scl_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_i2c0_scl_pins; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_i2c0_scl_pins; end;
                     end,
                 file = "include/cfg/twi.h"
             },
@@ -67,11 +67,11 @@ nutarch_m68k_coldfire_devices =
                 type = "enumerated",
                 description =
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_i2c0_sda_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_i2c0_sda_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_i2c0_sda_pins; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_i2c0_sda_pins; end;
                     end,
                 file = "include/cfg/twi.h"
             },
@@ -104,11 +104,11 @@ nutarch_m68k_coldfire_devices =
                 type = "enumerated",
                 description =
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_i2c1_scl_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_i2c1_scl_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_i2c1_scl_pins; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_i2c1_scl_pins; end;
                     end,
                 file = "include/cfg/twi.h"
             },
@@ -118,11 +118,11 @@ nutarch_m68k_coldfire_devices =
                 type = "enumerated",
                 description =
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_i2c1_sda_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_i2c1_sda_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_i2c1_sda_pins; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_i2c1_sda_pins; end;
                     end,
                 file = "include/cfg/twi.h"
             },
@@ -335,11 +335,11 @@ nutarch_m68k_coldfire_devices =
                 type = "enumerated",
                 description =
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart0_txd_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart0_txd_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart0_txd_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart0_txd_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },
@@ -349,11 +349,11 @@ nutarch_m68k_coldfire_devices =
                 type = "enumerated",
                 description =
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart0_rxd_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart0_rxd_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart0_rxd_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart0_rxd_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },
@@ -365,11 +365,11 @@ nutarch_m68k_coldfire_devices =
                 description = 
                     function()
                         local base_descr = "When selected, the driver will support RTS hardware handshake.\n";
-                        if c_is_provided("HW_MCU_MCF5225X") then return base_descr .. mcf5225x_uart0_rts_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return base_descr .. mcf5225_uart0_rts_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart0_rts_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart0_rts_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },
@@ -381,11 +381,11 @@ nutarch_m68k_coldfire_devices =
                 description =
                     function() 
                         local base_descr = "When selected, the driver will support CTS hardware handshake.\n";
-                        if c_is_provided("HW_MCU_MCF5225X") then return base_descr .. mcf5225x_uart0_cts_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return base_descr .. mcf5225_uart0_cts_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart0_cts_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart0_cts_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },  
@@ -543,11 +543,11 @@ nutarch_m68k_coldfire_devices =
                 type = "enumerated",
                 description =
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart1_txd_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart1_txd_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart1_txd_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart1_txd_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },
@@ -557,11 +557,11 @@ nutarch_m68k_coldfire_devices =
                 type = "enumerated",
                 description =
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart1_rxd_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart1_rxd_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart1_rxd_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart1_rxd_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },
@@ -573,11 +573,11 @@ nutarch_m68k_coldfire_devices =
                 description = 
                     function()
                         local base_descr = "When selected, the driver will support RTS hardware handshake.\n";
-                        if c_is_provided("HW_MCU_MCF5225X") then return base_descr .. mcf5225x_uart1_rts_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return base_descr .. mcf5225_uart1_rts_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart1_rts_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart1_rts_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },
@@ -589,11 +589,11 @@ nutarch_m68k_coldfire_devices =
                 description =
                     function() 
                         local base_descr = "When selected, the driver will support CTS hardware handshake.\n";
-                        if c_is_provided("HW_MCU_MCF5225X") then return base_descr .. mcf5225x_uart1_cts_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return base_descr .. mcf5225_uart1_cts_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart1_cts_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart1_cts_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },
@@ -751,11 +751,11 @@ nutarch_m68k_coldfire_devices =
                 type = "enumerated",
                 description =
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart2_txd_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart2_txd_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart2_txd_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart2_txd_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },
@@ -765,11 +765,11 @@ nutarch_m68k_coldfire_devices =
                 type = "enumerated",
                 description =
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart2_rxd_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart2_rxd_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart2_rxd_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart2_rxd_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },
@@ -781,11 +781,11 @@ nutarch_m68k_coldfire_devices =
                 description = 
                     function()
                         local base_descr = "When selected, the driver will support RTS hardware handshake.\n";
-                        if c_is_provided("HW_MCU_MCF5225X") then return base_descr .. mcf5225x_uart2_rts_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return base_descr .. mcf5225_uart2_rts_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart2_rts_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart2_rts_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },
@@ -797,11 +797,11 @@ nutarch_m68k_coldfire_devices =
                 description =
                     function() 
                         local base_descr = "When selected, the driver will support CTS hardware handshake.\n";
-                        if c_is_provided("HW_MCU_MCF5225X") then return base_descr .. mcf5225x_uart2_cts_pins_descr; end;
+                        if c_is_provided("HW_MCU_MCF5225") then return base_descr .. mcf5225_uart2_cts_pins_descr; end;
                     end,
                 choices = 
                     function() 
-                        if c_is_provided("HW_MCU_MCF5225X") then return mcf5225x_uart2_cts_pins end;
+                        if c_is_provided("HW_MCU_MCF5225") then return mcf5225_uart2_cts_pins end;
                     end,
                 file = "include/cfg/uart.h"
             },

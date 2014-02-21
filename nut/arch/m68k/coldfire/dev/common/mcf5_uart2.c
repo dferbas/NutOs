@@ -30,9 +30,10 @@
  * For additional information see http://www.ethernut.de/
  */
 
+#include <arch/m68k.h>
+#include <arch/m68k/coldfire/mcf5225/uart_mcf5225.h>
 #include <cfg/arch.h>
 #include <cfg/uart.h>
-#include <arch/m68k.h>
 #include <dev/usart.h>
 
 #define BASE    2

@@ -35,7 +35,7 @@
 #endif
 
 #if defined(MCU_COLDFIRE)
-#if defined(MCU_MCF5225X)
+#if defined(MCU_MCF5225)
 #define NutEnableTimerIrq()     NutIrqEnable(&sig_PIT0)
 #define NutDisableTimerIrq()    NutIrqDisable(&sig_PIT0)
 #elif defined(MCU_MCF51CN)

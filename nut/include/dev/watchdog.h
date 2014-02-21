@@ -163,11 +163,11 @@ extern uint32_t Lpc17xxWatchDogStart(uint32_t ms, uint32_t xmode);
 extern void Lpc17xxWatchDogRestart(void);
 extern void Lpc17xxWatchDogDisable(void);
 extern void Lpc17xxWatchDogEnable(void);
-#elif defined(MCU_MCF5225X)
-extern uint32_t Mcf5225xWatchDogStart(uint32_t ms);
-extern void Mcf5225xWatchDogRestart(void);
-extern void Mcf5225xWatchDogDisable(void);
-extern void Mcf5225xWatchDogEnable(void);
+#elif defined(MCU_MCF5225)
+extern uint32_t Mcf5225WatchDogStart(uint32_t ms);
+extern void Mcf5225WatchDogRestart(void);
+extern void Mcf5225WatchDogDisable(void);
+extern void Mcf5225WatchDogEnable(void);
 #elif defined(MCU_MCF51CN)
 extern uint32_t Mcf51CopStart(uint32_t ms);
 extern void Mcf51CopRestart(void);

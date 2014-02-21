@@ -35,7 +35,7 @@ STARTUP(crt_common.o)
 INPUT(crt_common_c.o)
 INPUT(crt_mcf52.o)
 INPUT(crt_mcf52_c.o)
-INPUT(crt_mcf5225x_512_rom_512_extram_boot.o)
+INPUT(crt_mcf5225_512_rom_512_extram.o)
 ENTRY(_start)
 
 /*
@@ -43,7 +43,7 @@ ENTRY(_start)
  */
 MEMORY
 {
-    bootloader(r) : ORIGIN = 0x00000000, LENGTH = 16K
+    bootloader(r) : ORIGIN = 0x00000000, LENGTH = 0
     rom(rx)       : ORIGIN = 0x00000000 + LENGTH(bootloader), LENGTH = 512K - LENGTH(bootloader)
     intram(rwx)   : ORIGIN = 0x20000000, LENGTH = 64K
     ipsbar(rw)    : ORIGIN = 0x40000000, LENGTH = 1024M
@@ -95,4 +95,4 @@ REGION_ALIAS("REGION_LOAD",     rom);
 /*
  * Sections description
  */
-INCLUDE sections_boot.ld
+INCLUDE sections.ld

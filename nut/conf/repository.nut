@@ -660,7 +660,7 @@ end
 -- These IDs represet an struct pointer value of the port.
 --
 function GetColdfirePioIds()
-    if c_is_provided("HW_MCU_MCF5225X") then
+    if c_is_provided("HW_MCU_MCF5225") then
         return {
             " ",
             "PORTTE",

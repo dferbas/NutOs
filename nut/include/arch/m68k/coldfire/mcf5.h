@@ -37,8 +37,8 @@
 #include <stdint.h>
 #include <cfg/arch.h>
 
-#if defined (MCU_MCF5225X)
-#include <arch/m68k/coldfire/mcf5225x/mcf5225x.h>
+#if defined (MCU_MCF5225)
+#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
 #elif defined (MCU_MCF51CN)
 #include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
 #else

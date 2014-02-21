@@ -63,7 +63,7 @@ void NutReset(void)
     Avr32Reset();
 #elif defined(__CORTEX__)
     Cortex_Reset();
-#elif defined(MCU_MCF5225X)
+#elif defined(MCU_MCF5225)
     Mcf5225_Reset();
 #elif defined(MCU_MCF51CN)
     Mcf51cn_Reset();
@@ -85,7 +85,7 @@ int NutResetCause(void)
     return Avr32ResetCause();
 #elif defined(__CORTEX__)
     return Cortex_ResetCause();
-#elif defined(MCU_MCF5225X)
+#elif defined(MCU_MCF5225)
     return Mcf5225_ResetCause();
 #elif defined(MCU_MCF51CN)
     return Mcf51cn_ResetCause();

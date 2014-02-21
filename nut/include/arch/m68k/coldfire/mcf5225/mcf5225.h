@@ -37,11 +37,12 @@
 #include "mcf5225_clock.h"
 #include "mcf5225_fbcs.h"
 #include "mcf5225_gpio.h"
+#include "mcf5225_gpt.h"
 #include "mcf5225_i2c.h"
 #include "mcf5225_intc.h"
 #include "mcf5225_pit.h"
 #include "mcf5225_rcm.h"
+#include "mcf5225_rtc.h"
 #include "mcf5225_scm.h"
 #include "mcf5225_uart.h"
-#include "mcf5225_gpt.h"
 

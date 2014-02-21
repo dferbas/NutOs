@@ -34,8 +34,8 @@
 #error "Do not include this file directly. Use dev/irqreg.h instead!"
 #endif
 
-#if defined(MCU_MCF5225X)
-#include <arch/m68k/coldfire/mcf5225x/irqreg_mcf5225x.h>
+#if defined(MCU_MCF5225)
+#include <arch/m68k/coldfire/mcf5225/irqreg_mcf5225.h>
 #elif defined(MCU_MCF51CN)
 #include <arch/m68k/coldfire/mcf51cn/irqreg_mcf51cn.h>
 #else

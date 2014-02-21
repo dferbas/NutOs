@@ -1355,7 +1355,7 @@ nutarch =
                     "HW_MCU_M68K",
                     "HW_MCU_COLDFIRE",
                     "HW_MCU_COLDFIRE_V2",
-                    "HW_MCU_MCF5225X",
+                    "HW_MCU_MCF5225",
                     "HW_MCU_MCF52259",
                 },
                 makedefs = { "MCU=52259" }

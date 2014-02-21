@@ -1,6 +1,6 @@
 #include <arch/m68k.h>
+#include <arch/m68k/coldfire/mcf5225/gpt_mcf5225.h>
 #include <dev/irqreg.h>
-#include <dev/mcf5225x_gpt.h>
 #include <string.h>
 #include <sys/event.h>
 #include <sys/types.h>
@@ -16,15 +16,6 @@ static void IntHandlerPAEvent(void *arg)
 		NutEventPostFromIrq(GptPAEHandler);
 
 	MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAIF;
-}
-
-/*
- * GPT Pulse Accumulator Overflow Interrupt
- */
-static void IntHandlerPAOverflow(void *arg)
-{
-    // JS TODO .. proc to tu je?
-	MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAOVF;
 }
 
 /*
@@ -54,11 +45,8 @@ void Mcf5225GptInitPA(HANDLE *pae_handler)
 	NutRegisterIrqHandler(&sig_GPT_PAI, IntHandlerPAEvent, NULL);
 	NutIrqEnable(&sig_GPT_PAI);
 	
-	NutRegisterIrqHandler(&sig_GPT_PAOV, IntHandlerPAOverflow, NULL);
-	NutIrqEnable(&sig_GPT_PAOV);	// do not work with event interrupt
-
-	Mcf5225xGptClearPACounter();
-	Mcf5225xGptStartPA();
+	Mcf5225GptClearPACounter();
+	Mcf5225GptStartPA();
 }
 
 /*

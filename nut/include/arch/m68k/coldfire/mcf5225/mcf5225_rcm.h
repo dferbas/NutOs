@@ -34,7 +34,7 @@
 #error "Do not include this file directly. Use arch/m68k.h instead!"
 #endif
 
-/* Register read/write macros */
+/* RCM Registers */
 #define MCF_RCM_RCR                          (*(volatile uint8_t *)(0x40110000))
 #define MCF_RCM_RSR                          (*(volatile uint8_t *)(0x40110001))
 

@@ -66,10 +66,6 @@ void InitClock(void)
     /* Wait until the PLL is locked. */
     while (!(MCF_CLOCK_SYNSR & MCF_CLOCK_SYNSR_LOCK))
         ;
-
-    /* Enable Real-Time Clock Control Register to enable RTC oscillator. */
-    // JS TODO: Move to RTC driver
-    // MCF_CLOCK_RTCCR = MCF_CLOCK_RTCCR_EXTALEN | MCF_CLOCK_RTCCR_OSCEN | MCF_CLOCK_RTCCR_REFS | MCF_CLOCK_RTCCR_RTCSEL;
 }
 
 void InitIntramAccess(void)

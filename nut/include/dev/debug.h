@@ -144,7 +144,7 @@ extern NUTDEVICE devDebug1;
 extern NUTDEVICE devDebug2;
 extern NUTDEVICE devDebug3;
 #endif
-#elif defined(MCU_MCF5225X)
+#elif defined(MCU_MCF5225)
 extern NUTDEVICE devDebug0;
 extern NUTDEVICE devDebug1;
 extern NUTDEVICE devDebug2;
