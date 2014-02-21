@@ -29,10 +29,12 @@
  *
  * For additional information see http://www.ethernut.de/
  */
-#include <stdio.h>
+
 #include <arch/m68k.h>
+#include <arch/m68k/coldfire/mcf51cn/mcg_mcf51cn.h>
 #include <cfg/clock.h>
 #include <dev/watchdog.h>
+#include <stdio.h>
 
 void InitClock(void)
 {

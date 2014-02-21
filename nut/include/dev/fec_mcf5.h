@@ -30,33 +30,25 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_INTFLASH_H_
-#define MCF51CN_INTFLASH_H_
+#ifndef MCF5_FEC0_H_
+#define MCF5_FEC0_H_
 
-#include <stdint.h>
 
-/* address in memory map to write in FLASH */
-#define FLASH_MIN_ADDRESS	 				0x00000000
+#include <sys/device.h>
+#include <net/if_var.h>
 
-/* End address for region of flash */
-#define FLASH_MAX_ADDRESS					0x0001FFFF
 
-/* Flash erase page size 1024 Bytes */
-#define FLASH_PAGE_ERASE_SIZE		1024 // size of sector to erase
+/*
+ * Available drivers.
+ */
+extern NUTDEVICE devMcfFec;
 
-/* Flash protected page size 4096 Bytes */
-#define FLASH_PAGE_PROTECT_SIZE		0x1000 // size of protected sector
+#ifndef DEV_ETHER
+#define DEV_ETHER   devMcfFec
+#endif
 
-int Mcf51cnIntFlashInit(void);
+#ifndef devEth0
+#define devEth0   devMcfFec
+#endif
 
-uint8_t Mcf51cnFlashProtectRegister(void);
-
-int Mcf51cnIntFlashRead(uint32_t dst, uint32_t *data, uint32_t size);
-
-int Mcf51cnIntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size);
-
-int Mcf51cnIntFlashSectorErase(uint32_t addr);
-
-int Mcf51cnIntFlashMassErase(void);
-
-#endif /* MCF51CN_INTFLASH_H_ */
+#endif /* MCF5_FEC0_H_ */

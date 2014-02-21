@@ -30,18 +30,44 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF5225X_GPIO_H_
-#define MCF5225X_GPIO_H_
+#ifndef _DEV_IRQREG_H_
+#error "Do not include this file directly. Use dev/irqreg.h instead!"
+#endif
 
 /*
- * GPIO Registers
+ * Interrupt level & priority setup
+ *
+ * IMPORTANT: Interrupt level and priority combination MUST be unique
  */
-#define MCF_GPIO_PORT(bank)  (*(volatile uint8_t *)(0x40100000 + (bank)))
-#define MCF_GPIO_DDR(bank)   (*(volatile uint8_t *)(0x40100018 + (bank)))
-#define MCF_GPIO_PIN(bank)   (*(volatile uint8_t *)(0x40100030 + (bank)))
-#define MCF_GPIO_SET(bank)   (*(volatile uint8_t *)(0x40100030 + (bank)))
-#define MCF_GPIO_CLR(bank)   (*(volatile uint8_t *)(0x40100048 + (bank)))
-#define MCF_GPIO_PAR8(bank)  (*(volatile uint8_t *)(0x40100060 + (bank)))
-#define MCF_GPIO_PAR16(bank) (*(volatile uint16_t *)(0x40100060 + ((bank == 3) ? 0x30 : (bank))))
+#define IPL_UART0       (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(0))
+#define IPL_UART1       (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(1))
+#define IPL_UART2       (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(2))
+#define IPL_I2C0        (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(3))
+#define IPL_I2C1        (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(4))
+#define IPL_PIT0	    (MCF_INTC_ICR_IL(4) | MCF_INTC_ICR_IP(0))
+#define IPL_PIT1	    (MCF_INTC_ICR_IL(4) | MCF_INTC_ICR_IP(1))
+#define IPL_GPT_PAOV    (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(3))
+#define IPL_GPT_PAI     (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(4))
+#define IPL_CWD         (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(7))
 
-#endif /* MCF5225X_GPIO_H_ */
+/*
+ * Interrupt handlers
+ */
+extern IRQ_HANDLER sig_CWD;
+extern IRQ_HANDLER sig_I2C0;
+extern IRQ_HANDLER sig_I2C1;
+extern IRQ_HANDLER sig_PIT0;
+extern IRQ_HANDLER sig_PIT1;
+extern IRQ_HANDLER sig_UART0;
+extern IRQ_HANDLER sig_UART1;
+extern IRQ_HANDLER sig_UART2;
+extern IRQ_HANDLER sig_GPT_PAOV;
+extern IRQ_HANDLER sig_GPT_PAI;
+
+/*
+ * Common Interrupt control
+ */
+extern int IrqCtlCommon(IRQ_HANDLER *sig_handler, int cmd, void *param,
+        volatile void *reg_imr, uint32_t imr_mask, uint8_t imr_size,
+        volatile uint32_t *reg_imr_ic, uint32_t imr_mask_ic,
+        volatile uint8_t *reg_icr, uint8_t ipl);

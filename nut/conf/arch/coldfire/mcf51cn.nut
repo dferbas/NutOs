@@ -152,7 +152,7 @@ nutarch_m68k_coldfire_mcf51cn =
     --
     {
         name = "nutarch_m68k_coldfire_mcf51cn_mcg",
-        brief = "Clock Setup",
+        brief = "Clock Setup (MCG)",
         description = "Multipurpose Clock Generator",
         script = "arch/coldfire/mcf51cn_mcg.nut"
     },
@@ -162,12 +162,12 @@ nutarch_m68k_coldfire_mcf51cn =
     --
     {
         name = "nutarch_m68k_coldfire_mcf51cn_mtim",
-        brief = "Modulo Timer",
+        brief = "Modulo Timer (MTIM)",
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_mtim.c" },
     },
     
     --
-    -- Timer/PWM Module (TPM)
+    -- Timer/PWM Module
     --
     {
         name = "nutarch_m68k_coldfire_mcf51cn_tpm",
@@ -195,7 +195,7 @@ nutarch_m68k_coldfire_mcf51cn =
     },
     
     --
-    -- Real-Time Counter (RTC)
+    -- Real-Time Counter
     --
     {
         name = "nutarch_m68k_coldfire_mcf51cn_rtc",
@@ -204,7 +204,7 @@ nutarch_m68k_coldfire_mcf51cn =
     },
     
     --
-    -- Serial Peripheral Interface (SPI)
+    -- Serial Peripheral Interface
     --
     {
         name = "nutarch_m68k_coldfire_mcf51cn_spi",
@@ -217,11 +217,21 @@ nutarch_m68k_coldfire_mcf51cn =
     },
     
     --
-    -- Fast Ethernet Controller (FEC)
+    -- Fast Ethernet Controller
     --
     {
         name = "nutarch_m68k_coldfire_mcf51cn_fec",
         brief = "Fast Ethernet Controller (FEC)",
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_fec.c" },
     },
+    
+    --
+    -- Analog to Digital Converter
+    --
+    {
+        name = "nutarch_m68k_coldfire_mcf51cn_adc",
+        brief = "A/D Converter (ADC12)",
+        description = "12-bit analog-to-digital converter.",
+        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_adc.c" },
+    },    
 }

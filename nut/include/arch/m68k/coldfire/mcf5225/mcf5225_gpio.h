@@ -30,25 +30,17 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_RTC_GPIO_H_
-#define MCF51CN_RTC_GPIO_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
-
-/* RTC Status and Control Register */
-#define MCF_RTC_SC 							 (*(volatile uint8_t *)(0xFFFF82C0))
-#define MCF_RTC_SC_RTIE                      0x10
-#define MCF_RTC_SC_RTIF                      0x80
-#define MCF_RTC_SC_RTCPS                     0x0F
-#define MCF_RTC_SC_RTCPS_BITNUM              0x00
-#define MCF_RTC_SC_RTCLKS                    0x60
-#define MCF_RTC_SC_RTCLKS_BITNUM             0x05
-
-
-/* RTC Counter Register */
-#define MCF_RTC_CNT 						(*(volatile uint8_t *)(0xFFFF82C1))
-
-/* RTC Modulo Register */
-#define MCF_RTC_MOD 						(*(volatile uint8_t *)(0xFFFF82C2))
-
-
-#endif /* MCF51CN_RTC_H_ */
+/*
+ * GPIO Registers
+ */
+#define MCF_GPIO_PORT(bank)  (*(volatile uint8_t *)(0x40100000 + (bank)))
+#define MCF_GPIO_DDR(bank)   (*(volatile uint8_t *)(0x40100018 + (bank)))
+#define MCF_GPIO_PIN(bank)   (*(volatile uint8_t *)(0x40100030 + (bank)))
+#define MCF_GPIO_SET(bank)   (*(volatile uint8_t *)(0x40100030 + (bank)))
+#define MCF_GPIO_CLR(bank)   (*(volatile uint8_t *)(0x40100048 + (bank)))
+#define MCF_GPIO_PAR8(bank)  (*(volatile uint8_t *)(0x40100060 + (bank)))
+#define MCF_GPIO_PAR16(bank) (*(volatile uint16_t *)(0x40100060 + ((bank == 3) ? 0x30 : (bank))))

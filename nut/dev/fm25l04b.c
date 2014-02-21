@@ -8,9 +8,10 @@
  *  Created on: Sep 13, 2013
  *      Author: dchvalkovsky
  */
+#include <arch/m68k.h>
+#include <arch/m68k/coldfire/mcf51cn/spi_mcf51cn.h>
 #include <dev/board.h>
 #include <stdio.h>
-#include <arch/m68k.h>
 
 #define SPI_BUS_WAITING_TIMEOUT 1000
 
@@ -23,11 +24,11 @@
 #define WREN 	0x6	//Set Write Enable Latch 0000 0110b
 
 static void fm25l04b_cs_lo(void){
-	Mcf51SpiSelect(NODE_CS_FRAM);
+	Mcf51cnSpiSelect(NODE_CS_FRAM);
 }
 
 static void fm25l04b_cs_hi(void){
-	Mcf51SpiDeselect(NODE_CS_FRAM);
+	Mcf51cnSpiDeselect(NODE_CS_FRAM);
 }
 
 /*
@@ -36,7 +37,7 @@ static void fm25l04b_cs_hi(void){
 static void fm25l04b_wren(void) {
 	uint8_t data = WREN;
 	fm25l04b_cs_lo();
-	Mcf51SpiTransfer(&data, NULL, 1);
+	Mcf51cnSpiTransfer(&data, NULL, 1);
     fm25l04b_cs_hi();
 
 }
@@ -49,7 +50,7 @@ uint8_t fm25l04b_readStatus(void) {
 	uint8_t dataRead[2];
 
 	fm25l04b_cs_lo();
-	Mcf51SpiTransfer(dataWrite, dataRead, 2);
+	Mcf51cnSpiTransfer(dataWrite, dataRead, 2);
     fm25l04b_cs_hi();
     return dataRead[1];
 }
@@ -64,7 +65,7 @@ void fm25l04b_writeStatus(uint8_t status) {
 	dataWrite[1] = status;
 
 	fm25l04b_cs_lo();
-	Mcf51SpiTransfer(dataWrite, NULL, 2);
+	Mcf51cnSpiTransfer(dataWrite, NULL, 2);
     fm25l04b_cs_hi();
 }
 
@@ -75,7 +76,7 @@ static void fm25l04b_CommandBegin(uint8_t command, uint16_t address) {
 	dataWrite[1] = (uint8_t) (address & 0xFF);
 
 	fm25l04b_cs_lo();
-	Mcf51SpiTransfer(dataWrite, NULL, 2);
+	Mcf51cnSpiTransfer(dataWrite, NULL, 2);
 }
 
 static inline void fm25l04b_CommandEnd(void) {
@@ -91,7 +92,7 @@ static inline void fm25l04b_CommandEnd(void) {
 void fm25l04b_write_block(uint16_t address, uint8_t *data, uint32_t size) {
 	fm25l04b_wren();
 	fm25l04b_CommandBegin(WRITE, address);
-	Mcf51SpiTransfer(data, NULL, size);
+	Mcf51cnSpiTransfer(data, NULL, size);
 	fm25l04b_CommandEnd();
 }
 
@@ -103,6 +104,6 @@ void fm25l04b_write_block(uint16_t address, uint8_t *data, uint32_t size) {
  */
 void fm25l04b_read_block(uint16_t address, uint8_t *data, uint32_t size) {
 	fm25l04b_CommandBegin(READ, address);
-	Mcf51SpiTransfer(NULL, data, size);
+	Mcf51cnSpiTransfer(NULL, data, size);
 	fm25l04b_CommandEnd();
 }

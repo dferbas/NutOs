@@ -30,29 +30,27 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF5_FEC0_H_
-#define MCF5_FEC0_H_
-
-
-#include <sys/device.h>
-#include <net/if_var.h>
-
-
-/*
- * Available drivers.
- */
-extern NUTDEVICE devMcfFec;
-
-#ifndef DEV_ETHER
-#define DEV_ETHER   devMcfFec
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
 #endif
 
-#ifndef devEth0
-#define devEth0   devMcfFec
-#endif
+/* PIT Registers */
+#define MCF_PIT_PCSR(x)                      (*(volatile uint16_t*)(0x40150000 + ((x) * 0x10000)))
+#define MCF_PIT_PMR(x)                       (*(volatile uint16_t*)(0x40150002 + ((x) * 0x10000)))
+#define MCF_PIT_PCNTR(x)                     (*(volatile uint16_t*)(0x40150004 + ((x) * 0x10000)))
 
-int FecIsInitialized(NUTDEVICE * dev);
+/* MCF_PIT_PCSR */
+#define MCF_PIT_PCSR_EN                      0x1
+#define MCF_PIT_PCSR_RLD                     0x2
+#define MCF_PIT_PCSR_PIF                     0x4
+#define MCF_PIT_PCSR_PIE                     0x8
+#define MCF_PIT_PCSR_OVW                     0x10
+#define MCF_PIT_PCSR_DBG                     0x20
+#define MCF_PIT_PCSR_DOZE                    0x40
+#define MCF_PIT_PCSR_PRE(x)                  (((x) & 0xF) << 0x8)
 
-void Fec_EthMWDTSetVariableFN(TMWDTSetVariableFN VariableFN);
+/* MCF_PIT_PMR */
+#define MCF_PIT_PMR_PM(x)                    (((x) & 0xFFFF) << 0)
 
-#endif /* MCF5_FEC0_H_ */
+/* MCF_PIT_PCNTR */
+#define MCF_PIT_PCNTR_PC(x)                  (((x) & 0xFFFF) << 0)

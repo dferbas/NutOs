@@ -30,8 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_IIC_H_
-#define MCF51CN_IIC_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* IIC Address Register */
 #define MCF_IIC_A1(x) 						(*(volatile uint8_t *)(0xFFFF8200 + ((x - 1) * 0x20)))
@@ -147,5 +148,3 @@
 #define MCF_IIC_FLT_FLT3                    0x08
 #define MCF_IIC_FLT_FLT                     0x0F
 #define MCF_IIC_FLT_FLT_BITNUM              0x00
-
-#endif /* MCF51CN_IIC_H_ */

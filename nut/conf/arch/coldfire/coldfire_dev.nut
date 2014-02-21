@@ -1,17 +1,6 @@
 nutarch_m68k_coldfire_devices =
 {
     --
-    -- Analog to Digital Converter (ADC12)
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf51cn_adc12",
-        brief = "A/D Converter (ADC12)",
-        description = "12-bit analog-to-digital converter.",
-        requires = { "HW_ADC12_COLDFIRE", "DEV_IRQ_ADC" },
-        sources = { "m68k/coldfire/dev/common/mcf5_adc12.c" },
-    },    
-    
-    --
     -- I2C Bus Default
     --
     {

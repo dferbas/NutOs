@@ -30,21 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_SPI_H_
-#define MCF51CN_SPI_H_
-
-#define NODE_CS_FRAM	0	// drive fram chip select
-#define NODE_CS_FLASH	1	// drive flash chip select
-
-int Mcf51SpiSelect(uint_fast8_t node_cs); //, uint32_t tmo);
-
-int Mcf51SpiDeselect(uint_fast8_t node_cs);
-
-void Mcf51SpiInterrupt(void *arg);
-
-int Mcf51SpiTransfer(const void *txbuf, void *rxbuf, int xlen);
-
-void Mcf51SpiInit(void);
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* SPI(x) Control Register 1 */
 #define MCF_SPI_C1(x) 						(*(volatile uint8_t *)(0xFFFF81C0 + ((x - 1) * 0x20)))
@@ -89,5 +77,3 @@ void Mcf51SpiInit(void);
 
 /* SPI(x) Data Register */
 #define MCF_SPI_D(x) 						(*(volatile uint8_t *)(0xFFFF81C5 + ((x - 1) * 0x20)))
-
-#endif /* MCF51CN_SPI_H_ */

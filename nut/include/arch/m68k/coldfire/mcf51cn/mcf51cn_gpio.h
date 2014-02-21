@@ -30,8 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_GPIO_H_
-#define MCF51CN_GPIO_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* GPIO Registers */
 #define MCF_GPIO_D(bank)    (*(volatile uint8_t *) (0xFFFF8000 + 0x10*(bank)))
@@ -41,5 +42,3 @@
 #define MCF_GPIO_DS(bank)   (*(volatile uint8_t *) (0xFFFF800A + 0x10*(bank)))
 #define MCF_GPIO_IFE(bank)  (*(volatile uint8_t *) (0xFFFF800B + 0x10*(bank)))
 #define MCF_GPIO_PMC(bank)  (*(volatile uint16_t *)(0xFFFF80C0 + 2*(bank)))
-
-#endif /* MCF51CN_GPIO_H_ */

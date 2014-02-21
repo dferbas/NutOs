@@ -30,63 +30,18 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#include <arch/m68k.h>
-#include <dev/watchdog.h>
-#include <dev/irqreg.h>
-#include <sys/timer.h>
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
-static ureg_t nested;
+#include "mcf5225_clock.h"
+#include "mcf5225_fbcs.h"
+#include "mcf5225_gpio.h"
+#include "mcf5225_i2c.h"
+#include "mcf5225_intc.h"
+#include "mcf5225_pit.h"
+#include "mcf5225_rcm.h"
+#include "mcf5225_scm.h"
+#include "mcf5225_uart.h"
+#include "mcf5225_gpt.h"
 
-static void IrqHandler(void *arg)
-{
-    /* Reset */
-    MCF_RCM_RCR |= MCF_RCM_RCR_SOFTRST;
-}
-
-uint32_t Mcf5225xWatchDogStart(uint32_t ms)
-{
-    int cwt;
-    uint8_t shift[8] = { 9, 11, 13, 15, 19, 23, 27, 31 };
-
-    /* Stop watchdog + Following steps must be taken to change CWT */
-    MCF_SCM_CWCR &= ~MCF_SCM_CWCR_CWE;
-    MCF_SCM_CWSR = 0x55;
-    MCF_SCM_CWSR = 0xAA;
-
-    /* Get Core Watchdog Timing */
-    for (cwt = 0; cwt < 8; cwt++)
-        if (((1 << shift[cwt]) / (NutGetCpuClock() / 1000)) > ms)
-            break;
-
-    /* Register interrupt handler */
-    NutRegisterIrqHandler(&sig_CWD, IrqHandler, NULL);
-
-    /* Erase pending interrupt if present */
-    MCF_SCM_CWCR |= MCF_SCM_CWCR_CWTIF;
-
-    /* Configure and enable watchdog */
-    MCF_SCM_CWCR = MCF_SCM_CWCR_CWE | MCF_SCM_CWCR_CWT(cwt);
-    nested = 1;
-
-    return ((1 << shift[cwt]) / (NutGetCpuClock() / 1000));
-}
-
-void Mcf5225xWatchDogRestart(void)
-{
-    MCF_SCM_CWSR = 0x55;
-    MCF_SCM_CWSR = 0xAA;
-}
-
-void Mcf5225xWatchDogDisable(void)
-{
-    if (nested)
-        nested++;
-
-    MCF_SCM_CWCR &= ~MCF_SCM_CWCR_CWE;
-}
-
-void Mcf5225xWatchDogEnable(void)
-{
-    if (nested > 1 && --nested == 1)
-        MCF_SCM_CWCR |= MCF_SCM_CWCR_CWE;
-}

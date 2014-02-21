@@ -47,7 +47,7 @@ __attribute__ ((section (".data.flash_ram"))) volatile int Mcf51cnIntFlashRamCMD
 	return 0;
 }
 
-uint8_t Mcf51cnFlashProtectRegister(void) {
+uint8_t Mcf51cnIntFlashProtectRegister(void) {
 	return MCF_FPROT;
 }
 

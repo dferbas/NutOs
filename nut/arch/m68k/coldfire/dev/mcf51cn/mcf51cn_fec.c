@@ -13,7 +13,6 @@
 #include <dev/phy_generic.h>
 #include <arch/m68k.h>
 #include <dev/gpio.h>
-#include <dev/mcf5_fec.h>
 #include <dev/phy.h>
 
 
@@ -1150,13 +1149,13 @@ static int FecInit(NUTDEVICE * dev)
 	return 0;
 }
 
-int FecIsInitialized(NUTDEVICE * dev){
+int Mcf51cnFecIsInitialized(NUTDEVICE * dev){
 	FECINFO *ni = (FECINFO *) dev->dev_dcb;
 	return ni->initialized;
 }
 
 /* Set MultiWatchDog set reset function */
-void Fec_EthMWDTSetVariableFN(TMWDTSetVariableFN VariableFN)
+void Mcf51cnFec_EthMWDTSetVariableFN(TMWDTSetVariableFN VariableFN)
 {
 	EthMWDTSetVariableFN = VariableFN;
 }
@@ -1193,7 +1192,7 @@ static IFNET ifn_eth0 = {
  * of this driver to initialize the network interface.
  *
  */
-NUTDEVICE devMcfFec = {
+NUTDEVICE devMcf51cnFec = {
     0,                          /*!< \brief Pointer to next device. */
     {'e', 't', 'h', '0', 0, 0, 0, 0, 0},        /*!< \brief Unique device name. */
     IFTYP_NET,                  /*!< \brief Type of device. */

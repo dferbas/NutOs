@@ -30,18 +30,28 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#ifndef INTFLASH_MCF51CN_H_
+#define INTFLASH_MCF51CN_H_
 
-#include "mcf51cn_adc.h"
-#include "mcf51cn_scr.h"
-#include "mcf51cn_fec.h"
-#include "mcf51cn_gpio.h"
-#include "mcf51cn_iic.h"
-#include "mcf51cn_mcg.h"
-#include "mcf51cn_mtim.h"
-#include "mcf51cn_rtc.h"
-#include "mcf51cn_sci.h"
-#include "mcf51cn_spi.h"
-#include "mcf51cn_tpm.h"
+#include <stdint.h>
+
+/* address in memory map to write in FLASH */
+#define FLASH_MIN_ADDRESS	 				0x00000000
+
+/* End address for region of flash */
+#define FLASH_MAX_ADDRESS					0x0001FFFF
+
+/* Flash erase page size 1024 Bytes */
+#define FLASH_PAGE_ERASE_SIZE		1024 // size of sector to erase
+
+/* Flash protected page size 4096 Bytes */
+#define FLASH_PAGE_PROTECT_SIZE		0x1000 // size of protected sector
+
+int Mcf51cnIntFlashInit(void);
+uint8_t Mcf51cnIntFlashProtectRegister(void);
+int Mcf51cnIntFlashRead(uint32_t dst, uint32_t *data, uint32_t size);
+int Mcf51cnIntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size);
+int Mcf51cnIntFlashSectorErase(uint32_t addr);
+int Mcf51cnIntFlashMassErase(void);
+
+#endif /* INTFLASH_MCF51CN_H_ */

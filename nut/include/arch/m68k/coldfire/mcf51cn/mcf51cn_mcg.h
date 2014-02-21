@@ -30,9 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_MCG_H_
-#define MCF51CN_MCG_H_
-
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* MCG Control Register 1*/
 #define MCF_MCG_C1 							 (*(volatile uint8_t *)(0xFFFF8240))
@@ -111,9 +111,3 @@
 #define MCF_MCG_C4_DMX32                     0x20
 #define MCF_MCG_C4_DRST_DRS                  0x03
 #define MCF_MCG_C4_DRST_DRS_BITNUM           0x00
-
-void Mcf51cnMcgInitClock(void);
-
-uint32_t Mcf51cnMcgGetFFCLK(void);
-
-#endif /* MCF51CN_MCG_H_ */

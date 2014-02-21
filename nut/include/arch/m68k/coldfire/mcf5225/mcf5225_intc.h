@@ -30,8 +30,9 @@
  * additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF5225X_INTC_H_
-#define MCF5225X_INTC_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* INTC Registers */
 #define MCF_INTC_IPRH(x)                     (*(volatile uint32_t*)(0x40000C00 + ((x) * 0x100)))
@@ -332,5 +333,3 @@
 
 /* MCF_INTC_LIACK */
 #define MCF_INTC_LIACK_VECTOR(x)             (((x) & 0xFF) << 0)
-
-#endif /* MCF5225X_INTC_H_ */

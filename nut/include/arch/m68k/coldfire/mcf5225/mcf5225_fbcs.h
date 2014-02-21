@@ -30,8 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF5225X_FBCS_H_
-#define MCF5225X_FBCS_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* Mini-FlexBus Chip Select Registers */
 #define MCF_FBCS_CSAR(x)                     (*(volatile uint32_t*)(0x40000080 + ((x) * 0xC)))
@@ -80,5 +81,3 @@
 #define MCF_FBCS_CSCR_ASET(x)                (((x) & 0x3) << 0x14)
 #define MCF_FBCS_CSCR_SWSEN                  0x800000
 #define MCF_FBCS_CSCR_SWS(x)                 (((x) & 0x3F) << 0x1A)
-
-#endif /* MCF5225X_FBCS_H_ */

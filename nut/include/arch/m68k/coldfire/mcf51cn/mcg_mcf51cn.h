@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2014 by Embedded Technologies s.r.o
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,17 +30,12 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#ifndef MCG_MCF51CN_H_
+#define MCG_MCF51CN_H_
 
-#include "mcf5225x_clock.h"
-#include "mcf5225x_fbcs.h"
-#include "mcf5225x_gpio.h"
-#include "mcf5225x_i2c.h"
-#include "mcf5225x_intc.h"
-#include "mcf5225x_pit.h"
-#include "mcf5225x_rcm.h"
-#include "mcf5225x_scm.h"
-#include "mcf5225x_uart.h"
+#include <stdint.h>
 
+void Mcf51cnMcgInitClock(void);
+uint32_t Mcf51cnMcgGetFFCLK(void);
+
+#endif  /* MCG_MCF51CN_H_ */

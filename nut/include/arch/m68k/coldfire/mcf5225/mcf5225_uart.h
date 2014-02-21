@@ -30,22 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF5225X_UART_H_
-#define MCF5225X_UART_H_
-
-/* Duplex modes */
-#define HALF    0
-#define FULL    1
-
-/* UART control structure used for write only registers */
-typedef struct _UARTWREGS UARTWREGS;
-struct _UARTWREGS {
-    uint8_t uimr;   /* UISR/UIMR register, write from one, red from other => write only */
-    uint8_t ubg1;   /* Write only */
-    uint8_t ubg2;   /* Write only */
-    uint8_t umr1;   /* Write/ Read after RESET MODE REGISTER POINTER */
-    uint8_t umr2;   /* Write/ Read after Write/ Read from UMR1 register */
-};
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* UART Registers */
 #define MCF_UART_UMR(x)                      (*(volatile uint8_t *)(0x40000200 + ((x) * 0x40)))
@@ -170,5 +157,3 @@ struct _UARTWREGS {
 
 /* MCF_UART_UOP0 */
 #define MCF_UART_UOP0_RTS                    0x1
-
-#endif /* MCF5225X_UART_H_ */

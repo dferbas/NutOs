@@ -30,18 +30,63 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_RTC_H_
-#define MCF51CN_RTC_H_
+#include <arch/m68k.h>
+#include <dev/watchdog.h>
+#include <dev/irqreg.h>
+#include <sys/timer.h>
 
-#include <dev/rtc.h>
+static ureg_t nested;
 
+static void IrqHandler(void *arg)
+{
+    /* Reset */
+    MCF_RCM_RCR |= MCF_RCM_RCR_SOFTRST;
+}
 
-extern NUTRTC rtcMcf51;
+uint32_t Mcf5225WatchDogStart(uint32_t ms)
+{
+    int cwt;
+    uint8_t shift[8] = { 9, 11, 13, 15, 19, 23, 27, 31 };
 
-int Mcf51RtcInit(NUTRTC *rtc);
+    /* Stop watchdog + Following steps must be taken to change CWT */
+    MCF_SCM_CWCR &= ~MCF_SCM_CWCR_CWE;
+    MCF_SCM_CWSR = 0x55;
+    MCF_SCM_CWSR = 0xAA;
 
-int Mcf51RtcSetClock(NUTRTC *rtc, const struct _tm *tm);
+    /* Get Core Watchdog Timing */
+    for (cwt = 0; cwt < 8; cwt++)
+        if (((1 << shift[cwt]) / (NutGetCpuClock() / 1000)) > ms)
+            break;
 
-int Mcf51RtcGetClock(NUTRTC *rtc, struct _tm *tm);
+    /* Register interrupt handler */
+    NutRegisterIrqHandler(&sig_CWD, IrqHandler, NULL);
 
-#endif /* MCF51CN_RTC_H_ */
+    /* Erase pending interrupt if present */
+    MCF_SCM_CWCR |= MCF_SCM_CWCR_CWTIF;
+
+    /* Configure and enable watchdog */
+    MCF_SCM_CWCR = MCF_SCM_CWCR_CWE | MCF_SCM_CWCR_CWT(cwt);
+    nested = 1;
+
+    return ((1 << shift[cwt]) / (NutGetCpuClock() / 1000));
+}
+
+void Mcf5225WatchDogRestart(void)
+{
+    MCF_SCM_CWSR = 0x55;
+    MCF_SCM_CWSR = 0xAA;
+}
+
+void Mcf5225WatchDogDisable(void)
+{
+    if (nested)
+        nested++;
+
+    MCF_SCM_CWCR &= ~MCF_SCM_CWCR_CWE;
+}
+
+void Mcf5225WatchDogEnable(void)
+{
+    if (nested > 1 && --nested == 1)
+        MCF_SCM_CWCR |= MCF_SCM_CWCR_CWE;
+}

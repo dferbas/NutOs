@@ -30,8 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF5225X_CLOCK_H_
-#define MCF5225X_CLOCK_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* CLOCK Registers */
 #define MCF_CLOCK_SYNCR                      (*(volatile uint16_t*)(0x40120000))
@@ -99,5 +100,3 @@
 /* MCF_CLOCK_BWCR */
 #define MCF_CLOCK_BWCR_BWDSEL                0x1
 #define MCF_CLOCK_BWCR_BWDSTOP               0x2
-
-#endif /* MCF5225X_CLOCK_H_ */

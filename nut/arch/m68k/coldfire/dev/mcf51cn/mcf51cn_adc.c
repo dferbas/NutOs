@@ -31,18 +31,16 @@
  */
 
 #include <arch/m68k.h>
+#include <arch/m68k/coldfire/mcf51cn/adc_mcf51cn.h>
 #include <cfg/peripherals.h>
-#include <dev/mcf51cn_adc.h>
 #include <dev/gpio.h>
-#include <stdio.h>
-
-#include <sys/event.h>
-#include <sys/atom.h>
-#include <sys/timer.h>
-#include <sys/thread.h>
-#include <sys/heap.h>
-
 #include <dev/irqreg.h>
+#include <stdio.h>
+#include <sys/atom.h>
+#include <sys/event.h>
+#include <sys/heap.h>
+#include <sys/thread.h>
+#include <sys/timer.h>
 
 #ifndef MCF51_ADC_INITIAL_MODE
 #define MCF51_ADC_INITIAL_MODE SINGLE_CONVERSION
@@ -70,7 +68,7 @@ static HANDLE readHandle;
  * \return 0: data read succesfully, 1: no data available
  */
 
-int Mcf51AdcBufRead(uint16_t channel, uint16_t * read)
+int Mcf51cnAdcBufRead(uint16_t channel, uint16_t * read)
 {
     uint16_t tail, head;
     tail = ADC_Buffer[channel][_adc_buf_tail];
@@ -85,7 +83,7 @@ int Mcf51AdcBufRead(uint16_t channel, uint16_t * read)
 }
 
 /* Store data in the buffer, called from interrupt */
-static inline int Mcf51AdcBufWrite(uint16_t channel, uint16_t write)
+static inline int Mcf51cnAdcBufWrite(uint16_t channel, uint16_t write)
 {
     uint16_t tail, head;
     tail = ADC_Buffer[channel][_adc_buf_tail];
@@ -104,7 +102,7 @@ static inline int Mcf51AdcBufWrite(uint16_t channel, uint16_t write)
  *
  * \param mode  Mode to set
  */
-void Mcf51AdcSetMode(TADCMode mode)
+void Mcf51cnAdcSetMode(TADCMode mode)
 {
     switch (mode) {
         case ADC_OFF:
@@ -125,7 +123,7 @@ void Mcf51AdcSetMode(TADCMode mode)
  *
  * \param channel  Specifies the channel to enable
  */
-void Mcf51AdcEnableChannel(TADCChannel channel)
+void Mcf51cnAdcEnableChannel(TADCChannel channel)
 {
 	uint8_t portGpio = 0;
 	uint8_t pinGpio = 0;
@@ -164,7 +162,7 @@ void Mcf51AdcEnableChannel(TADCChannel channel)
  *
  * \param channel  Specifies the channel to disable
  */
-void Mcf51AdcDisableChannel(TADCChannel channel)
+void Mcf51cnAdcDisableChannel(TADCChannel channel)
 {
 	adcEnableChannels &= ~(1 << channel);
 }
@@ -174,7 +172,7 @@ void Mcf51AdcDisableChannel(TADCChannel channel)
  *
  * \param prescale  Prescaler value 0-8
  */
-void Mcf51AdcSetPrescale(uint32_t prescale)
+void Mcf51cnAdcSetPrescale(uint32_t prescale)
 {
 	uint8_t cfg_reg;
 
@@ -197,7 +195,7 @@ void Mcf51AdcSetPrescale(uint32_t prescale)
 /*!
  * \brief do conversion
  */
-void Mcf51AdcStartConversion(void)
+void Mcf51cnAdcStartConversion(void)
 {
 	uint32_t detectChannel = adcEnableChannels;
 	uint16_t adcReadChannel = 0;
@@ -218,13 +216,13 @@ void Mcf51AdcStartConversion(void)
 /*
  * ADC interrupt handler.
  */
-static void Mcf51AdcInterrupt(void *arg)
+static void Mcf51cnAdcInterrupt(void *arg)
 {
 	/* MCF_ADC_SC1_COCO bit is cleared when MCF_ADC_R register is read. */
 	uint16_t ADC_Value = MCF_ADC_R;
 	uint16_t adcReadChannel = MCF_ADC_SC1 & MCF_ADC_SC1_ADCH;
 
-    Mcf51AdcBufWrite(adcReadChannel, ADC_Value);
+    Mcf51cnAdcBufWrite(adcReadChannel, ADC_Value);
 
     NutEventPostFromIrq(&readHandle);
 }
@@ -232,20 +230,20 @@ static void Mcf51AdcInterrupt(void *arg)
 /*!
  * \brief Initialize the adc to the configured default values and enable interrupt
  */
-void Mcf51AdcInit(void)
+void Mcf51cnAdcInit(void)
 {
     int channel;
 
     /* Only init once */
     if (ADC_Buffer) return;
 
-    Mcf51AdcSetMode(ADC_OFF);
+    Mcf51cnAdcSetMode(ADC_OFF);
 
     /* Basic configuration: Disable all channels and set mode and prescaler */
-    Mcf51AdcSetPrescale(8);
+    Mcf51cnAdcSetPrescale(8);
     adcEnableChannels = 0;
 
-    Mcf51AdcSetMode(MCF51_ADC_INITIAL_MODE);
+    Mcf51cnAdcSetMode(MCF51_ADC_INITIAL_MODE);
 
     /* Init adc buffers. One for every channel as we can sample all by automatic sequence */
     ADC_Buffer = NutHeapAlloc(sizeof(uint16_t *) * ADC_MAX_CHANNEL);
@@ -257,12 +255,9 @@ void Mcf51AdcInit(void)
 
     //NutEventPost(&readHandle);
 
-    if (NutRegisterIrqHandler(&sig_ADC, Mcf51AdcInterrupt, NULL)) {
+    if (NutRegisterIrqHandler(&sig_ADC, Mcf51cnAdcInterrupt, NULL)) {
         // We do not free buffer as this would cost ROM and is not likely
         return;
     }
     NutIrqEnable(&sig_ADC);
 }
-
-
-

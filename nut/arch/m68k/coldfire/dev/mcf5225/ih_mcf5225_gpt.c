@@ -30,18 +30,54 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#include <arch/m68k.h>
+#include <dev/irqreg.h>
 
-#include "mcf51cn_adc.h"
-#include "mcf51cn_scr.h"
-#include "mcf51cn_fec.h"
-#include "mcf51cn_gpio.h"
-#include "mcf51cn_iic.h"
-#include "mcf51cn_mcg.h"
-#include "mcf51cn_mtim.h"
-#include "mcf51cn_rtc.h"
-#include "mcf51cn_sci.h"
-#include "mcf51cn_spi.h"
-#include "mcf51cn_tpm.h"
+static int IrqCtlPai(int cmd, void *param);
+static int IrqCtlPaov(int cmd, void *param);
+
+IRQ_HANDLER sig_GPT_PAI = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtlPai
+    };
+
+IRQ_HANDLER sig_GPT_PAOV = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtlPaov
+    };
+
+static int IrqCtlPai(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_GPT_PAI, cmd, param,
+            &MCF_GPT_GPTPACTL, MCF_GPT_GPTPACTL_PAI, 1,
+            &MCF_INTC_IMRH(0), MCF_INTC_IMRH_INT_MASK42,
+            &MCF_INTC_ICR42(0), IPL_GPT_PAI);
+}
+
+static int IrqCtlPaov(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_GPT_PAOV, cmd, param,
+            &MCF_GPT_GPTPACTL, MCF_GPT_GPTPACTL_PAOVI, 1,
+            &MCF_INTC_IMRH(0), MCF_INTC_IMRH_INT_MASK43,
+            &MCF_INTC_ICR43(0), IPL_GPT_PAOV);
+}
+
+SIGNAL(IH_GPT_PAI)
+{
+    MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAIF;
+    CallHandler(&sig_GPT_PAI);
+}
+
+SIGNAL(IH_GPT_PAOV)
+{
+    MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAOVF;
+    CallHandler(&sig_GPT_PAOV);
+}

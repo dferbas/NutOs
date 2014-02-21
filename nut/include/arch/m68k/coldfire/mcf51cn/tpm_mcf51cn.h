@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2014 by Embedded Technologies s.r.o
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,18 +30,11 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#ifndef TPM_MCF51CN_H_
+#define TPM_MCF51CN_H_
 
-#include "mcf51cn_adc.h"
-#include "mcf51cn_scr.h"
-#include "mcf51cn_fec.h"
-#include "mcf51cn_gpio.h"
-#include "mcf51cn_iic.h"
-#include "mcf51cn_mcg.h"
-#include "mcf51cn_mtim.h"
-#include "mcf51cn_rtc.h"
-#include "mcf51cn_sci.h"
-#include "mcf51cn_spi.h"
-#include "mcf51cn_tpm.h"
+#include <stdint.h>
+
+int Mcf51cnPtmInitInputCapture(void (*handler) (void *), void *handler_arg, uint32_t devnum, uint32_t channel);
+
+#endif  /* MCG_MCF51CN_H_ */

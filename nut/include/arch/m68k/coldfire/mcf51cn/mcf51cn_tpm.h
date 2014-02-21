@@ -30,8 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_TPM_H_
-#define MCF51CN_TPM_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /*** TPMSC - TPM Status and Control Register; 0xFFFF8260 ***/
 #define MCF_TPM_SC(x) 					   	(*(volatile uint8_t*)(0xFFFF8260 + ((x - 1) * 0x20)))
@@ -64,7 +65,3 @@
 
 /*** TPMCV - TPM Timer Channel n Value Register; 0xFFFF8269 ***/
 #define MCF_TPM_CV(x, n)					(*(volatile uint16_t*)(0xFFFF8266 + ((x - 1) * 0x20) + ((n) * 0x3)))
-
-int McfPtmInitInputCapture(void (*handler) (void *), void *handler_arg, uint32_t devnum, uint32_t channel);
-
-#endif /* MCF51CN_TPM_H_ */

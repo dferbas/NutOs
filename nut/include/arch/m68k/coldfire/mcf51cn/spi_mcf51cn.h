@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2014 by Embedded Technologies s.r.o
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,40 +30,17 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _DEV_IRQREG_H_
-#error "Do not include this file directly. Use dev/irqreg.h instead!"
-#endif
+#ifndef SPI_MCF51CN_H_
+#define SPI_MCF51CN_H_
 
-/*
- * Interrupt level & priority setup
- *
- * IMPORTANT: Interrupt level and priority combination MUST be unique
- */
-#define IPL_UART0   (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(0))
-#define IPL_UART1   (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(1))
-#define IPL_UART2   (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(2))
-#define IPL_I2C0    (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(3))
-#define IPL_I2C1    (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(4))
-#define IPL_PIT0	(MCF_INTC_ICR_IL(4) | MCF_INTC_ICR_IP(0))
-#define IPL_PIT1	(MCF_INTC_ICR_IL(4) | MCF_INTC_ICR_IP(1))
-#define IPL_CWD     (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(7))
+#include <stdint.h>
 
-/*
- * Interrupt handlers
- */
-extern IRQ_HANDLER sig_CWD;
-extern IRQ_HANDLER sig_I2C0;
-extern IRQ_HANDLER sig_I2C1;
-extern IRQ_HANDLER sig_PIT0;
-extern IRQ_HANDLER sig_PIT1;
-extern IRQ_HANDLER sig_UART0;
-extern IRQ_HANDLER sig_UART1;
-extern IRQ_HANDLER sig_UART2;
+#define NODE_CS_FRAM    0   // drive fram chip select
+#define NODE_CS_FLASH   1   // drive flash chip select
 
-/*
- * Common Interrupt control
- */
-extern int IrqCtlCommon(IRQ_HANDLER *sig_handler, int cmd, void *param,
-        volatile void *reg_imr, uint32_t imr_mask, uint8_t imr_size,
-        volatile uint32_t *reg_imr_ic, uint32_t imr_mask_ic,
-        volatile uint8_t *reg_icr, uint8_t ipl);
+void Mcf51cnSpiInit(void);
+int Mcf51cnSpiTransfer(const void *txbuf, void *rxbuf, int xlen);
+int Mcf51cnSpiSelect(uint_fast8_t node_cs);
+int Mcf51cnSpiDeselect(uint_fast8_t node_cs);
+
+#endif  /* SPI_MCF51CN_H_ */

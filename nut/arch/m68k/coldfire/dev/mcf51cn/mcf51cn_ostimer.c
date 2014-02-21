@@ -35,6 +35,7 @@
 #include <cfg/clock.h>
 #include <dev/irqreg.h>
 #include <sys/timer.h>
+#include <arch/m68k/coldfire/mcf51cn/mtim_mcf51cn.h>
 
 /*!
  * \addtogroup xgNutArchM68kMCF51CNOsTimer
@@ -73,7 +74,7 @@
  */
 void NutRegisterTimer(void (*handler) (void *))
 {
-	McfMtimInitClock(handler);
+	Mcf51cnMtimInitClock(handler);
 }
 
 #ifndef NUT_CPU_FREQ

@@ -37,11 +37,11 @@
 /*
  * GPIO PortPins Initialization
  */
-#include "gpio_mcf5225x_i2c0.h"
-#include "gpio_mcf5225x_i2c1.h"
-#include "gpio_mcf5225x_uart0.h"
-#include "gpio_mcf5225x_uart1.h"
-#include "gpio_mcf5225x_uart2.h"
+#include "gpio_mcf5225_i2c0.h"
+#include "gpio_mcf5225_i2c1.h"
+#include "gpio_mcf5225_uart0.h"
+#include "gpio_mcf5225_uart1.h"
+#include "gpio_mcf5225_uart2.h"
 
 /*
  * GPIO Port Definitions

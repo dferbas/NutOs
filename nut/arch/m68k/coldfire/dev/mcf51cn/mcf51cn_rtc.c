@@ -32,13 +32,9 @@
 
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
-
-#include <sys/atom.h>
-
+#include <dev/rtc.h>
 #include <string.h>
-
-#include <dev/mcf51cn_rtc.h>
-
+#include <sys/atom.h>
 
 #define RTC_START_COUNTER	 MCF_RTC_SC = MCF_RTC_SC_RTIE \
 										| MCF_RTC_SC_RTIF \
@@ -48,16 +44,16 @@
 
 static long timeInSeconds;
 
-static void Mcf51RtcInterrupt(void *arg);
+static void Mcf51cnRtcInterrupt(void *arg);
 
-int Mcf51RtcInit(NUTRTC *rtc)
+static int Mcf51cnRtcInit(NUTRTC *rtc)
 {
 	MCF_RTC_SC = 0x00;
 	// (100ms / 25) * 0xF7 = 1s
 	MCF_RTC_MOD = 0xF9;
 	MCF_RTC_MOD = MCF_RTC_MOD;
 
-	if (NutRegisterIrqHandler(&sig_RTC, Mcf51RtcInterrupt, NULL)) {
+	if (NutRegisterIrqHandler(&sig_RTC, Mcf51cnRtcInterrupt, NULL)) {
 		// We do not free buffer as this would cost ROM and is not likely
 		return -1;
 	    }
@@ -68,7 +64,7 @@ int Mcf51RtcInit(NUTRTC *rtc)
 	return 0;
 }
 
-int Mcf51RtcSetClock(NUTRTC *rtc, const struct _tm *tm)
+static int Mcf51cnRtcSetClock(NUTRTC *rtc, const struct _tm *tm)
 {
 	time_t time;
 	time = mktime((struct _tm *)tm);
@@ -80,14 +76,14 @@ int Mcf51RtcSetClock(NUTRTC *rtc, const struct _tm *tm)
 }
 
 
-int Mcf51RtcGetClock(NUTRTC *rtc, struct _tm *tm)
+static int Mcf51cnRtcGetClock(NUTRTC *rtc, struct _tm *tm)
 {
 	time_t time = timeInSeconds;
 	localtime_r(&time,tm);
 	return 0;
 }
 
-static void Mcf51RtcInterrupt(void *arg)
+static void Mcf51cnRtcInterrupt(void *arg)
 {
 	/* reset RTC request flag */
 	MCF_RTC_SC |= 0x80;
@@ -97,11 +93,11 @@ static void Mcf51RtcInterrupt(void *arg)
 
 }
 
-NUTRTC rtcMcf51 = {
+NUTRTC rtcMcf51cn = {
   /*.dcb           = */ NULL,               /*!< Driver control block */
-  /*.rtc_init      = */ Mcf51RtcInit,       /*!< Hardware initializatiuon, rtc_init */
-  /*.rtc_gettime   = */ Mcf51RtcGetClock,   /*!< Read date and time, rtc_gettime */
-  /*.rtc_settime   = */ Mcf51RtcSetClock,   /*!< Set date and time, rtc_settime */
+  /*.rtc_init      = */ Mcf51cnRtcInit,     /*!< Hardware initializatiuon, rtc_init */
+  /*.rtc_gettime   = */ Mcf51cnRtcGetClock, /*!< Read date and time, rtc_gettime */
+  /*.rtc_settime   = */ Mcf51cnRtcSetClock, /*!< Set date and time, rtc_settime */
   /*.rtc_getalarm  = */ NULL,               /*!< Read alarm date and time, rtc_getalarm */
   /*.rtc_setalarm  = */ NULL,               /*!< Set alarm date and time, rtc_setalarm */
   /*.rtc_getstatus = */ NULL,               /*!< Read status flags, rtc_getstatus */

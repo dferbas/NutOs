@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2014 by Embedded Technologies s.r.o
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,29 +30,23 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF5225X_RCM_H_
-#define MCF5225X_RCM_H_
+#ifndef UART_MCF5225_H_
+#define UART_MCF5225_H_
 
-/* Register read/write macros */
-#define MCF_RCM_RCR                          (*(volatile uint8_t *)(0x40110000))
-#define MCF_RCM_RSR                          (*(volatile uint8_t *)(0x40110001))
+#include <stdint.h>
 
-/* MCF_RCM_RCR */
-#define MCF_RCM_RCR_LVDE                     0x1
-#define MCF_RCM_RCR_LVDRE                    0x4
-#define MCF_RCM_RCR_LVDIE                    0x8
-#define MCF_RCM_RCR_LVDF                     0x10
-#define MCF_RCM_RCR_FRCRSTOUT                0x40
-#define MCF_RCM_RCR_SOFTRST                  0x80
+/* Duplex modes */
+#define HALF    0
+#define FULL    1
 
-/* MCF_RCM_RSR */
-#define MCF_RCM_RSR_LOL                      0x1
-#define MCF_RCM_RSR_LOC                      0x2
-#define MCF_RCM_RSR_EXT                      0x4
-#define MCF_RCM_RSR_POR                      0x8
-#define MCF_RCM_RSR_WDR                      0x10
-#define MCF_RCM_RSR_SOFT                     0x20
-#define MCF_RCM_RSR_LVD                      0x40
-#define MCF_RCM_RSR_BWD                      0x80
+/* UART control structure used for write only registers */
+typedef struct _UARTWREGS UARTWREGS;
+struct _UARTWREGS {
+    uint8_t uimr;   /* UISR/UIMR register, write from one, red from other => write only */
+    uint8_t ubg1;   /* Write only */
+    uint8_t ubg2;   /* Write only */
+    uint8_t umr1;   /* Write/ Read after RESET MODE REGISTER POINTER */
+    uint8_t umr2;   /* Write/ Read after Write/ Read from UMR1 register */
+};
 
-#endif /* MCF5225X_RCM_H_ */
+#endif  /* UART_MCF5225_H_ */

@@ -33,7 +33,7 @@
 #include <dev/irqreg.h>
 #include <dev/gpio.h>
 
-int McfPtmInitInputCapture(void (*handler) (void *), void *handler_arg, uint32_t devnum, uint32_t channel){
+int Mcf51cnPtmInitInputCapture(void (*handler) (void *), void *handler_arg, uint32_t devnum, uint32_t channel){
 	int bank, bit;
 	uint32_t flags = GPIO_CFG_ALT3;
 	IRQ_HANDLER *p_irqHandler = 0;

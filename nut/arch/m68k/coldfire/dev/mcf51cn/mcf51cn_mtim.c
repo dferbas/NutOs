@@ -31,10 +31,11 @@
  */
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
+#include <arch/m68k/coldfire/mcf51cn/mcg_mcf51cn.h>
 
 #define MODULO_COUNTER_SIZE 0x100
 
-void McfMtimInitClock(void (*handler) (void *)){
+void Mcf51cnMtimInitClock(void (*handler) (void *)){
 
 	uint32_t mcgFFClk;
 	uint8_t psCounter = 0;
@@ -70,7 +71,4 @@ void McfMtimInitClock(void (*handler) (void *)){
 		/* Reset and start counter */
 		MCF_MTIM_SC(1) = MCF_MTIM_SC_TRST;
 	}
-
-
-
 }

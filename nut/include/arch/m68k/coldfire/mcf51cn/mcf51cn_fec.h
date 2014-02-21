@@ -30,8 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_FEC_H_
-#define MCF51CN_FEC_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 #define MCF_FEC_EIR 							(*(volatile uint32_t *)(0xFFFFE004))
 #define MCF_FEC_EIMR 							(*(volatile uint32_t *)(0xFFFFE008))
@@ -463,6 +464,3 @@
 #define MCF_FEC_TX_BD_LAST_IN_FRAME			(1<<11)
 #define MCF_FEC_TX_BD_TRANSMIT_CRC			(1<<10)
 #define MCF_FEC_TX_BD_APPEND_BAD_CRC		(1<<9)
-
-
-#endif /* MCF51CN_FEC_H_ */

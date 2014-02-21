@@ -30,19 +30,17 @@
  * For additional information see http://www.ethernut.de/
  */
 
-
+#include <arch/m68k.h>
+#include <arch/m68k/coldfire/mcf51cn/spi_mcf51cn.h>
 #include <cfg/spi.h>
 #include <dev/gpio.h>
-#include <arch/m68k.h>
-
 #include <dev/irqreg.h>
-#include <sys/event.h>
-#include <sys/nutdebug.h>
-#include <sys/atom.h>
-#include <sys/mutex.h>
-
-#include <stdlib.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <sys/atom.h>
+#include <sys/event.h>
+#include <sys/mutex.h>
+#include <sys/nutdebug.h>
 
 static MUTEX 	spi_bus_mutex;		// waiting for spi bus
 static HANDLE 	spi_transfer_handler;	// waiting for spi transfer finished
@@ -55,7 +53,7 @@ static HANDLE 	spi_transfer_handler;	// waiting for spi transfer finished
 /*!
  * \brief Set the specified chip select to a given level.
  */
-static int Mcf51SpiChipSelect(uint_fast8_t cs, uint_fast8_t level)
+static int Mcf51cnSpiChipSelect(uint_fast8_t cs, uint_fast8_t level)
 {
     int rc = 0;
 
@@ -85,7 +83,7 @@ static int Mcf51SpiChipSelect(uint_fast8_t cs, uint_fast8_t level)
  * \return 0 on success. In case of an error, -1 is returned and the bus
  *         is not locked.
  */
-int Mcf51SpiSelect(uint_fast8_t node_cs) //, uint32_t tmo)
+int Mcf51cnSpiSelect(uint_fast8_t node_cs) //, uint32_t tmo)
 {
     int rc;
 
@@ -98,7 +96,7 @@ int Mcf51SpiSelect(uint_fast8_t node_cs) //, uint32_t tmo)
         /* Enable SPI peripherals and clock. */
 
         /* Finally activate the node's chip select. */
-        rc = Mcf51SpiChipSelect(node_cs, CHIP_SELECT_LO);
+        rc = Mcf51cnSpiChipSelect(node_cs, CHIP_SELECT_LO);
         if (rc) {
         	errno = ENXIO;
             /* Release the bus in case of an error. */
@@ -118,10 +116,10 @@ int Mcf51SpiSelect(uint_fast8_t node_cs) //, uint32_t tmo)
  *
  * \return Always 0.
  */
-int Mcf51SpiDeselect(uint_fast8_t node_cs)
+int Mcf51cnSpiDeselect(uint_fast8_t node_cs)
 {
     /* Deactivate the node's chip select. */
-	Mcf51SpiChipSelect(node_cs, CHIP_SELECT_HI);
+	Mcf51cnSpiChipSelect(node_cs, CHIP_SELECT_HI);
 
     /* Release the bus. */
 	NutMutexUnlock(&spi_bus_mutex);
@@ -134,7 +132,7 @@ static uint8_t * volatile spi0_txp;
 static uint8_t * volatile spi0_rxp;
 static volatile size_t spi0_xc;
 
-void Mcf51SpiInterrupt(void *arg)
+static void Mcf51cnSpiInterrupt(void *arg)
 {
     uint8_t data;
     uint8_t status;
@@ -182,7 +180,7 @@ void Mcf51SpiInterrupt(void *arg)
  *
  * \return Always 0, -1 on timeout.
  */
-int Mcf51SpiTransfer(const void *txbuf, void *rxbuf, int xlen)
+int Mcf51cnSpiTransfer(const void *txbuf, void *rxbuf, int xlen)
 {
     uint8_t data;
     int rc;
@@ -221,13 +219,13 @@ int Mcf51SpiTransfer(const void *txbuf, void *rxbuf, int xlen)
 /*!
  * \brief Initialize an SPI bus node.
  */
-void Mcf51SpiInit(void)
+void Mcf51cnSpiInit(void)
 {
 
-    Mcf51SpiChipSelect(NODE_CS_FRAM, CHIP_SELECT_HI);	// set chip select to output high (disabled)
+    Mcf51cnSpiChipSelect(NODE_CS_FRAM, CHIP_SELECT_HI);	// set chip select to output high (disabled)
     GpioPinConfigSet(PORTE, 2, GPIO_CFG_OUTPUT/* | GPIO_CFG_DRIVE_STRENGTH*/); // init PTE2 as output
 
-    Mcf51SpiChipSelect(NODE_CS_FLASH, CHIP_SELECT_HI);	// set chip select to output high (disabled)
+    Mcf51cnSpiChipSelect(NODE_CS_FLASH, CHIP_SELECT_HI);	// set chip select to output high (disabled)
     GpioPinConfigSet(PORTB, 2, GPIO_CFG_OUTPUT/* | GPIO_CFG_DRIVE_STRENGTH*/); // init PTB2 as output
 
 #if	SPI_CHANNEL == 2
@@ -259,10 +257,10 @@ void Mcf51SpiInit(void)
 	 *  SPI Transmit Interrupt Enable is not used
 	 */
 #if	SPI_CHANNEL == 2
-    NutRegisterIrqHandler(&sig_SPI2, Mcf51SpiInterrupt, 0);
+    NutRegisterIrqHandler(&sig_SPI2, Mcf51cnSpiInterrupt, 0);
 	NutIrqEnable(&sig_SPI2);
 #else
-	NutRegisterIrqHandler(&sig_SPI1, Mcf51SpiInterrupt, 0);
+	NutRegisterIrqHandler(&sig_SPI1, Mcf51cnSpiInterrupt, 0);
 	NutIrqEnable(&sig_SPI1);
 #endif
 

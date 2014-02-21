@@ -30,8 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF5225X_SCM_H_
-#define MCF5225X_SCM_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* SCM Registers */
 #define MCF_SCM_IPSBAR                       (*(volatile uint32_t*)(0x40000000))
@@ -228,5 +229,3 @@
 /* MCF_SCM_GPACR */
 #define MCF_SCM_GPACR_ACCESS_CTRL(x)         (((x) & 0xF) << 0)
 #define MCF_SCM_GPACR_LOCK                   0x80
-
-#endif /* MCF5225X_SCM_H_ */

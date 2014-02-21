@@ -30,8 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_ADC_REG_H_
-#define MCF51CN_ADC_REG_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* Status and Control Register 1 */
 #define MCF_ADC_SC1 						 (*(volatile uint8_t *)(0xFFFF8140))
@@ -108,5 +109,3 @@
 #define MCF_ADC_CFG_MODE_BITNUM              0x02
 #define MCF_ADC_CFG_ADIV                     0x60
 #define MCF_ADC_CFG_ADIV_BITNUM              0x05
-
-#endif /* MCF51CN_ADC_REG_H_ */

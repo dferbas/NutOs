@@ -33,3 +33,48 @@
 #ifndef _DEV_BOARD_H_
 #error "Do not include this file directly. Use dev/board.h instead!"
 #endif
+
+/*
+ * Debug device.
+ */
+#include <dev/debug.h>
+
+//#define EARLY_STDIO_DEV devDebug2
+
+#ifndef DEV_DEBUG
+#define DEV_DEBUG       devDebug2
+#endif
+
+#ifndef DEV_DEBUG_NAME
+#define DEV_DEBUG_NAME  "sci2"
+#endif
+
+/*
+ * UART devices
+ */
+#include <dev/scimcf5.h>
+#define DEV_UART1       devSciMcf5_1
+#define DEV_UART2       devSciMcf5_2
+#define DEV_UART3       devSciMcf5_3
+#define DEV_UART1_NAME  "sci1"
+#define DEV_UART2_NAME  "sci2"
+#define DEV_UART3_NAME  "sci3"
+
+/*
+ * Ethernet device
+ */
+extern NUTDEVICE devMcf51cnFec;
+
+#ifndef DEV_ETHER
+#define DEV_ETHER   devMcf51cnFec
+#endif
+
+/*
+ * RTC chip
+ */
+#include <dev/rtc.h>
+extern NUTRTC rtcMcf51cn;
+
+#ifndef RTC_CHIP0
+#define RTC_CHIP0 rtcMcf51cn
+#endif

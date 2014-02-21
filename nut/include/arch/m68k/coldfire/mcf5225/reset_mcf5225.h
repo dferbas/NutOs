@@ -30,18 +30,14 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
+#ifndef _DEV_RESET_H_
+#error "Do not include this file directly. Use dev/reset.h instead!"
 #endif
 
-#include "mcf51cn_adc.h"
-#include "mcf51cn_scr.h"
-#include "mcf51cn_fec.h"
-#include "mcf51cn_gpio.h"
-#include "mcf51cn_iic.h"
-#include "mcf51cn_mcg.h"
-#include "mcf51cn_mtim.h"
-#include "mcf51cn_rtc.h"
-#include "mcf51cn_sci.h"
-#include "mcf51cn_spi.h"
-#include "mcf51cn_tpm.h"
+/* Family dependant reset codes */
+#define NUT_RSTTYP_BACKUP_WATCHDOG  6
+#define NUT_RSTTYP_LOSS_OF_CLOCK    7
+#define NUT_RSTTYP_LOSS_OF_LOCK     8
+
+extern void Mcf5225_Reset(void);
+extern int Mcf5225_ResetCause(void);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2014 by Embedded Technologies s.r.o
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,8 +30,10 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_ADC_H_
-#define MCF51CN_ADC_H_
+#ifndef ADC_MCF51CN_H_
+#define ADC_MCF51CN_H_
+
+#include <stdint.h>
 
 /*!
  * \enum  adc_moded_type dev/at91_adc.h
@@ -80,10 +82,10 @@ typedef enum adc_channel_type
 
 /* Function prototypes */
 
-void Mcf51AdcInit(void);
+void Mcf52cnAdcInit(void);
 
 
-// Mcf51AdcStartConversion
+// AdcStartConversion
 //
 // Begins ADC conversion. The conversion will process all
 // enabled channels one after the other.
@@ -96,10 +98,10 @@ void Mcf51AdcInit(void);
 // post: The ADC has started conversion. Completion of
 //       any conversions is not guaranteed.
 
-void Mcf51AdcStartConversion(void);
+void Mcf52cnAdcStartConversion(void);
 
 
-// Mcf51AdcSetPrescale
+// AdcSetPrescale
 //
 // Allows setting of ADC clock prescalar (ADC rate).
 // The  ADC rate is given by the system clock rate
@@ -110,22 +112,22 @@ void Mcf51AdcStartConversion(void);
 //       choices given above
 // post: ADC prescalar set to desired choice
 
-void Mcf51AdcSetPrescale(uint32_t prescale);
+void Mcf52cnAdcSetPrescale(uint32_t prescale);
 
 
-// Mcf51AdcEnableChannel
-// Mcf51AdcDisableChannel
+// AdcDisableChannel
+// AdcEnableChannel
 //
 // Enables/disables a channel to be sampled on the next conversion
 //
 // pre: none
 // post: Channel is selected / deselected. Next conversion will respect these settings
 
-void Mcf51AdcDisableChannel(TADCChannel channel);
-void Mcf51AdcEnableChannel(TADCChannel channel);
+void Mcf52cnAdcDisableChannel(TADCChannel channel);
+void Mcf52cnAdcEnableChannel(TADCChannel channel);
 
 
-// Mcf51AdcSetMode
+// AdcSetMode
 //
 // Possible values:
 //    - ADC_OFF
@@ -140,16 +142,15 @@ void Mcf51AdcEnableChannel(TADCChannel channel);
 // pre: none
 // post: Set adc conversion to the selected value.
 
-void Mcf51AdcSetMode(TADCMode mode);
+void Mcf52cnAdcSetMode(TADCMode mode);
 
-// Mcf51AdcBufRead
+// AdcBufRead
 //
 // Reads the next sampled value of the given channel from the buffer.
 //
 // pre: Sample completed
 // post: Value will be removed from buffer
 
-int Mcf51AdcBufRead(uint16_t channel, uint16_t * read);
+int Mcf52cnAdcBufRead(uint16_t channel, uint16_t * read);
 
-
-#endif /* MCF51CN_ADC_H_ */
+#endif  /* ADC_MCF51CN_H_ */

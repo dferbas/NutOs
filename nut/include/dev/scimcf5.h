@@ -35,13 +35,11 @@
 
 #include <sys/device.h>
 
-/*!
- * \file dev/scimcf5.h
- * \brief Asynchronous serial device definitions.
+/*
+ * SCIs (USARTs) available in the MCF51CN.
  */
-
-extern NUTDEVICE devSciMcf5_0;
 extern NUTDEVICE devSciMcf5_1;
 extern NUTDEVICE devSciMcf5_2;
+extern NUTDEVICE devSciMcf5_3;
 
 #endif /* _USARTMCF5_H_ */

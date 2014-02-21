@@ -30,18 +30,43 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#include <arch/m68k.h>
+#include <dev/reset.h>
 
-#include "mcf51cn_adc.h"
-#include "mcf51cn_scr.h"
-#include "mcf51cn_fec.h"
-#include "mcf51cn_gpio.h"
-#include "mcf51cn_iic.h"
-#include "mcf51cn_mcg.h"
-#include "mcf51cn_mtim.h"
-#include "mcf51cn_rtc.h"
-#include "mcf51cn_sci.h"
-#include "mcf51cn_spi.h"
-#include "mcf51cn_tpm.h"
+void Mcf5225_Reset(void)
+{
+    MCF_RCM_RCR |= MCF_RCM_RCR_SOFTRST;
+}
+
+int Mcf5225_ResetCause(void)
+{
+    // TODO: One or more status bits may be set at the same time.
+
+    uint8_t rsr = MCF_RCM_RSR;
+
+    if (rsr & MCF_RCM_RSR_POR)
+        return NUT_RSTTYP_POWERUP;
+
+    if (rsr & MCF_RCM_RSR_EXT)
+        return NUT_RSTTYP_EXTERNAL;
+
+    if (rsr & MCF_RCM_RSR_BWD)
+        return NUT_RSTTYP_BACKUP_WATCHDOG;
+
+    if (rsr & MCF_RCM_RSR_WDR)
+        return NUT_RSTTYP_WATCHDOG;
+
+    if (rsr & MCF_RCM_RSR_LVD)
+        return NUT_RSTTYP_BROWNOUT;
+
+    if (rsr & MCF_RCM_RSR_LOL)
+        return NUT_RSTTYP_LOSS_OF_LOCK;
+
+    if (rsr & MCF_RCM_RSR_LOC)
+        return NUT_RSTTYP_LOSS_OF_CLOCK;
+
+    if (rsr & MCF_RCM_RSR_SOFT)
+        return NUT_RSTTYP_SOFTWARE;
+
+    return NUT_RSTTYP_UNKNOWN;
+}

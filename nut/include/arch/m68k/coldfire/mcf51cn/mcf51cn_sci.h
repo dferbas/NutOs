@@ -30,8 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_SCI_H_
-#define MCF51CN_SCI_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* SCI - Serial Communication Interface */
 
@@ -104,5 +105,3 @@
 
 /* Data Register */
 #define MCF_SCI_D(x) 						(*(volatile uint8_t *)(0xFFFF8167 + ((x - 1) * 0x20)))
-
-#endif /* MCF51CN_SCI_H_ */

@@ -58,7 +58,7 @@ uint32_t NutWatchDogStart(uint32_t ms, uint32_t xmode)
 #elif defined(MCU_LPC17xx)
     return Lpc17xxWatchDogStart(ms, xmode);
 #elif defined(MCU_MCF5225X)
-	return Mcf5225xWatchDogStart(ms);
+	return Mcf5225WatchDogStart(ms);
 #elif defined(MCU_MCF51CN)
 	return Mcf51CopStart(ms);
 #else

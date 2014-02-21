@@ -30,28 +30,28 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF5225X_PIT_H_
-#define MCF5225X_PIT_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
-/* PIT Registers */
-#define MCF_PIT_PCSR(x)                      (*(volatile uint16_t*)(0x40150000 + ((x) * 0x10000)))
-#define MCF_PIT_PMR(x)                       (*(volatile uint16_t*)(0x40150002 + ((x) * 0x10000)))
-#define MCF_PIT_PCNTR(x)                     (*(volatile uint16_t*)(0x40150004 + ((x) * 0x10000)))
+/* Register read/write macros */
+#define MCF_RCM_RCR                          (*(volatile uint8_t *)(0x40110000))
+#define MCF_RCM_RSR                          (*(volatile uint8_t *)(0x40110001))
 
-/* MCF_PIT_PCSR */
-#define MCF_PIT_PCSR_EN                      0x1
-#define MCF_PIT_PCSR_RLD                     0x2
-#define MCF_PIT_PCSR_PIF                     0x4
-#define MCF_PIT_PCSR_PIE                     0x8
-#define MCF_PIT_PCSR_OVW                     0x10
-#define MCF_PIT_PCSR_DBG                     0x20
-#define MCF_PIT_PCSR_DOZE                    0x40
-#define MCF_PIT_PCSR_PRE(x)                  (((x) & 0xF) << 0x8)
+/* MCF_RCM_RCR */
+#define MCF_RCM_RCR_LVDE                     0x1
+#define MCF_RCM_RCR_LVDRE                    0x4
+#define MCF_RCM_RCR_LVDIE                    0x8
+#define MCF_RCM_RCR_LVDF                     0x10
+#define MCF_RCM_RCR_FRCRSTOUT                0x40
+#define MCF_RCM_RCR_SOFTRST                  0x80
 
-/* MCF_PIT_PMR */
-#define MCF_PIT_PMR_PM(x)                    (((x) & 0xFFFF) << 0)
-
-/* MCF_PIT_PCNTR */
-#define MCF_PIT_PCNTR_PC(x)                  (((x) & 0xFFFF) << 0)
-
-#endif /* MCF5225X_PIT_H_ */
+/* MCF_RCM_RSR */
+#define MCF_RCM_RSR_LOL                      0x1
+#define MCF_RCM_RSR_LOC                      0x2
+#define MCF_RCM_RSR_EXT                      0x4
+#define MCF_RCM_RSR_POR                      0x8
+#define MCF_RCM_RSR_WDR                      0x10
+#define MCF_RCM_RSR_SOFT                     0x20
+#define MCF_RCM_RSR_LVD                      0x40
+#define MCF_RCM_RSR_BWD                      0x80

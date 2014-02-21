@@ -30,8 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef MCF51CN_MTIM_H_
-#define MCF51CN_MTIM_H_
+#ifndef _ARCH_M68K_H_
+#error "Do not include this file directly. Use arch/m68k.h instead!"
+#endif
 
 /* MTIM Clock Configuration Register */
 #define MCF_MTIM_SC(x) 						(*(volatile uint8_t *)(0xFFFF82A0 + ((x - 1) * 0x60)))
@@ -60,7 +61,3 @@
 
 /* MTIM Modulo Register */
 #define MCF_MTIM_MOD(x)						(*(volatile uint8_t *)(0xFFFF82A3 + ((x - 1) * 0x60)))
-
-void McfMtimInitClock(void (*handler) (void *));
-
-#endif /* MCF51CN_MTIM_H_ */

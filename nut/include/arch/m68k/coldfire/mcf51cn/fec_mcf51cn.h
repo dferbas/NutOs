@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2014 by Embedded Technologies s.r.o
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,14 +30,13 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _DEV_RESET_H_
-#error "Do not include this file directly. Use dev/reset.h instead!"
-#endif
+#ifndef FEC_MCF51CN_H_
+#define FEC_MCF51CN_H_
 
-/* Family dependant reset codes */
-#define NUT_RSTTYP_BACKUP_WATCHDOG  6
-#define NUT_RSTTYP_LOSS_OF_CLOCK    7
-#define NUT_RSTTYP_LOSS_OF_LOCK     8
+#include <sys/device.h>
+#include <sys/types.h>
 
-extern void Mcf5225x_Reset(void);
-extern int Mcf5225x_ResetCause(void);
+int Mcf51cnFecIsInitialized(NUTDEVICE * dev);
+void Mcf51cnFec_EthMWDTSetVariableFN(TMWDTSetVariableFN VariableFN);
+
+#endif  /* FEC_MCF51CN_H_ */

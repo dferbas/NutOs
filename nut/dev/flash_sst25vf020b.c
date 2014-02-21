@@ -10,11 +10,12 @@
  *  Created on: Nov 5, 2013
  *	  Author: dchvalkovsky
  */
+#include <arch/m68k/coldfire/mcf51cn/spi_mcf51cn.h>
 #include <dev/board.h>
-#include <stdio.h>
-#include <sys/timer.h>
-#include <sys/event.h>
 #include <dev/flash_sst25vf020b.h>
+#include <stdio.h>
+#include <sys/event.h>
+#include <sys/timer.h>
 
 // command codes for SST25VF032B
 #define WRITE_STATUS    	0x01 // called WRSR in datasheet
@@ -43,11 +44,11 @@ static void flash_CommandEnd(void);
 static void flash_command(uint8_t data);
 
 static void flash_cs_lo(void){
-	Mcf51SpiSelect(NODE_CS_FLASH);
+	Mcf51cnSpiSelect(NODE_CS_FLASH);
 }
 
 static void flash_cs_hi(void){
-	Mcf51SpiDeselect(NODE_CS_FLASH);
+	Mcf51cnSpiDeselect(NODE_CS_FLASH);
 }
 
 void flash_init(void)
@@ -80,7 +81,7 @@ static void flash_wait_busy_AAI(void)
  */
 static void flash_command(uint8_t data) {
 	flash_cs_lo();
-	Mcf51SpiTransfer(&data, NULL, 1);
+	Mcf51cnSpiTransfer(&data, NULL, 1);
 	flash_cs_hi();
 }
 
@@ -144,7 +145,7 @@ void flash_writeStatus(uint8_t status) {
 	dataWrite[1] = status;
 
 	flash_cs_lo();
-	Mcf51SpiTransfer(dataWrite, NULL, 2);
+	Mcf51cnSpiTransfer(dataWrite, NULL, 2);
     flash_cs_hi();
 }
 
@@ -156,7 +157,7 @@ uint8_t flash_readStatus(void) {
 	uint8_t dataWrite[2] = { READ_STATUS, 0xFF };
 
 	flash_cs_lo();
-	Mcf51SpiTransfer(dataWrite, dataRead, 2);
+	Mcf51cnSpiTransfer(dataWrite, dataRead, 2);
 	flash_cs_hi();
 	return dataRead[1];
 }
@@ -173,7 +174,7 @@ static void flash_CommandBegin(uint8_t command, uint32_t address) {
 	dataWrite[3] = (uint8_t) (address & 0xFF);
 
 	flash_cs_lo();
-	Mcf51SpiTransfer(dataWrite, NULL, 4);
+	Mcf51cnSpiTransfer(dataWrite, NULL, 4);
 }
 
 /*
@@ -191,7 +192,7 @@ static inline void flash_CommandEnd(void) {
 static void flash_write_byte_noEvantWait(uint32_t address, uint8_t byte) {
     flash_command(WREN);
     flash_CommandBegin(WRITE, address);
-    Mcf51SpiTransfer(&byte, NULL, 1);
+    Mcf51cnSpiTransfer(&byte, NULL, 1);
     flash_CommandEnd();
     flash_wait_busy();
 }
@@ -243,7 +244,7 @@ void flash_write_block(uint32_t address, uint8_t * buffer, uint32_t count) {
 		flash_buff[j++] = *p_buff++;
 		flash_buff[j++] = *p_buff++;
 
-		Mcf51SpiTransfer(flash_buff, NULL, j);
+		Mcf51cnSpiTransfer(flash_buff, NULL, j);
 
 		flash_cs_hi();
 		flash_wait_busy();
@@ -265,7 +266,7 @@ void flash_write_block(uint32_t address, uint8_t * buffer, uint32_t count) {
 void flash_read_block(uint32_t address, uint8_t * buffer, uint32_t count) {
 	NutEventWait(&handle_flash_trans, NUT_WAIT_INFINITE);
 	flash_CommandBegin(READ, address);
-	Mcf51SpiTransfer(NULL, buffer, count);
+	Mcf51cnSpiTransfer(NULL, buffer, count);
 	flash_CommandEnd();
 	NutEventPost(&handle_flash_trans);
 }
@@ -278,8 +279,8 @@ void flash_higher_speed_read_block(uint32_t address, uint8_t * buffer, uint32_t 
 	NutEventWait(&handle_flash_trans, NUT_WAIT_INFINITE);
 	flash_CommandBegin(HIGHER_SPEED_READ, address);
 
-	Mcf51SpiTransfer(NULL, &dummyChar, 1); // read/write dummy byte, necessary for higher speed read
-	Mcf51SpiTransfer(NULL, buffer, count);
+	Mcf51cnSpiTransfer(NULL, &dummyChar, 1); // read/write dummy byte, necessary for higher speed read
+	Mcf51cnSpiTransfer(NULL, buffer, count);
 
 	flash_CommandEnd();
 	NutEventPost(&handle_flash_trans);
