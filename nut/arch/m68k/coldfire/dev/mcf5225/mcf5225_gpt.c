@@ -32,7 +32,7 @@ void Mcf5225GptInitPA(HANDLE *pae_handler)
 	MCF_GPT_GPTPACTL = 0x00;
 	MCF_GPT_GPTPACNT = 65000; // Clear PA Counter
 	
-// JS TODO .. predelat na gpio
+// JS TODO - predelat na gpio
 //	MCF_GPIO_PTAPAR &= ~(MCF_GPIO_PTAPAR_PTAPAR3(3));
 //	MCF_GPIO_PTAPAR |= (MCF_GPIO_PTAPAR_PTAPAR3(1));
 	

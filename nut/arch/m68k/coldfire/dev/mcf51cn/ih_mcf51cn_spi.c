@@ -56,25 +56,24 @@ IRQ_HANDLER sig_SPI2 = {
 
 static int IrqCtl1(int cmd, void *param)
 {
-	/* enable only receive buffer full interrupt */
     return IrqCtlCommon(&sig_SPI1, cmd, param, &MCF_SPI_C1(1), MCF_SPI_C1_SPIE, 1);
 }
 
 static int IrqCtl2(int cmd, void *param)
 {
-	/* enable only receive buffer full interrupt */
     return IrqCtlCommon(&sig_SPI2, cmd, param, &MCF_SPI_C1(2), MCF_SPI_C1_SPIE, 1);
 }
 
 SIGNAL(IH_SPI1)
 {
+    /* Interrupt is cleared in driver by reading to SPI data register. */
+
     CallHandler(&sig_SPI1);
 }
 
 SIGNAL(IH_SPI2)
 {
+    /* Interrupt is cleared in driver by reading to SPI data register. */
+
     CallHandler(&sig_SPI2);
 }
-
-
-

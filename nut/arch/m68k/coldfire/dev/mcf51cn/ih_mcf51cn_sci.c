@@ -129,30 +129,42 @@ static int IrqCtl3_Tx(int cmd, void *param)
 
 SIGNAL(IH_SCI1_RX)
 {
+    /* Interrupt is cleared in driver by reading to SCI data register. */
+
     CallHandler(&sig_SCI1_RX);
 }
 
 SIGNAL(IH_SCI1_TX)
 {
+    /* Interrupt is cleared in driver by writing to SCI data register. */
+
     CallHandler(&sig_SCI1_TX);
 }
 
 SIGNAL(IH_SCI2_RX)
 {
+    /* Interrupt is cleared in driver by reading to SCI data register. */
+
     CallHandler(&sig_SCI2_RX);
 }
 
 SIGNAL(IH_SCI2_TX)
 {
+    /* Interrupt is cleared in driver by writing to SCI data register. */
+
     CallHandler(&sig_SCI2_TX);
 }
 
 SIGNAL(IH_SCI3_RX)
 {
+    /* Interrupt is cleared in driver by reading to SCI data register. */
+
     CallHandler(&sig_SCI3_RX);
 }
 
 SIGNAL(IH_SCI3_TX)
 {
+    /* Interrupt is cleared in driver by writing to SCI data register (SCIxD). */
+
     CallHandler(&sig_SCI3_TX);
 }

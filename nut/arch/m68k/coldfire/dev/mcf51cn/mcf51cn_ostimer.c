@@ -99,7 +99,6 @@ void NutRegisterTimer(void (*handler) (void *))
  */
 uint32_t NutArchClockGet(int idx)
 {
-    // JS TODO NutArchClockGet
     return 50000000;
 }
 #endif

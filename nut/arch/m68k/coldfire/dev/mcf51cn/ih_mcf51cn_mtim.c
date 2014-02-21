@@ -72,10 +72,6 @@ SIGNAL(IH_MTIM1)
 
 SIGNAL(IH_MTIM2)
 {
-    int a = 2;
-    MCF_MTIM_SC(a) &= ~MCF_MTIM_SC_TOF;
+    MCF_MTIM_SC(2) &= ~MCF_MTIM_SC_TOF;
     CallHandler(&sig_MTIM2);
 }
-
-
-

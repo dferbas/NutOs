@@ -335,7 +335,6 @@ static int FecBdInit(FECINFO *ni)
 	{
 #ifdef BD_IN_INTRAM
 		ni->rx_buf_unaligned = NutStackAlloc(FEC_RX_BUFFERS * FEC_RX_BUFSIZ + 16);
-		// JS TODO doresit kdyz neni externi ram
 #else
 		ni->rx_buf_unaligned = NutHeapAlloc(FEC_RX_BUFFERS * FEC_RX_BUFSIZ + 16);
 #endif

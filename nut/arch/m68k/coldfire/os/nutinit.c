@@ -142,7 +142,7 @@ THREAD( NutIdle, arg)
      * SR[IPL] = 0; (See NutThreadCreate(): ef->sr = 0x2000;)
      * IMRL[0] = 0;
      */
-#ifdef MCU_MCF5225 // JS TODO
+#ifdef MCU_MCF5225
     MCF_INTC_IMRL(0) &= ~MCF_INTC_IMRL_MASKALL;
 #endif
 

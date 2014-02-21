@@ -35,7 +35,7 @@
 #endif
 
 /* Family dependant reset codes */
-// JS TODO
+// not implemneted yet
 
 extern void Mcf51cn_Reset(void);
 extern int Mcf51cn_ResetCause(void);

@@ -6,7 +6,7 @@
 #include <sys/event.h>
 #include <sys/timer.h>
 
-#define NutEnterCriticalLevel(...)   NutEnterCritical()        // TODO JS .. upravit podle SolarMonitoru
+#define NutEnterCriticalLevel(...)   NutEnterCritical()        // TODO JS - upravit podle SolarMonitoru
 
 #undef NUTTRACER    // TODO .. not portet yet
 //#define UART_NO_SW_FLOWCONTROL

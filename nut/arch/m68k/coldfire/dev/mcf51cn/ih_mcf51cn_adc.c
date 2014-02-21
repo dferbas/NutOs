@@ -53,6 +53,11 @@ static int IrqCtl(int cmd, void *param)
 
 SIGNAL(IH_ADC)
 {
+    /*
+     * Interrupt flag (MCF_ADC_SC1_COCO bit) is cleared when converted value (MCF_ADC_R) is read.
+     * This must be ensured by assigned signal handler.
+     */
+
     CallHandler(&sig_ADC);
 }
 

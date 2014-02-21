@@ -34,11 +34,10 @@
 
 void Mcf51cn_Reset(void)
 {
-    // JS TODO
+    // JS TODO - not implemented
 }
 
 int Mcf51cn_ResetCause(void)
 {
-    //JS TODO
     return NUT_RSTTYP_UNKNOWN;
 }

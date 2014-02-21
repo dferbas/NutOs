@@ -36,7 +36,7 @@
 
 void InitClock(void)
 {
-    // JS TODO .. configurable from Nut/OS Configurator or Board specific function
+    // JS TODO - configurable from Nut/OS Configurator or Board specific function
     // This fixed configuration is used for SM2-MU board
 
     /* Turn on external oscillator in external crystal mode. */
