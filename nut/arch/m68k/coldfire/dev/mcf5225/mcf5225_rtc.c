@@ -30,6 +30,8 @@
  * For additional information see http://www.ethernut.de/
  */
 
+#include <arch/m68k.h>
+#include <dev/rtc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,11 +46,11 @@
  *
  * \return 0 on success or -1 in case of an error.
  */
-int McfRtcGetClock(NUTRTC *rtc, struct _tm *tm)
+int Mcf5225RtcGetClock(NUTRTC *rtc, struct _tm *tm)
 {
 	int rslt = -1;
 
-    if (pt) {
+    if (tm) {
     	MCF_RTC_RTCISR |= MCF_RTC_RTCISR_MIN;
 
 		time_t timer = MCF_RTC_SECONDS
@@ -84,11 +86,11 @@ static int Mcf5225RtcSetClock(NUTRTC *rtc, const struct _tm *tm)
 	int rslt = -1;
 
     if (tm) {
-        tm      tm_tmp;
-    	time_t  timer;
+        struct _tm  tm_tmp;
+    	time_t      timer;
 
     	memcpy(&tm_tmp, tm, sizeof(tm_tmp));    // copy const to non-const
-    	timer = _mkgmtime((tm *)tm_tmp);
+    	timer = _mkgmtime(&tm_tmp);
 
     	MCF_RTC_RTCCTL = 0;
 
