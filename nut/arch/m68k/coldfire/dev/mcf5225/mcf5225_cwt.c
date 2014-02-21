@@ -61,9 +61,6 @@ uint32_t Mcf5225WatchDogStart(uint32_t ms)
     /* Register interrupt handler */
     NutRegisterIrqHandler(&sig_CWD, IrqHandler, NULL);
 
-    /* Erase pending interrupt if present */
-    MCF_SCM_CWCR |= MCF_SCM_CWCR_CWTIF;
-
     /* Configure and enable watchdog */
     MCF_SCM_CWCR = MCF_SCM_CWCR_CWE | MCF_SCM_CWCR_CWT(cwt);
     nested = 1;

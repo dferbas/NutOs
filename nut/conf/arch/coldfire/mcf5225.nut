@@ -121,7 +121,7 @@ nutarch_m68k_coldfire_mcf5225 =
                    },
         sources = { 
                     "m68k/coldfire/dev/mcf5225/ih_mcf5225_pit.c",
-                    "m68k/coldfire/dev/mcf5225/ih_mcf5225_cwd.c",
+                    "m68k/coldfire/dev/mcf5225/ih_mcf5225_cwt.c",
                     "m68k/coldfire/dev/mcf5225/ih_mcf5225_i2c.c",
                     "m68k/coldfire/dev/mcf5225/ih_mcf5225_uart.c", 
                     "m68k/coldfire/dev/mcf5225/ih_mcf5225_gpt.c",
@@ -148,12 +148,13 @@ nutarch_m68k_coldfire_mcf5225 =
     },
     
     --
-    -- Core Watchdog
+    -- Core Watchdog Timer
     --
     {
-        name = "nutarch_m68k_coldfire_mcf5225_cwd",
-        brief = "Core Watchdog",
-        sources = { "m68k/coldfire/dev/mcf5225/mcf5225_cwd.c" }
+        name = "nutarch_m68k_coldfire_mcf5225_cwt",
+        brief = "Core Watchdog Timer (CWT)",
+        description = "Core watchdog timer for MCF5225 family.",
+        sources = { "m68k/coldfire/dev/mcf5225/mcf5225_cwt.c" }
     },
 
     --
