@@ -96,24 +96,9 @@ vector72:   .long   IH_RTC                  	// 0x1C8 RTC
 //------------------------------------------------------------------------------
 	.section .init0,"ax",%progbits
 
-//#if defined(NUT_WDT_ENABLE)
-    /* Default enable COP Watchdog Time-out with 1024ms period. For Restart
-    Watchdog, write 0x55 and 0xAA values to the System Reset Status Register */
-//	movel 0xFFFF8100,%d0
-//	moveal %d0,%a0
-//	moveb 0x55,%a0@
-//	moveb 0xAA,%a0@
-//#else
-    /* For Disable Cop Watchdog, move 0x10 value to the System Options Register 1
-	on address (0xFFFF8101). */
-//	movel 0xFFFF8101,%d0
-//	moveal %d0,%a0
-//	moveb 0x10,%a0@
-//#endif
-
 //------------------------------------------------------------------------------
 // Section 10 - CPU and Peripherals Initialization (family dependant code)
 //------------------------------------------------------------------------------
     .section .init10,"ax",%progbits
+    jsr InitSystem
     jsr InitClock
-

@@ -169,10 +169,10 @@ extern void Mcf5225WatchDogRestart(void);
 extern void Mcf5225WatchDogDisable(void);
 extern void Mcf5225WatchDogEnable(void);
 #elif defined(MCU_MCF51CN)
-extern uint32_t Mcf51CopStart(uint32_t ms);
-extern void Mcf51CopRestart(void);
-extern void Mcf51CopDisable(void);
-extern void Mcf51CopEnable(void);
+extern uint32_t Mcf51cnCopStart(uint32_t ms);
+extern void Mcf51cnCopRestart(void);
+extern void Mcf51cnCopDisable(void);
+extern void Mcf51cnCopEnable(void);
 #endif
 
 /*@}*/

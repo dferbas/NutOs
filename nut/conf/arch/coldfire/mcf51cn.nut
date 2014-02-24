@@ -25,16 +25,6 @@ nutarch_m68k_coldfire_mcf51cn =
         provides = {
                 "HW_ADC12_COLDFIRE",
                 "HW_SCI_COLDFIRE",
---              "HW_MTIM_COLDFIRE",
---              "HW_IIC_COLDFIRE",
---              "HW_GPIO_COLDFIRE",
---              "HW_COP_COLDFIRE",
---              "HW_FEC_COLDFIRE",
---              "HW_RTC_COLDFIRE",
---              "HW_SPI_COLDFIRE",
---              "HW_TMP_COLDFIRE",
---              "HW_KBI_COLDFIRE",
---              "HW_MFB_COLDFIRE",
         },
         options =
         {
@@ -46,35 +36,6 @@ nutarch_m68k_coldfire_mcf51cn =
                 default = 1,
                 file = "include/cfg/arch.h"
             },
---          {
---              macro = "IIC1",
---              type = "integer",
---              default = 1,
---              provides = { "HW_IIC1" },
---              file = "include/cfg/peripherals.h"
---          },
---          {
---              macro = "IIC2",
---              type = "integer",
---              default = 1,
---              provides = { "HW_IIC2" },
---              file = "include/cfg/peripherals.h"
---          },
---          {
---              macro = "MTIM1",
---              type = "integer",
---              default = 1,
---              provides = { "HW_MTIM1" },
---              file = "include/cfg/peripherals.h"
---          },
---          {
---              macro = "MTIM2",
---              type = "integer",
---              default = 1,
---              provides = { "HW_MTIM2" },
---              file = "include/cfg/peripherals.h"
---          },
---          
             {
                 macro = "SCI1",
                 type = "integer",
@@ -100,6 +61,49 @@ nutarch_m68k_coldfire_mcf51cn =
     },
     
     --
+    -- Runtime Initialization
+    --
+    {
+        name = "nutarch_m68k_coldfire_mcf51_init",
+        brief = "Initialization",
+        description = "System startup code for Coldfire V1 Core MCUs.",
+        sources = { 
+                    "m68k/coldfire/init/crt_$(LDNAME).S",
+                    "m68k/coldfire/init/crt_common.S",
+                    "m68k/coldfire/init/crt_common_c.c", 
+                    "m68k/coldfire/init/crt_mcf51cn.S",
+                    "m68k/coldfire/init/crt_mcf51cn_c.c",
+                  },
+        targets = { 
+                    "m68k/coldfire/init/crt_$(LDNAME).o",
+                    "m68k/coldfire/init/crt_common.o",
+                    "m68k/coldfire/init/crt_common_c.o", 
+                    "m68k/coldfire/init/crt_mcf51cn.o", 
+                    "m68k/coldfire/init/crt_mcf51cn_c.o",
+                  },
+        requires = { "TOOL_CC_M68K", "TOOL_GCC"},
+        options =
+        {
+            {
+                macro = "NUT_WDT_ENABLE",
+                brief = "Watchdog",
+                description = "If enabled, the watchdog timer will be started during system initialization.\n\n"..
+                              "Once the watchdog is configured, it is not possible to re-configure the watchdog.\n"..
+                              "If enabled, NutWatchDogRestart() functiom must be called periodically from application.",
+                flavor = "booldata",
+                file = "include/cfg/clock.h"
+            },
+            {
+                macro = "NUT_LVD_ENABLE",
+                brief = "Low Voltage Detection",
+                description = "If enabled, the Low Voltage Detection module resets MCU after low voltage is detected",
+                flavor = "booldata",
+                file = "include/cfg/clock.h"
+            }
+        }
+    },    
+
+    --
     -- GPIO Interface
     --
     {
@@ -119,12 +123,6 @@ nutarch_m68k_coldfire_mcf51cn =
         provides = { 
                     "DEV_IRQ_ADC",
                     "DEV_IRQ_SCI",
---                  "DEV_IRQ_MTIM",
---                  "DEV_IRQ_IIC",
---                  "DEV_IRQ_TPM",
---                  "DEV_IRQ_RTC",
---                  "DEV_IRQ_SPI",
---                  "DEV_IRQ_FEC",
                    },
         sources = { 
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_mtim.c",
@@ -183,6 +181,15 @@ nutarch_m68k_coldfire_mcf51cn =
         brief = "System Timer",
         provides = { "NUT_OSTIMER_DEV" },
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_ostimer.c" },
+    },
+
+    --
+    -- Watchdog Timer
+    --
+    {
+        name = "nutarch_m68k_coldfire_mcf51_cop",
+        brief = "Watchdog (COP)",
+        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_cop.c" },
     },
 
     --

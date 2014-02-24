@@ -32,31 +32,50 @@
 
 #include <arch/m68k.h>
 
-uint32_t Mcf51CopStart(uint32_t ms)
+uint32_t Mcf51cnCopStart(uint32_t ms)
 {
-	/* For start Watchdog, set System Options 1 Register (SOPT1), which
-	 * has three write-once bits and one write anytime bit. For the write-once
-	 * bits, only the first write after reset is honored. */
+    /*
+     * Not supported by CPU
+     *
+     * Watchdog enable/disable is possible using system option register (SOPT1),
+     * which is controlled by different module
+     *
+     * In addition, the register is once-write only, co it cannot be modified.
+     *
+     * In default configuration, watchdog is started and it may be disabled only.
+     * The default period is 1,024 ms.
+     *
+     */
 
-	return 0;
+    return 0;
 }
 
-void Mcf51CopRestart(void)
+void Mcf51cnCopRestart(void)
 {
     MCF_SRS = 0x55;
     MCF_SRS = 0xAA;
 }
 
-void Mcf51CopDisable(void)
+void Mcf51cnCopDisable(void)
 {
-	/* For disable Watchdog, set System Options 1 Register (SOPT1), which
-	 * has three write-once bits and one write anytime bit. For the write-once
-	 * bits, only the first write after reset is honored. */
+    /*
+     * Not supported by CPU
+     *
+     * Watchdog enable/disable is possible using system option register (SOPT1),
+     * which is controlled by different module
+     *
+     * In addition, the register is once-write only, co it cannot be modified.
+     */
 }
 
-void Mcf51CopEnable(void)
+void Mcf51cnCopEnable(void)
 {
-	/* For enable Watchdog, set System Options 1 Register (SOPT1), which
-	 * has three write-once bits and one write anytime bit. For the write-once
-	 * bits, only the first write after reset is honored. */
+    /*
+     * Not supported by CPU
+     *
+     * Watchdog enable/disable is possible using system option register (SOPT1),
+     * which is controlled by different module
+     *
+     * In addition, the register is once-write only, co it cannot be modified.
+     */
 }

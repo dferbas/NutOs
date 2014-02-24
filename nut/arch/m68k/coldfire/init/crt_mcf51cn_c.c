@@ -36,51 +36,26 @@
 #include <dev/watchdog.h>
 #include <stdio.h>
 
+void InitSystem(void)
+{
+    uint8_t reg;
+
+    /* Configure system options register 1 */
+    reg = 0x1c; // default
+#ifndef NUT_WDT_ENABLE
+    reg &= ~(MCF_SOPT1_COPT);
+#endif
+    MCF_SOPT1 = reg;
+
+    /* Configure System Power Management Status and Control 1 Register */
+    reg = 0x1c; // default
+#ifndef NUT_LVD_ENABLE
+    MCF_SPMSC1 &= ~(MCF_SPMSC1_LVDE_MASK);
+#endif
+    MCF_SPMSC1 = reg;
+}
+
 void InitClock(void)
 {
-	MCF_SPMSC1 = 0x1C;
-	MCF_SPMSC2 = 0x02;
-	MCF_SPMSC3 &= ~0x38;
-	  
-#if defined(NUT_WDT_ENABLE)
-    /* Default enable COP Watchdog Time-out with 1024ms period. For Restart
-    Watchdog, write 0x55 and 0xAA values to the System Reset Status Register */
-	NutWatchDogRestart();
-#else
-    /* For Disable Cop Watchdog, move 0x10 value to the System Options Register 1 */
-	MCF_SOPT1 = 0x10;
-#endif
-	  
-//#if defined(NUT_WDT_ENABLE)
-    /* Default enable COP Watchdog Time-out with 1024ms period. For Restart
-    Watchdog, write 0x55 and 0xAA values to the System Reset Status Register */
-//	movel 0xFFFF8100,%d0
-//	moveal %d0,%a0
-//	moveb 0x55,%a0@
-//	moveb 0xAA,%a0@
-//#else
-    /* For Disable Cop Watchdog, move 0x10 value to the System Options Register 1
-	on address (0xFFFF8101). */
-//	movel 0xFFFF8101,%d0
-//	moveal %d0,%a0
-//	moveb 0x10,%a0@
-//#endif
-
-	  /* Initialization of CPU registers */
-	  /*lint -save  -e950 Disable MISRA rule (1.1) checking. */
-//	  asm {
-//	    /* VBR: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,ADDRESS=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0 */
-//	    clr.l d0
-//	    movec d0,VBR
-//	    /* CPUCR: ARD=0,IRD=0,IAE=0,IME=0,BWD=0,??=0,FSD=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0 */
-//	    clr.l d0
-//	    movec d0,CPUCR
-//	  }
-	  /*lint -restore Enable MISRA rule (1.1) checking. */
-	  /* PTDPF1: D4=3 */
-	  MCF_PTDPF1 |= 0x03;
-	  /* PTDPF1: D5=3 */
-	  MCF_PTDPF1 |= 0x0C;
-
 	Mcf51cnMcgInitClock();
 }

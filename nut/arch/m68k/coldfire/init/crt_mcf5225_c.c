@@ -42,7 +42,7 @@ void InitClock(void)
     /* Turn on external oscillator in external crystal mode. */
     MCF_CLOCK_OCLR = MCF_CLOCK_OCLR_REFS | MCF_CLOCK_OCLR_OSCEN;
 
-    /* Select closk source. */
+    /* Select clock source. */
     MCF_CLOCK_CCLR = 0x00;
 
     /* Disable on-chip oscilator. */
