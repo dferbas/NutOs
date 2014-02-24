@@ -99,7 +99,7 @@ static int Mcf51cnRtcInit(NUTRTC *rtc)
         return -1;
     }
 
-	if (NutRegisterIrqHandler(&sig_RTC, Mcf51cnRtcInterrupt, NULL)) {
+	if (NutRegisterIrqHandler(&sig_RTC, Mcf51cnRtcInterrupt, rtc)) {
 	    NutHeapFree(rtc->dcb);
 		return -1;
 	}
