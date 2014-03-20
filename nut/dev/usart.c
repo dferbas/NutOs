@@ -808,15 +808,11 @@ int UsartIOCtl(NUTDEVICE * dev, int req, void *conf)
         break;
 
     case UART_SETFLOWCONTROL:
-        lv = dcb->dcb_modeflags;
-        rc = (dcb->dcb_set_flow_control) (lv);
-        if (rc == 0) {
-            dcb->dcb_modeflags = lv;
-        }
-        break;
-    case UART_GETFLOWCONTROL:
-        *lvp = (*dcb->dcb_get_flow_control) ();
-        break;
+		rc = (*dcb->dcb_set_flow_control) (lv);
+		break;
+	case UART_GETFLOWCONTROL:
+		*lvp = (*dcb->dcb_get_flow_control) ();
+		break;
 
     case UART_SETBLOCKREAD:
         lv = dcb->dcb_modeflags;
