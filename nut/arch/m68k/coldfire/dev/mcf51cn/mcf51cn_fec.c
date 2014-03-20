@@ -38,7 +38,7 @@
 #define TX_BUFFER_ALIGNMENT   4
 #define BD_ALIGNMENT          16 // may be 4.
 
-#define MAX_FL						ETHER_MAX_LEN	// maximum frame length
+#define MAX_FL						(ETHER_MAX_LEN-4)	// maximum frame length - CRC
 #define PHY_RESET_TIMEOUT			200			// e.g. Power Up Stabilization of DP83848C takes 176ms
 #define PHY_AUTONEGO_TIMEOUT		6000			// Parallel detection and Auto-Negotiation take approximately 2-3 seconds to complete. In addition, Auto-Negotiation with next page should take approximately 2-3 seconds to complete, depending on the number of next pages sent. Refer to Clause 28 of the IEEE 802.3u standard for a full description of the individual timers related to Auto-Negotiation.
 #define FEC_LINK_TIMEOUT			1000			// e.g. using DP83848C takes 200ms after autonego "fails"

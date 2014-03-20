@@ -52,6 +52,8 @@ static uint32_t Mcf5SciGetStatus(void);
 static int Mcf5SciSetStatus(uint32_t flags);
 static void Mcf5SciTxStart(void);
 static void Mcf5SciRxStart(void);
+static int Mcf5SciSetFlowControl(uint32_t flags);
+static uint32_t Mcf5SciGetFlowControl(void);
 static int Mcf5SciInit(void);
 static int Mcf5SciDeinit(void);
 
@@ -70,8 +72,8 @@ static USARTDCB dcb_sci1 = {
     Mcf5SciDeinit,            /* dcb_deinit */
     Mcf5SciTxStart,           /* dcb_tx_start */
     Mcf5SciRxStart,           /* dcb_rx_start */
-    0,    /* dcb_set_flow_control */
-    0,    /* dcb_get_flow_control */
+    Mcf5SciSetFlowControl,    /* dcb_set_flow_control */
+    Mcf5SciGetFlowControl,    /* dcb_get_flow_control */
     Mcf5SciSetSpeed,          /* dcb_set_speed */
     Mcf5SciGetSpeed,          /* dcb_get_speed */
     Mcf5SciSetDataBits,       /* dcb_set_data_bits */

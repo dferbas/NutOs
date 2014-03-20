@@ -82,7 +82,7 @@ typedef enum adc_channel_type
 
 /* Function prototypes */
 
-void Mcf52cnAdcInit(void);
+void Mcf51cnAdcInit(void);
 
 
 // AdcStartConversion
@@ -98,7 +98,7 @@ void Mcf52cnAdcInit(void);
 // post: The ADC has started conversion. Completion of
 //       any conversions is not guaranteed.
 
-void Mcf52cnAdcStartConversion(void);
+void Mcf51cnAdcStartConversion(void);
 
 
 // AdcSetPrescale
@@ -112,7 +112,7 @@ void Mcf52cnAdcStartConversion(void);
 //       choices given above
 // post: ADC prescalar set to desired choice
 
-void Mcf52cnAdcSetPrescale(uint32_t prescale);
+void Mcf51cnAdcSetPrescale(uint32_t prescale);
 
 
 // AdcDisableChannel
@@ -123,8 +123,8 @@ void Mcf52cnAdcSetPrescale(uint32_t prescale);
 // pre: none
 // post: Channel is selected / deselected. Next conversion will respect these settings
 
-void Mcf52cnAdcDisableChannel(TADCChannel channel);
-void Mcf52cnAdcEnableChannel(TADCChannel channel);
+void Mcf51cnAdcDisableChannel(TADCChannel channel);
+void Mcf51cnAdcEnableChannel(TADCChannel channel);
 
 
 // AdcSetMode
@@ -142,7 +142,7 @@ void Mcf52cnAdcEnableChannel(TADCChannel channel);
 // pre: none
 // post: Set adc conversion to the selected value.
 
-void Mcf52cnAdcSetMode(TADCMode mode);
+void Mcf51cnAdcSetMode(TADCMode mode);
 
 // AdcBufRead
 //
@@ -151,6 +151,6 @@ void Mcf52cnAdcSetMode(TADCMode mode);
 // pre: Sample completed
 // post: Value will be removed from buffer
 
-int Mcf52cnAdcBufRead(uint16_t channel, uint16_t * read);
+int Mcf51cnAdcBufRead(uint16_t channel, uint16_t * read);
 
 #endif  /* ADC_MCF51CN_H_ */

@@ -37,6 +37,25 @@
 #include <sys/event.h>
 #include <sys/timer.h>
 
+/* \brief ASCII code for software flow control, starts transmitter. */
+#define ASCII_XON   0x11
+/* \brief ASCII code for software flow control, stops transmitter. */
+#define ASCII_XOFF  0x13
+
+/* \brief XON transmit pending flag. */
+#define XON_PENDING     0x10
+/* \brief XOFF transmit pending flag. */
+#define XOFF_PENDING    0x20
+/* \brief XOFF sent flag. */
+#define XOFF_SENT       0x40
+/* \brief XOFF received flag. */
+#define XOFF_RCVD       0x80
+
+/*!
+ * \brief Enables software flow control if not equal zero.
+ */
+static ureg_t flow_control;
+
 /*!
  * \brief Receiver error flags.
  */
@@ -54,6 +73,33 @@ static void Mcf5SciTxReady(void *arg)
     register RINGBUF *rbf = &((USARTDCB *)arg)->dcb_tx_rbf;;
     register uint8_t *cp;
     uint_fast8_t usr;
+
+#ifndef UART_NO_SW_FLOWCONTROL
+
+    /*
+     * Process pending software flow controls first.
+     */
+    if (flow_control & (XON_PENDING | XOFF_PENDING)) {
+        if (flow_control & XOFF_PENDING) {
+        	MCF_SCI_D(BASE) = ASCII_XOFF;
+            flow_control |= XOFF_SENT;
+        } else {
+        	MCF_SCI_D(BASE) = ASCII_XON;
+            flow_control &= ~XOFF_SENT;
+        }
+        flow_control &= ~(XON_PENDING | XOFF_PENDING);
+        return;
+    }
+
+    if (flow_control & XOFF_RCVD) {
+        /*
+         * If XOFF has been received, we disable the transmit interrupts
+         * and return without sending anything.
+         */
+    	MCF_SCI_C2(BASE) &= ~(MCF_SCI_C2_TIE);
+        return;
+    }
+#endif /* UART_NO_SW_FLOWCONTROL */
 
     /*
      * Prepare next character for transmitting
@@ -140,6 +186,28 @@ static void Mcf5SciRxComplete(void *arg) {
        /* Receive char from Rx FIFO */
         ch = MCF_SCI_D(BASE);
 
+#ifndef UART_NO_SW_FLOWCONTROL
+        /*
+         * Handle software handshake. We have to do this before checking the
+         * buffer, because flow control must work in write-only mode, where
+         * there is no receive buffer.
+         */
+        if (flow_control) {
+            /* XOFF character disables transmit interrupts. */
+            if (ch == ASCII_XOFF) {
+            	NutIrqDisable(&sig_sci_tx);
+                flow_control |= XOFF_RCVD;
+                return;
+            }
+            /* XON enables transmit interrupts. */
+            else if (ch == ASCII_XON) {
+            	NutIrqEnable(&sig_sci_tx);
+                flow_control &= ~XOFF_RCVD;
+                return;
+            }
+        }
+#endif
+
         /*
          * Check buffer overflow.
          */
@@ -155,6 +223,27 @@ static void Mcf5SciRxComplete(void *arg) {
         if (cnt++ == 0){
             postEvent = 1;
         }
+
+#ifndef UART_NO_SW_FLOWCONTROL
+
+        /*
+         * Check the high watermark for software handshake. If the number of
+         * buffered bytes is above this mark, then send XOFF.
+         */
+        else if (flow_control) {
+            if(cnt >= rbf->rbf_hwm) {
+                if((flow_control & XOFF_SENT) == 0) {
+                    if (MCF_SCI_C2(BASE) & MCF_SCI_C2_TIE) {
+                    	MCF_SCI_D(BASE) = ASCII_XOFF;
+                        flow_control |= XOFF_SENT;
+                        flow_control &= ~XOFF_PENDING;
+                    } else {
+                        flow_control |= XOFF_PENDING;
+                    }
+                }
+            }
+        }
+#endif
 
         /*
          * Store the character and increment and the ring buffer pointer.
@@ -190,9 +279,6 @@ static void Mcf5SciEnable(void)
 	 * Enable Sci receive.
 	 */
     MCF_SCI_C2(BASE) = MCF_SCI_C2_RE | MCF_SCI_C2_TE;
-
-    NutIrqEnable(&sig_sci_rx);
-    NutIrqEnable(&sig_sci_tx);
 }
 
 /*!
@@ -339,7 +425,22 @@ static int Mcf5SciSetStopBits(uint8_t bits)
  */
 static uint32_t Mcf5SciGetStatus(void)
 {
-	return -1;
+	uint32_t rc = 0;
+
+	/*
+	 * Determine software handshake status. The flow control status may
+	 * change during interrupt, but this doesn't really hurt us.
+	 */
+	if (flow_control) {
+		if (flow_control & XOFF_SENT) {
+			rc |= UART_RXDISABLED;
+		}
+		if (flow_control & XOFF_RCVD) {
+			rc |= UART_TXDISABLED;
+		}
+	}
+
+	return rc;
 }
 
 /*!
@@ -351,7 +452,104 @@ static uint32_t Mcf5SciGetStatus(void)
  */
 static int Mcf5SciSetStatus(uint32_t flags)
 {
-   return -1;
+    /*
+     * Process software handshake control.
+     */
+    if (flow_control) {
+
+        /* Access to the flow control status must be atomic. */
+        NutEnterCritical();
+
+        /*
+         * Enabling or disabling the receiver means to behave like
+         * having sent a XON or XOFF character resp.
+         */
+        if (flags & UART_RXENABLED) {
+            flow_control &= ~XOFF_SENT;
+        } else if (flags & UART_RXDISABLED) {
+            flow_control |= XOFF_SENT;
+        }
+
+        /*
+         * Enabling or disabling the transmitter means to behave like
+         * having received a XON or XOFF character resp.
+         */
+        if (flags & UART_TXENABLED) {
+            flow_control &= ~XOFF_RCVD;
+        } else if (flags & UART_TXDISABLED) {
+            flow_control |= XOFF_RCVD;
+        }
+        NutExitCritical();
+    }
+
+    /*
+     * Verify the result.
+     */
+    if (Mcf5SciGetStatus() != flags) {
+        return -1;
+    }
+    return 0;
+}
+
+/*!
+ * \brief Query flow control mode.
+ *
+ * This routine is called by ioctl function of the upper level USART
+ * driver through the USARTDCB jump table.
+ *
+ * \return See UsartIOCtl().
+ */
+static uint32_t Mcf5SciGetFlowControl(void)
+{
+    uint32_t rc = 0;
+
+    if (flow_control) {
+        rc |= USART_MF_XONXOFF;
+    } else {
+        rc &= ~USART_MF_XONXOFF;
+    }
+
+    return rc;
+}
+
+/*!
+ * \brief Set flow control mode.
+ *
+ * This function is called by ioctl function of the upper level USART
+ * driver through the USARTDCB jump table.
+ * Nove pridan parametr USART_MF_HALFDUPLEX_YZ, ktery se vklada spolecne
+ * s parametrem USART_MF_HALFDUPLEX. Pokud USART_MF_HALFDUPLEX_YZ je
+ * zadan komonikuje se pres porty XY, pokud neni tak pres AB.
+ *
+ * \param flags See UsartIOCtl().
+ *
+ * \return 0 on success, -1 otherwise.
+ */
+static int Mcf5SciSetFlowControl(uint32_t flags)
+{
+    /*
+     * Set software handshake mode.
+     */
+    if (flags & USART_MF_XONXOFF) {
+        if(flow_control == 0) {
+            NutEnterCritical();
+            flow_control = 1 | XOFF_SENT;  /* force XON to be sent on next read */
+            NutExitCritical();
+        }
+    } else {
+
+        NutEnterCritical();
+        flow_control = 0;
+        NutExitCritical();
+    }
+
+    /*
+     * Verify the result.
+     */
+    if (Mcf5SciGetFlowControl() != flags) {
+        return -1;
+    }
+    return 0;
 }
 
 /*!
@@ -364,7 +562,7 @@ static int Mcf5SciSetStatus(uint32_t flags)
 static void Mcf5SciTxStart(void)
 {
     /* Enable Transmit to activate interrupt TxReady */
-	MCF_SCI_C2(BASE) |= (MCF_SCI_C2_TIE); //MCF_SCI_C2_TCIE |
+	NutIrqEnable(&sig_sci_tx);
 }
 
 /*!
@@ -380,6 +578,22 @@ static void Mcf5SciRxStart(void)
     /*
      * Enable receive interrupt. It could be disabled by flow control.
      */
+    NutIrqEnable(&sig_sci_rx);
+
+	/*
+	 * Do any required software flow control.
+	 */
+	if (flow_control && (flow_control & XOFF_SENT) != 0) {
+		NutEnterCritical();
+		if (MCF_SCI_C2(BASE) & MCF_SCI_C2_TIE) {
+			MCF_SCI_D(BASE) = ASCII_XON;
+			flow_control &= ~XON_PENDING;
+		} else {
+			flow_control |= XON_PENDING;
+		}
+		flow_control &= ~(XOFF_SENT | XOFF_PENDING);
+		NutExitCritical();
+	}
 }
 
 /*
@@ -425,7 +639,7 @@ static int Mcf5SciInit(void)
         return -1;
 
     /*
-     * Start receiving immediatelly
+     * Start receiving immediately
      * NOTE: Transmitting is started too, but it is stopped after while in Mcf5SciTxReady()
      */
     Mcf5SciEnable();

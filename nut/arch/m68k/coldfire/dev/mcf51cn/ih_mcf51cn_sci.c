@@ -98,32 +98,32 @@ IRQ_HANDLER sig_SCI3_TX = {
 
 static int IrqCtl1_Rx(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_SCI1_RX, cmd, param, &MCF_SCI_C2(1), MCF_SCI_C2_TIE, 1);
+    return IrqCtlCommon(&sig_SCI1_RX, cmd, param, &MCF_SCI_C2(1), MCF_SCI_C2_RIE, 1);
 }
 
 static int IrqCtl1_Tx(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_SCI1_TX, cmd, param, &MCF_SCI_C2(1), MCF_SCI_C2_RIE, 1);
+    return IrqCtlCommon(&sig_SCI1_TX, cmd, param, &MCF_SCI_C2(1), MCF_SCI_C2_TIE, 1);
 }
 
 static int IrqCtl2_Rx(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_SCI2_RX, cmd, param, &MCF_SCI_C2(2), MCF_SCI_C2_TIE, 1);
+    return IrqCtlCommon(&sig_SCI2_RX, cmd, param, &MCF_SCI_C2(2), MCF_SCI_C2_RIE, 1);
 }
 
 static int IrqCtl2_Tx(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_SCI2_TX, cmd, param, &MCF_SCI_C2(2), MCF_SCI_C2_RIE, 1);
+    return IrqCtlCommon(&sig_SCI2_TX, cmd, param, &MCF_SCI_C2(2), MCF_SCI_C2_TIE, 1);
 }
 
 static int IrqCtl3_Rx(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_SCI3_RX, cmd, param, &MCF_SCI_C2(3), MCF_SCI_C2_TIE, 1);
+    return IrqCtlCommon(&sig_SCI3_RX, cmd, param, &MCF_SCI_C2(3), MCF_SCI_C2_RIE, 1);
 }
 
 static int IrqCtl3_Tx(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_SCI2_TX, cmd, param, &MCF_SCI_C2(3), MCF_SCI_C2_RIE, 1);
+    return IrqCtlCommon(&sig_SCI2_TX, cmd, param, &MCF_SCI_C2(3), MCF_SCI_C2_TIE, 1);
 }
 
 
