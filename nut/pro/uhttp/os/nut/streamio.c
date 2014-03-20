@@ -64,6 +64,7 @@ int StreamInit(void)
     return 0;
 }
 
+#define MAX_PACKET_LEN ((3 * 256) - 40 - 14) // fec buffer 256 - tcp/ip headers - eth header
 int StreamClientAccept(HTTP_CLIENT_HANDLER handler, const char *params)
 {
     int rc = -1;
@@ -78,8 +79,8 @@ int StreamClientAccept(HTTP_CLIENT_HANDLER handler, const char *params)
     for (;;) {
 		sock = NutTcpCreateSocket();
 		if (sock) {
-            static uint16_t mss = 1460; // max packet length 1460
-            static uint16_t tcpbufsiz = 1536; // 256*6
+            static uint16_t mss = MAX_PACKET_LEN;
+            static uint16_t tcpbufsiz = 3 * MAX_PACKET_LEN; // mss * 3, idealne 6*, nedostatek RAM
 
             NutTcpSetSockOpt(sock, TCP_MAXSEG, &mss, sizeof(mss));
             NutTcpSetSockOpt(sock, SO_SNDBUF, &mss, sizeof(mss));
