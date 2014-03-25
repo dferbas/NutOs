@@ -9,11 +9,15 @@
 #define DFSST25VF020_H_
 
 #include <stdint.h>
+#include <arch/m68k/coldfire/mcf51cn/spi_mcf51cn.h>
 
 #define SPI_FLASH_PAGE_SIZE		0x1000 // sector erase 4k
 #define SPI_FLASH_PAGE_COUNT	64
 
-void flash_init(void);
+/*
+ * params sc - slave select value from spi_mcf51cn.h
+ */
+void flash_init(int sc);
 
 void flash_chip_erase(void);
 

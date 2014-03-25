@@ -5,11 +5,17 @@
  *      Author: dchvalkovsky
  */
 #include <dev/board.h>
+#include <arch/m68k/coldfire/mcf51cn/spi_mcf51cn.h>
 
 /*
  * Fram size (4096 / 8) = 512B
  */
 #define FRAM_SIZE 	0x200 //512B
+
+/*
+ * Set slave select PTE2
+ */
+void fm25l04b_init(void);
 
 /*
  * Table Status register

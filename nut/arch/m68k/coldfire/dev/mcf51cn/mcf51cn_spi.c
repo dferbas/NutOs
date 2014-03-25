@@ -33,7 +33,6 @@
 #include <arch/m68k.h>
 #include <arch/m68k/coldfire/mcf51cn/spi_mcf51cn.h>
 #include <cfg/spi.h>
-#include <dev/gpio.h>
 #include <dev/irqreg.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -58,10 +57,10 @@ static int Mcf51cnSpiChipSelect(uint_fast8_t cs, uint_fast8_t level)
     int rc = 0;
 
     switch (cs) {
-    case NODE_CS_FRAM:
+    case NODE_CS_PTE2:
     	GpioPinSet(PORTE, 2, level);
     	break;
-    case NODE_CS_FLASH:
+    case NODE_CS_PTB2:
         GpioPinSet(PORTB, 2, level);
         break;
     default:
@@ -221,12 +220,6 @@ int Mcf51cnSpiTransfer(const void *txbuf, void *rxbuf, int xlen)
  */
 void Mcf51cnSpiInit(void)
 {
-
-    Mcf51cnSpiChipSelect(NODE_CS_FRAM, CHIP_SELECT_HI);	// set chip select to output high (disabled)
-    GpioPinConfigSet(PORTE, 2, GPIO_CFG_OUTPUT/* | GPIO_CFG_DRIVE_STRENGTH*/); // init PTE2 as output
-
-    Mcf51cnSpiChipSelect(NODE_CS_FLASH, CHIP_SELECT_HI);	// set chip select to output high (disabled)
-    GpioPinConfigSet(PORTB, 2, GPIO_CFG_OUTPUT/* | GPIO_CFG_DRIVE_STRENGTH*/); // init PTB2 as output
 
 #if	SPI_CHANNEL == 2
 	MCF_SCGC2 |= MCF_SCGC2_SPI2;

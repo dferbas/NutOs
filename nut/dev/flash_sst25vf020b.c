@@ -10,7 +10,6 @@
  *  Created on: Nov 5, 2013
  *	  Author: dchvalkovsky
  */
-#include <arch/m68k/coldfire/mcf51cn/spi_mcf51cn.h>
 #include <dev/board.h>
 #include <dev/flash_sst25vf020b.h>
 #include <stdio.h>
@@ -43,16 +42,32 @@ static void flash_CommandBegin(uint8_t command, uint32_t address);
 static void flash_CommandEnd(void);
 static void flash_command(uint8_t data);
 
+static int flash_sc;
+
 static void flash_cs_lo(void){
-	Mcf51cnSpiSelect(NODE_CS_FLASH);
+	Mcf51cnSpiSelect(flash_sc);
 }
 
 static void flash_cs_hi(void){
-	Mcf51cnSpiDeselect(NODE_CS_FLASH);
+	Mcf51cnSpiDeselect(flash_sc);
 }
 
-void flash_init(void)
+/*
+ * params sc - slave select value from spi_mcf51cn.h
+ */
+void flash_init(int sc)
 {
+	flash_sc = sc;
+	int port;
+
+	if (flash_sc == NODE_CS_PTE2)
+		port = PORTE; // Powernet
+	else
+		port = PORTB; // SM2-RM
+
+	GpioPinSetHigh(port, 2);
+	GpioPinConfigSet(port, 2, GPIO_CFG_OUTPUT); // init PTB2 as output
+
 	/* Write-Enable */
 	flash_writeStatus(0x82); // 0x82
 	NutEventPost(&handle_flash_trans);

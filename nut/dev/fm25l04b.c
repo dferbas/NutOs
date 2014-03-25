@@ -9,9 +9,9 @@
  *      Author: dchvalkovsky
  */
 #include <arch/m68k.h>
-#include <arch/m68k/coldfire/mcf51cn/spi_mcf51cn.h>
 #include <dev/board.h>
 #include <stdio.h>
+#include <dev/flash_sst25vf020b.h>
 
 #define SPI_BUS_WAITING_TIMEOUT 1000
 
@@ -24,11 +24,19 @@
 #define WREN 	0x6	//Set Write Enable Latch 0000 0110b
 
 static void fm25l04b_cs_lo(void){
-	Mcf51cnSpiSelect(NODE_CS_FRAM);
+	Mcf51cnSpiSelect(NODE_CS_PTE2);
 }
 
 static void fm25l04b_cs_hi(void){
-	Mcf51cnSpiDeselect(NODE_CS_FRAM);
+	Mcf51cnSpiDeselect(NODE_CS_PTE2);
+}
+
+/*
+ * Init slave select
+ */
+void fm25l04b_init(void) {
+	GpioPinSetHigh(PORTE, 2); // SM2-RM
+	GpioPinConfigSet(PORTE, 2, GPIO_CFG_OUTPUT);
 }
 
 /*

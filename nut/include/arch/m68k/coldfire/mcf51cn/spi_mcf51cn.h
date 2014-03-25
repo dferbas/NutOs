@@ -34,9 +34,10 @@
 #define SPI_MCF51CN_H_
 
 #include <stdint.h>
+#include <dev/gpio.h>
 
-#define NODE_CS_FRAM    0   // drive fram chip select
-#define NODE_CS_FLASH   1   // drive flash chip select
+#define NODE_CS_PTE2    	0   // drive SM2-RM fram chip select and POWERNET flash chip select
+#define NODE_CS_PTB2   		1   // drive SM2-RM flash chip select
 
 void Mcf51cnSpiInit(void);
 int Mcf51cnSpiTransfer(const void *txbuf, void *rxbuf, int xlen);
