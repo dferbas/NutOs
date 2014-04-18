@@ -44,7 +44,7 @@ void 	fm25l04b_writeStatus(uint8_t status);
  * param/ data - write buffer length of param/ size
  * param/ size - write data count
  */
-void fm25l04b_write_block(uint16_t address, uint8_t *data, uint32_t size);
+void fm25l04b_write_block(uint16_t address, char *data, uint32_t size);
 
 /*
  * Read fram block.
@@ -52,4 +52,4 @@ void fm25l04b_write_block(uint16_t address, uint8_t *data, uint32_t size);
  * param/ data - read buffer length of param/ size
  * param/ size - read data count
  */
-void fm25l04b_read_block(uint16_t address, uint8_t *data, uint32_t size);
+void fm25l04b_read_block(uint16_t address, char *data, uint32_t size);

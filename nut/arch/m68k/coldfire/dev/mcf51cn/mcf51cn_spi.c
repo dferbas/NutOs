@@ -239,8 +239,9 @@ void Mcf51cnSpiInit(void)
 	/* Init registers */
 	(void) MCF_SPI_S(SPI_CHANNEL); 		/* Read the status register */
 	(void) MCF_SPI_D(SPI_CHANNEL); 		/* Read the data register */
-	/* Set the baud rate register, speed 1,25MHz */
-	MCF_SPI_BR(SPI_CHANNEL) = 0x41; 	// TODO: pokud zadam nejvyzsi rychlost 12,5Mhz tak to zamrzne po dokonceni dlouheho zapisu nebo cteni
+	/* Set the baud rate register 0x41 for speed 1,25MHz */
+	/* Set the baud rate register 0x72 for speed 375kHz */
+	MCF_SPI_BR(SPI_CHANNEL) = 0x72; 	// TODO: pokud zadam nejvyzsi rychlost 12,5Mhz tak to zamrzne po dokonceni dlouheho zapisu nebo cteni
 	MCF_SPI_C2(SPI_CHANNEL) = 0x00; 	/* Configure the SPI port - control register 2 */
 	MCF_SPI_C1(SPI_CHANNEL) = MCF_SPI_C1_MSTR; /* Master */
 

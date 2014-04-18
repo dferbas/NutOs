@@ -10,6 +10,7 @@
  */
 #include <arch/m68k.h>
 #include <dev/board.h>
+#include <sys/timer.h>
 #include <stdio.h>
 #include <dev/flash_sst25vf020b.h>
 
@@ -97,7 +98,7 @@ static inline void fm25l04b_CommandEnd(void) {
  * param/ data - write buffer length of param/ size
  * param/ size - write data count
  */
-void fm25l04b_write_block(uint16_t address, uint8_t *data, uint32_t size) {
+void fm25l04b_write_block(uint16_t address, char *data, uint32_t size) {
 	fm25l04b_wren();
 	fm25l04b_CommandBegin(WRITE, address);
 	Mcf51cnSpiTransfer(data, NULL, size);
@@ -110,7 +111,7 @@ void fm25l04b_write_block(uint16_t address, uint8_t *data, uint32_t size) {
  * param/ data - read buffer length of param/ size
  * param/ size - read data count
  */
-void fm25l04b_read_block(uint16_t address, uint8_t *data, uint32_t size) {
+void fm25l04b_read_block(uint16_t address, char *data, uint32_t size) {
 	fm25l04b_CommandBegin(READ, address);
 	Mcf51cnSpiTransfer(NULL, data, size);
 	fm25l04b_CommandEnd();
