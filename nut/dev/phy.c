@@ -50,8 +50,9 @@
 
 /* WARNING: Variadic macros are C99 and may fail with C89 compilers. */
 #ifdef NUTDEBUG
-#include <stdio.h>
-#define PHPRINTF(args,...) printf(args,##__VA_ARGS__); fflush(stdout);
+//#include <stdio.h>
+//#define PHPRINTF(args,...) printf(args,##__VA_ARGS__); fflush(stdout);
+#define PHPRINTF(args,...)
 #else
 #define PHPRINTF(args,...)
 #endif

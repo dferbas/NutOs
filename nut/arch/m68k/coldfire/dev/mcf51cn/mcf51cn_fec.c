@@ -396,7 +396,7 @@ static int FecBdInit(FECINFO *ni)
 static int FecReset(IFNET *nif)
 {
 	int rc = 0;
-	int link_wait;
+	int wait;
 	uint32_t regvalue;
 
 	/* ECR[ETHER_EN] is cleared (initialization time) */
@@ -454,6 +454,32 @@ static int FecReset(IFNET *nif)
 	/* Register PHY */
 	NutRegisterPhy( 1, PhyWrite, PhyRead);
 
+	/* Set Reset Phy pin to output */
+	GpioPinSetHigh(PORTC, 3); 
+	GpioPinConfigSet(PORTC, 3, GPIO_CFG_ALT1);
+	MCF_GPIO_DD(PORTC) |= 0x8;
+
+	/* Wait for running phy after reset. */
+	NutSleep(200);
+
+	/* If Phy does not respond, restart Phy. It happends when connect to power source and voltage oscillate. */
+	if (PhyRead(PHY_REG_BMSR) == 0xFFFF){
+		DBG("PHY RESTART\n");
+		GpioPinSetLow(PORTC, 3);
+		NutSleep(10); // reset time 10ms
+		GpioPinSetHigh(PORTC, 3);
+		for (wait = 25;; wait--) { // wait until phy start
+			if (PhyRead(PHY_REG_BMSR) != 0xFFFF) {
+				break;
+			}
+			if (wait == 0) {
+				DBG("PHY NOT STARTED!\n");
+				return -1;
+			}
+			NutSleep(200);
+		}
+	}
+
 	/* Activate reset, wait for completion. */
 	regvalue = 1;
 	rc = NutPhyCtl(PHY_CTL_RESET, &regvalue);
@@ -495,12 +521,12 @@ static int FecReset(IFNET *nif)
 		rc = NutPhyCtl(PHY_CTL_AUTONEG_RE, &phy_addr); //PhyProbe();
 
 		/* Wait for auto negotiation completed and link established. */
-		for (link_wait = 25;; link_wait--) {
+		for (wait = 25;; wait--) {
 			NutPhyCtl(PHY_GET_STATUS, &regvalue);
 			if (regvalue & PHY_STATUS_AUTONEG_OK) {
 				break;
 			}
-			if (link_wait == 0) {
+			if (wait == 0) {
 				DBG("NO AUTONEGO!\n");
 				return -1;
 			}
@@ -542,12 +568,12 @@ static int FecReset(IFNET *nif)
 	}
 
     /* Wait for auto negotiation completed and link established. */
-    for (link_wait = 25;; link_wait--) {
+    for (wait = 25;; wait--) {
         NutPhyCtl(PHY_GET_STATUS, &regvalue);
         if(regvalue & PHY_STATUS_HAS_LINK) {
             break;
         }
-        if (link_wait == 0) {
+        if (wait == 0) {
         	DBG("NO LINK!\n");
             return -1;
         }
@@ -1151,6 +1177,15 @@ static int FecInit(NUTDEVICE * dev)
 int Mcf51cnFecIsInitialized(NUTDEVICE * dev){
 	FECINFO *ni = (FECINFO *) dev->dev_dcb;
 	return ni->initialized;
+}
+
+int Mcf51cnFecLinkedUp(void){
+	uint16_t reg_val;
+	reg_val = PhyRead(PHY_REG_BMSR);
+	if (reg_val == 0xFFFF)
+		return 0; /* Phy doesnt respond, no link */
+	else
+		return reg_val & PHY_REG_BMSR_LINK_STATUS;
 }
 
 /* Set MultiWatchDog set reset function */
