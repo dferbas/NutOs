@@ -37,6 +37,7 @@
 #include <sys/types.h>
 
 int Mcf51cnFecIsInitialized(NUTDEVICE * dev);
+int Mcf51cnFecLinkedUp(void);
 void Mcf51cnFec_EthMWDTSetVariableFN(TMWDTSetVariableFN VariableFN);
 
 #endif  /* FEC_MCF51CN_H_ */
