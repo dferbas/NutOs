@@ -509,11 +509,17 @@ static uint32_t Mcf5UsartGetSpeed(void)
  */
 static int Mcf5UsartSetSpeed(uint32_t rate)
 {
-    uint16_t sv;
+    uint32_t divider, divider_reminder, divisor;
 
-    sv = (uint16_t) (NutGetCpuClock() / (rate * 32));
-    reg_uart.ubg1 = (uint8_t) ((sv & 0xFF00) >> 8);
-    reg_uart.ubg2 = (uint8_t) (sv & 0x00FF);
+    divisor = rate * 32;
+    divider =  NutGetCpuClock() / divisor;
+    divider_reminder = NutGetCpuClock() % divisor;
+
+    if ((divider_reminder * 2) > divisor) // pokud je zbytek po delelni vetsi nez polovina delitele (vynasobeno dvema), zaokrohli divider nahoru (pricti jedna)
+        divider ++;
+
+    reg_uart.ubg1 = (uint8_t) ((divider & 0xFF00) >> 8);
+    reg_uart.ubg2 = (uint8_t) (divider & 0x00FF);
 
     Mcf5UsartDisable();
     MCF_UART_UBG1(BASE) = reg_uart.ubg1;

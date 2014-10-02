@@ -62,8 +62,8 @@
 #define DM9000B     0x0181B8B0  /* nn. same as DM9161B */
 
 /* National Semiconductor PHY tranceiver */
-#define DP83838     0x20005C90  /* EVK1100, EVK1105 */
-#define DP83848     0x20005CA0  /* STM3210C-EVAL */
+#define DP83848     0x20005C90  /* EVK1100, EVK1105 */
+//#define DP83848     0x20005CA0  /* STM3210C-EVAL */
 
 /* Micrel PHY tranceiver */
 #define KS8721      0x00221610  /* Olimex SAM7-EX256 */

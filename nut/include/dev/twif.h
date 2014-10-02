@@ -17,11 +17,11 @@
  *    contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * THIS SOFTWARE IS PROVIDED BY EGNITE SOFTWARE GMBH AND CONTRIBUTORS
  * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL EGNITE
+ * SOFTWARE GMBH OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
  * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
  * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
@@ -48,6 +48,59 @@
  * Prepare release 3.1
  *
  */
+#if 1 // fixni driver
+
+#include <sys/types.h>
+#include <stdint.h>
+
+#define TWI_SETSPEED		0x0401	/*!< \brief Set transfer speed. */
+#define TWI_GETSPEED		0x0402	/*!< \brief Query transfer speed. */
+#define TWI_SETSLAVEADDRESS	0x0403	/*!< \brief Set local slave address. */
+#define TWI_GETSLAVEADDRESS	0x0404	/*!< \brief Query local slave address. */
+#define TWI_SETSTATUS		0x0409	/*!< \brief Set status. */
+#define TWI_GETSTATUS		0x040a	/*!< \brief Query status. */
+
+
+#define TWERR_OK		0	/*!< \brief No error occured. */
+#define TWERR_TIMEOUT		1	/*!< \brief Interface timeout. */
+#define TWERR_BUS		2	/*!< \brief Bus error. */
+#define TWERR_IF_LOCKED		3	/*!< \brief Interface locked. */
+#define TWERR_SLA_NACK		4	/*!< \brief No slave response. */
+#define TWERR_DATA_NACK		5	/*!< \brief Data not acknowledged. */
+
+
+#define TWSLA_MIN		17	/*!< \brief Lowest slave address.
+					 * Addresses below are reserved
+					 * for special purposes.
+					 */
+#define TWSLA_MAX		79	/*!< \brief Lowest slave address.
+					 * Addresses above are reserved
+					 * for special purposes.
+					 */
+#define TWSLA_BCAST		0	/*!< \brief Broadcast slave address. */
+#define TWSLA_HOST		16	/*!< \brief Host slave address. */
+#define TWSLA_DEFAULT		193	/*!< \brief Default slave address. */
+
+extern int TwInit(uint8_t sla);
+extern int TwIOCtl(int req, void *conf);
+
+extern int TwMasterTransact(uint8_t sla, CONST void *txdata, uint16_t txlen, void *rxdata, uint16_t rxsiz, uint32_t tmo);
+extern int TwMasterRead(uint8_t sla, CONST void *addr, uint8_t addrlen, void *rxdata, uint16_t rxsiz, uint32_t tmo);
+extern int TwMasterWrite(uint8_t sla, CONST void *addr, uint8_t addrlen, void *txdata, uint16_t txsiz, uint32_t tmo);
+//extern int TwMasterRegRead(uint8_t sla, uint32_t iadr, uint8_t iadrlen, void *rxdata, uint8_t rxsiz, uint32_t tmo);
+extern int TwMasterRegRead(uint8_t sla, uint32_t iadr, uint8_t iadrlen, void *rxdata, uint16_t rxsiz, uint32_t tmo);
+//extern int TwMasterRegWrite(uint8_t sla, uint32_t iadr, uint8_t iadrlen, void *txdata, uint8_t txsiz, uint32_t tmo);
+extern int TwMasterRegWrite(uint8_t sla, uint32_t iadr, uint8_t iadrlen, CONST void *txdata, uint16_t txsiz, uint32_t tmo);
+extern int TwMasterError(void);
+extern uint16_t TwMasterIndexes( uint8_t idx);
+
+extern int TwSlaveListen(uint8_t *sla, void *rxdata, uint16_t rxsiz, uint32_t tmo);
+extern int TwSlaveRespond(void *txdata, uint16_t txlen, uint32_t tmo);
+extern int TwSlaveError(void);
+
+#else
+
+// TODO: Pouzit puvodni od shindyho pro univerzalni driver
 
 #include <sys/types.h>
 #include <cfg/arch.h>
@@ -217,4 +270,5 @@ extern int NutDestroyTwiBus( NUTTWIBUS *bus);
 #define TwSlaveRespond(txdata, txlen, tmo) NutTwiSlaveRespond(&DEF_TWIBUS, txlen, tmo)
 #define TwSlaveError(void) NutTwiSlaveError(&DEF_TWIBUS)
 
+#endif
 #endif

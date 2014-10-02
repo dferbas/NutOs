@@ -51,6 +51,13 @@ MEMORY
 }
 
 /* 
+ * Symbols for dynamic drivers
+ */
+PROVIDE (__driver_size    = 128k );
+PROVIDE (__driver_start   = __extram_start + __extram_size - __driver_size);
+
+
+/* 
  * Symbols for CPU initialization 
  */
 PROVIDE (__intram_start   = ORIGIN(intram));

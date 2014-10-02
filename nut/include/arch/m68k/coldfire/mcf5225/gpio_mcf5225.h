@@ -225,12 +225,12 @@
 #define GpioPinGet(bank, bit)           ((MCF_GPIO_PIN(bank) >> bit) & 0x1)
 #define GpioPinSet(bank, bit, value)    ((value) ? (GpioPinSetHigh(bank, bit)) : (GpioPinSetLow(bank, bit)))
 #define GpioPinSetHigh(bank, bit)       MCF_GPIO_SET(bank) = _BV(bit)
-#define GpioPinSetLow(bank, bit)        MCF_GPIO_CLR(bank) = _BV(bit)
+#define GpioPinSetLow(bank, bit)        MCF_GPIO_CLR(bank) = ~_BV(bit)
 
 #define GpioPortGet(bank)               MCF_GPIO_PIN(bank)
 #define GpioPortSet(bank, value)        MCF_GPIO_PORT(bank) = (value)
 #define GpioPortSetHigh(bank, mask)     MCF_GPIO_SET(bank) = (mask)
-#define GpioPortSetLow(bank, mask)      MCF_GPIO_CLR(bank) = (mask)
+#define GpioPortSetLow(bank, mask)      MCF_GPIO_CLR(bank) = ~(mask)
 
 extern uint32_t GpioPinConfigGet(int bank, int bit);
 extern int GpioPinConfigSet(int bank, int bit, uint32_t flags);

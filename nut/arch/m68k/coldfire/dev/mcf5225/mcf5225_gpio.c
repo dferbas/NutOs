@@ -229,7 +229,7 @@ int GpioPortConfigSet(int bank, uint32_t mask, uint32_t flags)
         role_mask = (bank_cfg->pins_configurable & 0xF0) ? MCF_GPIO_PAR16(bank) : MCF_GPIO_PAR8(bank);
 
         /* Shift in new roles */
-        for (i = 0; i < 7; i++) {
+        for (i = 0; i < 8; i++) {
             if (mask & (1 << i)) {
                 /* Erase old role */
                 role_mask &= ~(GPIO_CFG_PERIPHERAL_MASK << (2 * i));

@@ -30,12 +30,34 @@
  * For additional information see http://www.ethernut.de/
  */
 
-//------------------------------------------------------------------------------
-// Section 4 - External Memories initialization (board dependant code)
-//           - After this section all memories which need data initialization
-//             MUST be initialized.
-//------------------------------------------------------------------------------
-    .section .init4,"ax",%progbits
-    jsr BackDoorEnable
-    jsr InitExtram
+#include <arch/m68k.h>
+#include <dev/irqreg.h>
+
+static int QspiIrqCtl(int cmd, void *param);
+
+IRQ_HANDLER sig_QSPI_TF = {
+#ifdef NUT_PERFMON
+    0,              /* Interrupt counter, ir_count. */
+#endif
+    NULL,           /* Passed argument, ir_arg. */
+    NULL,           /* Handler subroutine, ir_handler. */
+    QspiIrqCtl     /* Interrupt control, ir_ctl. */
+};
+
+static int QspiIrqCtl(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_QSPI_TF, cmd, param,
+            &MCF_QSPI_QIR, MCF_QSPI_QIR_SPIFE | MCF_QSPI_QIR_ABRTE | MCF_QSPI_QIR_WCEFE | MCF_QSPI_QIR_ABRTL, 2,
+            &MCF_INTC_IMRL(0), MCF_INTC_IMRL_INT_MASK18 | MCF_INTC_IMRL_MASKALL,
+            &MCF_INTC_ICR18(0), IPL_QSPI_TF);
+}
+
+SIGNAL(IH_QSPI_TF)
+{
+	if (MCF_QSPI_QIR & (MCF_QSPI_QIR_SPIFE))
+	{
+		MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);
+		CallHandler(&sig_QSPI_TF);
+	}
+}
 

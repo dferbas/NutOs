@@ -35,12 +35,6 @@
 
 #include <cfg/arch.h>
 
-#if defined (MCU_COLDFIRE)
-#include <arch/m68k/coldfire/mcf5.h>
-#else
-#warning "Unknown M68K MCU Family defined"
-#endif
-
 #if !defined(__BIG_ENDIAN__)
 #define __BIG_ENDIAN__
 #endif
@@ -76,6 +70,12 @@
 
 #ifndef _NOP
 #define _NOP() __asm__ __volatile__ ("nop")
+#endif
+
+#if defined (MCU_COLDFIRE)
+#include <arch/m68k/coldfire/mcf5.h>
+#else
+#warning "Unknown M68K MCU Family defined"
 #endif
 
 #endif

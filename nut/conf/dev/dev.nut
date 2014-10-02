@@ -4977,4 +4977,80 @@ nutdev =
         requires = {"DEV_SPI_MCF51CN_DEPRECATED" },
         sources = { "flash_sst25vf020b.c" }
     },
+
+    --
+    -- MCP9800 - Temperature sensor
+    --
+    {
+        name = "nutarch_mcp9800",
+        brief = "MCP9800",
+        description = "MCP9800 - Temperature sensor.",
+        requires = {"DEV_TWI" },
+        sources = { "mcp9800.c" }
+    },
+
+    --
+    -- 1 Wire DS2482 - Single-Channel 1-Wire Master
+    --
+    {
+        name = "nutarch_one_wire",
+        brief = "1 Wire DS2482",
+        description = "1 Wire DS2482 - Single-Channel 1-Wire Master",
+        requires = {"DEV_TWI" },
+        sources = { "ds2482.c" }
+    },
+
+    --
+    -- EEPROM 24AA256 - 256K I2C™ CMOS Serial EEPROM
+    --
+    {
+        name = "nutarch_eeprom_24AA256",
+        brief = "EEPROM 24AA256",
+        description = "EEPROM 24AA256 - 256K I2C™ CMOS Serial EEPROM",
+        requires = {"DEV_TWI" },
+        provides = { "DEV_NVMEM_I2C" },
+        sources = { "eeprom_24aa256.c" },
+        options =
+        {
+            {
+                macro = "I2C_SLA_24AA256",
+                brief = "Slave Address",
+                description = "24AA256 slave address (0x50..0x57)",
+                default = "0x51",
+               	file = "include/cfg/eeprom_24AA256.h"
+            },
+        },
+    },
+
+    --
+    -- FRAM FM24CL64 - 16Kb Serial 3V F-RAM Memory
+    --
+    {
+        name = "nutarch_fram",
+        brief = "FRAM FM24CL64",
+        description = "FRAM FM24CL64 - 64Kb Serial 3V F-RAM Memory",
+        requires = {"DEV_TWI" },
+        sources = { "fm24cl64.c" },
+        options =
+        {
+            {
+                macro = "I2C_SLA_FM24CL64",
+                brief = "Slave Address",
+                description = "FM24CL64 slave address (0x50..0x57)",
+                default = "0x50",
+               	file = "include/cfg/fm24cl64.h"
+            },
+        },
+    },
+
+    --
+    --  DS28CM00 - I²C/SMBus Silicon Serial Number
+    --
+    {
+        name = "nutarch_silicon",
+        brief = "Silicon - DS28CM00",
+        description = "DS28CM00 - I²C/SMBus Silicon Serial Number",
+        requires = {"DEV_TWI" },
+        sources = { "ds28cm00.c" }
+    },
 }

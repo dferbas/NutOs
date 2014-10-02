@@ -50,8 +50,9 @@
 
 /* WARNING: Variadic macros are C99 and may fail with C89 compilers. */
 #ifdef NUTDEBUG
-#include <stdio.h>
-#define PHPRINTF(args,...) printf(args,##__VA_ARGS__); fflush(stdout);
+//#include <stdio.h>
+//#define PHPRINTF(args,...) printf(args,##__VA_ARGS__); fflush(stdout);
+#define PHPRINTF(args,...)
 #else
 #define PHPRINTF(args,...)
 #endif
@@ -158,6 +159,9 @@ phy_status_descr_t phy_status_descr[] = {
 
      Micrel KS8721
     { KS8721,    { {31, 0x0004}, {31, 0x0008}, {0, 0}, {31, 0x0010}, {0, 0} } },*/
+
+	/* National Semiconductor PHY tranceiver */
+	{ DP83848,   { {5, 0x0060}, {1, 0x0180}, {0, 0}, {1, 0x0140}, {0, 0} } }, // read link partner ability
 
     /* Micrel KSZ8051 */
     { KSZ8051,   { {30, 0x0001}, {30, 0x0002}, {0, 0}, {30, 0x0004}, {0, 0} } },

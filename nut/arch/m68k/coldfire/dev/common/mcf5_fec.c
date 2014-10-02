@@ -20,17 +20,19 @@
 #define DBG	printf
 
 //#define PhyProbe
-//#define TX_PACKET_ASSEMBLE
-//#define BD_IN_INTRAM
+#if defined (MCU_MCF5225)
+# define TX_PACKET_ASSEMBLE		// SM2-MU defined
+# define BD_IN_INTRAM			// SM2-MU defined
+#endif
 
 #ifdef TX_PACKET_ASSEMBLE
-#ifdef BD_IN_INTRAM
-#define	TX_BUF_FREE		NutStackFree
+# ifdef BD_IN_INTRAM
+#  define	TX_BUF_FREE		NutStackFree
+# else
+#  define	TX_BUF_FREE		NutHeapFree
+# endif
 #else
-#define	TX_BUF_FREE		NutHeapFree
-#endif
-#else
-#define	TX_BUF_FREE		NutNetBufFree
+# define	TX_BUF_FREE		NutNetBufFree
 #endif
 
 #define ALIGN(x,pow)	(((x) + ((pow)-1)) & ~((pow)-1))
@@ -38,45 +40,58 @@
 #define TX_BUFFER_ALIGNMENT   4
 #define BD_ALIGNMENT          16 // may be 4.
 
-#define MAX_FL						(ETHER_MAX_LEN-4)	// maximum frame length - CRC
+#define MAX_FL						(ETHER_MAX_LEN)	// maximum frame length
 #define PHY_RESET_TIMEOUT			200			// e.g. Power Up Stabilization of DP83848C takes 176ms
 #define PHY_AUTONEGO_TIMEOUT		6000			// Parallel detection and Auto-Negotiation take approximately 2-3 seconds to complete. In addition, Auto-Negotiation with next page should take approximately 2-3 seconds to complete, depending on the number of next pages sent. Refer to Clause 28 of the IEEE 802.3u standard for a full description of the individual timers related to Auto-Negotiation.
 #define FEC_LINK_TIMEOUT			1000			// e.g. using DP83848C takes 200ms after autonego "fails"
-//#define FEC_WAIT_FOR_LINK_TIMEOUT	10000			// if this macro is defined, the FEC will wait for link after startup
+#if defined (MCU_MCF5225)
+# define FEC_WAIT_FOR_LINK_TIMEOUT	10000			// if this macro is defined, the FEC will wait for link after startup
+#endif
 
 #ifndef NUT_THREAD_NICRXSTACK
-#define NUT_THREAD_NICRXSTACK   	660			// SM2-RM 660,
+#if defined (MCU_MCF5225)
+#  define NUT_THREAD_NICRXSTACK   	1000		// SM2-MU 1000
+# else
+#  define NUT_THREAD_NICRXSTACK   	660			// SM2-RM 660
+# endif
 #endif
 
 #ifndef NIC_PHY_ADDR
-#define NIC_PHY_ADDR	        	1
+# define NIC_PHY_ADDR	        	1
 #endif
 
-#ifndef NIC_PHY_UID
-//#define NIC_PHY_UID 				0x20005C90
-#define NIC_PHY_UID 				0x00221556
-#endif
+//#define NIC_PHY_UID 				0x20005C90 // MCF52259
+//#define NIC_PHY_UID 				0x00221556 // MCF51CN
 
 /*
  * Buffer descriptors config
  */
 #ifdef TX_PACKET_ASSEMBLE
-#define FEC_TX_BUFFERS				(1*1 + 1)		// no fragments (one buffer only)
+#if defined (MCU_MCF5225)
+#  define FEC_TX_BUFFERS				(2*1 + 1)		// SM2-MU no fragments (one buffer only)
+# else
+#  define FEC_TX_BUFFERS				(1*1 + 1)		// no fragments (one buffer only)
+# endif
 #else
-#define FEC_TX_BUFFERS				(2*4 + 1)		// 2*4 netbuf fragments
+# define FEC_TX_BUFFERS				(2*4 + 1)		// 2*4 netbuf fragments
 #endif
 #define FEC_RX_BUFSIZ				256				// to minimize bus utilization (descriptor fetches), set this field to 256 or larger.
 // DCH TODO otestovat zmenseni pameti na 2 ze 4
 // INFO: nesmi se stat, ze se zaplni vsechny BD jednim paketem, proto musi byt vzdy o jeden RxBD vic
 // TODO: muze se stat, ze kvuli chybe na siti prijde delsi paket? .. Osetruje to nejak HW?
-#define FEC_RX_BUFFERS				((1 * ((ETHER_MAX_LEN/FEC_RX_BUFSIZ) + 1)) + 1)
+#if defined (MCU_MCF5225)
+# define FEC_RX_BUFFERS				(4 * ((ETHER_MAX_LEN/FEC_RX_BUFSIZ) + 1)) // SM2-MU
+#else
+# define FEC_RX_BUFFERS				((1 * ((ETHER_MAX_LEN/FEC_RX_BUFSIZ) + 1)) + 1) // SM2-RM
+#endif
+
 
 #if (FEC_TX_BUFFERS < FEC_TX_BUFFERS_MIN)
-#error("FEC_TX_BUFFERS must be grater or equal to FEC_TX_BUFFERS_MIN")
+# error("FEC_TX_BUFFERS must be grater or equal to FEC_TX_BUFFERS_MIN")
 #endif
 
 #if ((FEC_RX_BUFFERS * FEC_RX_BUFSIZ) < MAX_FL)
-#error("FEC_RX_BUFFERS or FEC_RX_BUFSIZ too small")
+# error("FEC_RX_BUFFERS or FEC_RX_BUFSIZ too small")
 #endif
 
 // Switch on red led 
@@ -90,9 +105,9 @@ static TMWDTSetVariableFN	EthMWDTSetVariableFN = NULL;
  * One free BD must left all times - HW requirement (more info in datasheet)
  */
 #ifdef TX_PACKET_ASSEMBLE
-#define FEC_TX_BUFFERS_MIN		(1 + 1)
+# define FEC_TX_BUFFERS_MIN		(1 + 1)
 #else
-#define FEC_TX_BUFFERS_MIN		(4 + 1)			// 4 netbuf fragments
+# define FEC_TX_BUFFERS_MIN		(4 + 1)			// 4 netbuf fragments
 #endif
 
 /*
@@ -272,6 +287,43 @@ get_phy_addr:
 #endif
 	PhyWrite(PHY_REG_BMCR, reg_val);
 
+
+// 	/* Set loopback */
+//	if (nif->if_flags & IFF_LOOPBACK_PHY){
+//		DBG("PHY: loopback = ON\n");
+//		reg_val &= ~PHY_REG_BMCR_AUTO_NEG_ENABLE;
+//		reg_val |= PHY_REG_BMCR_LOOPBACK;
+//	}
+//	else {
+//		if (nif->if_flags & IFF_AUTONEGO_ENABLE){
+//			reg_val |= PHY_REG_BMCR_AUTO_NEG_ENABLE;
+//			reg_val |= PHY_REG_BMCR_RESTART_AUTONEG;
+//		}
+//		else{
+//			reg_val &= ~PHY_REG_BMCR_AUTO_NEG_ENABLE;
+//		}
+//
+//		reg_val &= ~PHY_REG_BMCR_LOOPBACK;
+//	}
+//
+//	if(!(reg_val & PHY_REG_BMCR_AUTO_NEG_ENABLE)){
+//		/* Set speed */
+//		reg_val &= ~PHY_REG_BMCR_FORCE_SPEED_MASK;
+//		if (nif->if_flags & IFF_SPEED_100){
+//			reg_val |= PHY_REG_BMCR_FORCE_SPEED_100;
+//		}
+//		else {
+//			reg_val |= PHY_REG_BMCR_FORCE_SPEED_10;
+//		}
+//
+//		/* enable full duplex for test loopback */
+//		reg_val |= PHY_REG_BMCR_FORCE_FULL_DUP;
+//		MCF_FEC_TCR |= MCF_FEC_TCR_FDEN;
+//		MCF_FEC_RCR &= ~MCF_FEC_RCR_DRT;
+//	}
+//
+//	PhyWrite(PHY_REG_BMCR, &reg_val);
+
 	/* Handle auto negotiation if configured. */
     if (reg_val & PHY_REG_BMCR_AUTO_NEG_ENABLE)
     {
@@ -413,10 +465,15 @@ static int FecReset(IFNET *nif)
 	}
 
 	/* Setup MII speed */
-	MCF_FEC_MSCR = MCF_FEC_MSCR_MII_SPEED(0x05);		//Internal FEC freq = 25 MHz
+#if defined (MCU_MCF5225)
+	MCF_FEC_MSCR = MCF_FEC_MSCR_MII_SPEED(0x08);		//Internal FEC freq = 2,5 MHz, MCF52259 set 0x08
+#else //if defined (MCU_MCF51CN)
+	MCF_FEC_MSCR = MCF_FEC_MSCR_MII_SPEED(0x05);		//Internal FEC freq = 2,5 MHz, MCF52259 set 0x05
+#endif
 
 	/* Set MII mode */
 	MCF_FEC_RCR |= MCF_FEC_RCR_MII_MODE;
+
 	/* Enable receive on transmit */
 	MCF_FEC_RCR &= ~MCF_FEC_RCR_DRT;
 
@@ -433,19 +490,24 @@ static int FecReset(IFNET *nif)
 	/* Disable loopback */
 	MCF_FEC_RCR &= ~MCF_FEC_RCR_LOOP;
 
-	MCF_SOPT3 = MCF_SOPT3_PCS_OSCOUT << MCF_SOPT3_PCS_BITNUM;
 
+#if defined (MCU_MCF5225)
+	/* Configure MII port for MCF52259 GPIO: */
+//	GpioPortConfigSet(PORTTI, 0xFF, GPIO_CFG_PERIPHERAL0);	// primary function
+//	GpioPortConfigSet(PORTTJ, 0xFF, GPIO_CFG_PERIPHERAL0);	// primary function
+//	GpioPortConfigSet(PORTNQ, 0x28, GPIO_CFG_PERIPHERAL1);	// FEC_MDIO + FEC_MDC (alt 1)
+	MCF_GPIO_PTIPAR = 0xFF;
+	MCF_GPIO_PTJPAR = 0xFF;
+	MCF_GPIO_PNQPAR = MCF_GPIO_PNQPAR_IRQ3_FEC_MDIO | MCF_GPIO_PNQPAR_IRQ5_FEC_MDC;
+#else // MCU_MCF51CN
+	MCF_SOPT3 = MCF_SOPT3_PCS_OSCOUT << MCF_SOPT3_PCS_BITNUM;
 	/* Configure MII port for MCF51CN */
 	GpioPortConfigSet(PORTA, 0xFF, GPIO_CFG_ALT1 | GPIO_CFG_PULLUP);
 	/* MII_TX_ER pin P0RB2 used as gpio chip select in SM2-RM SPI FRAM */
 	GpioPortConfigSet(PORTB, 0xFB, GPIO_CFG_ALT1 | GPIO_CFG_PULLUP);
 	GpioPortConfigSet(PORTC, 0x07, GPIO_CFG_ALT1 | GPIO_CFG_PULLUP);
+#endif
 
-	/* Configure MII port for MCF52259 GPIO:
-	 * MCF_GPIO_PTIPAR = 0xFF;
-	 * MCF_GPIO_PTJPAR = 0xFF;
-	 * MCF_GPIO_PNQPAR = MCF_GPIO_PNQPAR_IRQ3_FEC_MDIO | MCF_GPIO_PNQPAR_IRQ5_FEC_MDC;
-	 */
 
 #ifdef PhyProbe
 	if(1)
@@ -454,6 +516,7 @@ static int FecReset(IFNET *nif)
 	/* Register PHY */
 	NutRegisterPhy( 1, PhyWrite, PhyRead);
 
+#if defined (MCU_MCF51CN)
 	/* Set Reset Phy pin to output */
 	GpioPinSetHigh(PORTC, 3); 
 	GpioPinConfigSet(PORTC, 3, GPIO_CFG_ALT1);
@@ -479,6 +542,7 @@ static int FecReset(IFNET *nif)
 			NutSleep(200);
 		}
 	}
+#endif
 
 	/* Activate reset, wait for completion. */
 	regvalue = 1;
@@ -582,10 +646,8 @@ static int FecReset(IFNET *nif)
     return rc;
 }
 
-
 static int FecStart(FECINFO *ni, uint8_t *mac)
 {
-
 	/* Set MAC address */
 	MCF_FEC_PALR = MCF_FEC_PALR_PADDR1(*(uint32_t *)(mac + 0));
 	MCF_FEC_PAUR = MCF_FEC_PAUR_PADDR2(*(uint16_t *)(mac + 4));
@@ -1143,7 +1205,7 @@ static int FecInit(NUTDEVICE * dev)
 	 */
 	while (1)
 	{
-		if (!FecReset())
+		if (!FecReset(ifn))
 		{
 			if (FecStart(ni, ifn->if_mac))
 				return -1;
@@ -1174,12 +1236,12 @@ static int FecInit(NUTDEVICE * dev)
 	return 0;
 }
 
-int Mcf51cnFecIsInitialized(NUTDEVICE * dev){
+int Mcf5FecIsInitialized(NUTDEVICE * dev){
 	FECINFO *ni = (FECINFO *) dev->dev_dcb;
 	return ni->initialized;
 }
 
-int Mcf51cnFecLinkedUp(void){
+int Mcf5FecLinkedUp(void){
 	uint16_t reg_val;
 	reg_val = PhyRead(PHY_REG_BMSR);
 	if (reg_val == 0xFFFF)
@@ -1189,7 +1251,7 @@ int Mcf51cnFecLinkedUp(void){
 }
 
 /* Set MultiWatchDog set reset function */
-void Mcf51cnFec_EthMWDTSetVariableFN(TMWDTSetVariableFN VariableFN)
+void Mcf5FecEthMWDTSetVariableFN(TMWDTSetVariableFN VariableFN)
 {
 	EthMWDTSetVariableFN = VariableFN;
 }
@@ -1226,7 +1288,7 @@ static IFNET ifn_eth0 = {
  * of this driver to initialize the network interface.
  *
  */
-NUTDEVICE devMcf51cnFec = {
+NUTDEVICE devMcf5Fec = {
     0,                          /*!< \brief Pointer to next device. */
     {'e', 't', 'h', '0', 0, 0, 0, 0, 0},        /*!< \brief Unique device name. */
     IFTYP_NET,                  /*!< \brief Type of device. */

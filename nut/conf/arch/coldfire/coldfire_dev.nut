@@ -1,6 +1,21 @@
 nutarch_m68k_coldfire_devices =
 {
     --
+    -- Interrupt Handler
+    --
+    {
+        name = "nutarch_m68k_coldfire_mcf5_ihndlr",
+        brief = "Interrupt Handler",
+        description = "Peripheral interrupt handlers for MCF5 family.",
+        provides = { 
+                    "DEV_IRQ_FEC",
+                   },
+        sources = { 
+          			"m68k/coldfire/dev/common/ih_mcf5_fec.c",
+        		  },
+    },
+    
+    --
     -- I2C Bus Default
     --
     {
@@ -41,7 +56,7 @@ nutarch_m68k_coldfire_devices =
         name = "nutarch_m68k_coldfire_devices_i2c0",
         brief = "I2C Bus 0 Controller",
         description = "Coldfire hardware I2C support.",
-        requires = { "HW_I2C_COLDFIRE", "DEV_IRQ_I2C", "HW_I2C0" },
+        requires = { "ZAKAZAN", "HW_I2C_COLDFIRE", "DEV_IRQ_I2C", "HW_I2C0" },
         provides = { "DEV_TWI", "I2C_DEFAULT", "I2C_DEFAULT0" },
         sources = { "m68k/coldfire/dev/common/mcf5_i2c.c",
                     "m68k/coldfire/dev/common/mcf5_i2c0.c" },
@@ -92,7 +107,7 @@ nutarch_m68k_coldfire_devices =
         name = "nutarch_m68k_coldfire_devices_i2c1",
         brief = "I2C Bus 1 Controller",
         description = "Coldfire hardware I2C support.",
-        requires = { "HW_I2C_COLDFIRE", "DEV_IRQ_I2C", "HW_I2C1" },
+        requires = { "ZAKAZAN", "HW_I2C_COLDFIRE", "DEV_IRQ_I2C", "HW_I2C1" },
         provides = { "DEV_TWI" , "I2C_DEFAULT", "I2C_DEFAULT1" },
         sources = { "m68k/coldfire/dev/common/mcf5_i2c.c",
                     "m68k/coldfire/dev/common/mcf5_i2c1.c" },
@@ -938,5 +953,14 @@ nutarch_m68k_coldfire_devices =
                 file = "include/cfg/uart.h"
             },
         },
+    },
+    
+    --
+    -- Fast Ethernet Controller
+    --
+    {
+        name = "nutarch_m68k_coldfire_mcf5_fec",
+        brief = "Fast Ethernet Controller (FEC)",
+        sources = { "m68k/coldfire/dev/common/mcf5_fec.c" },
     },
 }

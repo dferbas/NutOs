@@ -73,8 +73,8 @@ extern NUTRTC rtcMcf51cn;
 /*
  * Ethernet device
  */
-extern NUTDEVICE devMcf51cnFec;
+extern NUTDEVICE devMcf5Fec;
 
 #ifndef DEV_ETHER
-#define DEV_ETHER   devMcf51cnFec
+#define DEV_ETHER   devMcf5Fec
 #endif

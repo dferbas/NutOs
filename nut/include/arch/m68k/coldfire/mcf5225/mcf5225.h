@@ -45,4 +45,8 @@
 #include "mcf5225_rtc.h"
 #include "mcf5225_scm.h"
 #include "mcf5225_uart.h"
+#include "mcf5225_qspi.h"
+#include "mcf5225_fec.h"
+#include "mcf5225_qspi.h"
+#include "mcf5225_old_i2c.h"
 

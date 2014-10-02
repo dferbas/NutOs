@@ -39,6 +39,7 @@
  *
  * IMPORTANT: Interrupt level and priority combination MUST be unique
  */
+#define IPL_QSPI_TF     (MCF_INTC_ICR_IL(2) | MCF_INTC_ICR_IP(4))
 #define IPL_UART0       (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(0))
 #define IPL_UART1       (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(1))
 #define IPL_UART2       (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(2))
@@ -46,6 +47,10 @@
 #define IPL_I2C1        (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(4))
 #define IPL_PIT0	    (MCF_INTC_ICR_IL(4) | MCF_INTC_ICR_IP(0))
 #define IPL_PIT1	    (MCF_INTC_ICR_IL(4) | MCF_INTC_ICR_IP(1))
+#define IPL_FEC_RB		(MCF_INTC_ICR_IL(5) | MCF_INTC_ICR_IP(5))
+#define IPL_FEC_RF		(MCF_INTC_ICR_IL(5) | MCF_INTC_ICR_IP(4))
+#define IPL_FEC_TB		(MCF_INTC_ICR_IL(5) | MCF_INTC_ICR_IP(3))
+#define IPL_FEC_TF		(MCF_INTC_ICR_IL(5) | MCF_INTC_ICR_IP(2))
 #define IPL_GPT_PAOV    (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(3))
 #define IPL_GPT_PAI     (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(4))
 #define IPL_CWD         (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(7))
@@ -63,6 +68,11 @@ extern IRQ_HANDLER sig_UART1;
 extern IRQ_HANDLER sig_UART2;
 extern IRQ_HANDLER sig_GPT_PAOV;
 extern IRQ_HANDLER sig_GPT_PAI;
+extern IRQ_HANDLER sig_FEC_RB;
+extern IRQ_HANDLER sig_FEC_RF;
+extern IRQ_HANDLER sig_FEC_TB;
+extern IRQ_HANDLER sig_FEC_TF;
+extern IRQ_HANDLER sig_QSPI_TF;
 
 /*
  * Common Interrupt control

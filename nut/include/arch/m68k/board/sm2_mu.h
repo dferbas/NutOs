@@ -42,6 +42,18 @@
 #define DEV_UART1       devUartOldMcf5_1
 #define DEV_UART2       devUartOldMcf5_2
 
+#ifndef NUTUART0
+#define NUTUART0		DEV_UART0
+#endif
+
+#ifndef NUTUART1
+#define NUTUART1		DEV_UART1
+#endif
+
+#ifndef NUTUART2
+#define NUTUART2		DEV_UART2
+#endif
+
 /*
  * Debug device.
  */
@@ -57,5 +69,14 @@ extern NUTRTC rtcMcf5225;
 
 #ifndef RTC_CHIP0
 #define RTC_CHIP0 rtcMcf5225
+#endif
+
+/*
+ * Ethernet device
+ */
+extern NUTDEVICE devMcf5Fec;
+
+#ifndef DEV_ETHER
+#define DEV_ETHER   devMcf5Fec
 #endif
 

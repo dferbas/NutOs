@@ -130,7 +130,6 @@ nutarch_m68k_coldfire_mcf51cn =
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_adc.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_rtc.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_spi.c",
-          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_fec.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_sci.c",
         		  },
     },
@@ -224,15 +223,6 @@ nutarch_m68k_coldfire_mcf51cn =
                       "TODO: This driver must be recoded to use standard SPIBUS framework",
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_spi.c" },
         provides = { "DEV_SPI_MCF51CN_DEPRECATED" },
-    },
-    
-    --
-    -- Fast Ethernet Controller
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf51cn_fec",
-        brief = "Fast Ethernet Controller (FEC)",
-        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_fec.c" },
     },
     
     --

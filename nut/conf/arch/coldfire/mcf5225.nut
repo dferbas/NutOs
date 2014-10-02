@@ -142,6 +142,7 @@ nutarch_m68k_coldfire_mcf5225 =
         provides = { 
                     "DEV_IRQ_I2C",
                     "DEV_IRQ_UART",
+                    "DEV_IRQ_QSPI",
                    },
         sources = { 
                     "m68k/coldfire/dev/mcf5225/ih_mcf5225_pit.c",
@@ -149,6 +150,7 @@ nutarch_m68k_coldfire_mcf5225 =
                     "m68k/coldfire/dev/mcf5225/ih_mcf5225_i2c.c",
                     "m68k/coldfire/dev/mcf5225/ih_mcf5225_uart.c", 
                     "m68k/coldfire/dev/mcf5225/ih_mcf5225_gpt.c",
+                    "m68k/coldfire/dev/mcf5225/ih_mcf5225_qspi.c",
                   },
     },
 
@@ -240,4 +242,29 @@ nutarch_m68k_coldfire_mcf5225 =
         description = "Mcf5225 RTC driver.",
         sources = { "m68k/coldfire/dev/mcf5225/mcf5225_rtc.c" }
     },
+
+    --
+    -- QSPI
+    --
+    {
+        name = "nutarch_mcf5225_qspi",
+        brief = "QSPI Driver",
+        description = "Hardware specific QSPI driver. Implements hardware ",
+        requires = {"HW_MCU_M68K", "NUT_OSTIMER_DEV", "NUT_EVENT", "DEV_IRQ_QSPI" },
+        provides = {"DEV_SPI" },
+        sources = { "m68k/coldfire/dev/mcf5225/mcf5225_qspi.c" }
+    },
+    
+    --
+    -- I2c
+    --
+    {
+        name = "nutarch_mcf5225_old_i2c",
+        brief = "I2C (MCF5225)",
+        description = "Old I2C for MCF5225 family.",
+        requires = {"HW_I2C_COLDFIRE", "DEV_IRQ_I2C", "HW_I2C0" },
+        provides = { "DEV_TWI" },
+        sources = { "m68k/coldfire/dev/mcf5225/mcf5225_old_i2c.c" }
+    },
+
 }
