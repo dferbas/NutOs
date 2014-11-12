@@ -591,16 +591,18 @@ mcf51cn_ld_choice = {
 }
 
 mcf5225_ld_description = {
-        mcf5225_512_rom                    = "MCF5225x, code running in FLASH",
-        mcf5225_512_rom_512_extram         = "MCF5225x, code running in FLASH, data in external SDRAM",
-        mcf5225_512_rom_512_extram_boot    = "MCF5225x, code running in FLASH, data in external SDRAM, started by bootloader at address 0x4000, vectors in external SDRAM"
+        mcf5225_512_rom                    		= "MCF5225x, code running in FLASH",
+        mcf5225_512_rom_512_extram         		= "MCF5225x, code running in FLASH, data in external SDRAM",
+        mcf5225_512_rom_512_extram_boot    		= "MCF5225x, code running in FLASH, data in external SDRAM, started by bootloader at address 0x4000, vectors in external SDRAM",
+        mcf5225_512_rom_512_extram_boot_driver = "MCF5225x, code running in FLASH, data in external SDRAM, started by bootloader at address 0x4000, vectors in external SDRAM, drivers savad in RAM"
 }
 
 mcf5225_ld_choice = {
         " ",
         "mcf5225_512_rom",
         "mcf5225_512_rom_512_extram",
-        "mcf5225_512_rom_512_extram_boot"
+        "mcf5225_512_rom_512_extram_boot",
+        "mcf5225_512_rom_512_extram_boot_driver"
 }
 
 --

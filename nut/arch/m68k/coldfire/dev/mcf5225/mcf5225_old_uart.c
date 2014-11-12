@@ -6,8 +6,6 @@
 #include <sys/event.h>
 #include <sys/timer.h>
 
-#define NutEnterCriticalLevel(...)   NutEnterCritical()        // TODO JS - upravit podle SolarMonitoru
-
 #undef NUTTRACER    // TODO .. not portet yet
 //#define UART_NO_SW_FLOWCONTROL
 
@@ -20,8 +18,6 @@
 #ifdef NUTTRACER
 #include <sys/tracer.h>
 #endif
-
-#define PREVENT_SPURIOUS_INTERRUPT(code) {NutEnterCritical();{code;} NutExitCritical();}
 
 /* Enable Transmit Ready Interrupt. */
 #define SET_TXRDY_INTERRUPT() \

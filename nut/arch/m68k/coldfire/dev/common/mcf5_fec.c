@@ -44,9 +44,9 @@
 #define PHY_RESET_TIMEOUT			200			// e.g. Power Up Stabilization of DP83848C takes 176ms
 #define PHY_AUTONEGO_TIMEOUT		6000			// Parallel detection and Auto-Negotiation take approximately 2-3 seconds to complete. In addition, Auto-Negotiation with next page should take approximately 2-3 seconds to complete, depending on the number of next pages sent. Refer to Clause 28 of the IEEE 802.3u standard for a full description of the individual timers related to Auto-Negotiation.
 #define FEC_LINK_TIMEOUT			1000			// e.g. using DP83848C takes 200ms after autonego "fails"
-#if defined (MCU_MCF5225)
-# define FEC_WAIT_FOR_LINK_TIMEOUT	10000			// if this macro is defined, the FEC will wait for link after startup
-#endif
+//#if defined (MCU_MCF5225)
+//# define FEC_WAIT_FOR_LINK_TIMEOUT	10000			// if this macro is defined, the FEC will wait for link after startup
+//#endif
 
 #ifndef NUT_THREAD_NICRXSTACK
 #if defined (MCU_MCF5225)
@@ -498,7 +498,7 @@ static int FecReset(IFNET *nif)
 //	GpioPortConfigSet(PORTNQ, 0x28, GPIO_CFG_PERIPHERAL1);	// FEC_MDIO + FEC_MDC (alt 1)
 	MCF_GPIO_PTIPAR = 0xFF;
 	MCF_GPIO_PTJPAR = 0xFF;
-	MCF_GPIO_PNQPAR = MCF_GPIO_PNQPAR_IRQ3_FEC_MDIO | MCF_GPIO_PNQPAR_IRQ5_FEC_MDC;
+	MCF_GPIO_PNQPAR = (MCF_GPIO_PNQPAR & ~((3 << 6) | (3 << 10))) | (MCF_GPIO_PNQPAR_IRQ3_FEC_MDIO | MCF_GPIO_PNQPAR_IRQ5_FEC_MDC);
 #else // MCU_MCF51CN
 	MCF_SOPT3 = MCF_SOPT3_PCS_OSCOUT << MCF_SOPT3_PCS_BITNUM;
 	/* Configure MII port for MCF51CN */
@@ -1072,6 +1072,61 @@ static void FecIntRxF(FECINFO * ni)
 	NutEventPostFromIrq(&ni->rx_rdy);
 }
 
+
+//**********************************************************************
+// Detekce pripojeneho ethernetu
+//**********************************************************************
+int PHY_Test(NUTDEVICE *dev)
+{
+	static uint32_t last_status = 0xffffffff;
+    IFNET *nif = (IFNET *) dev->dev_icb;
+    uint32_t status;
+
+//	value = PhyRead(0x10) & 0x7;
+
+	NutPhyCtl(PHY_GET_STATUS, &status);
+
+	if(status == last_status) {
+		// Zadna zmena stavu ethernetu
+		return last_status;
+	}	
+	last_status = status;
+	
+	if(status & PHY_STATUS_HAS_LINK) {
+		/* Link is on. */
+
+		if(status & PHY_STATUS_FULLDUPLEX) {
+			/* Enable full duplex & receive on transmit */
+			MCF_FEC_TCR |= MCF_FEC_TCR_FDEN;
+			MCF_FEC_RCR &= ~MCF_FEC_RCR_DRT;
+//			printf("\r\nFull duplex Set\r\n");
+		} else {
+			/* Disable full duplex & receive on transmit */
+			MCF_FEC_TCR &= ~MCF_FEC_TCR_FDEN;
+			MCF_FEC_RCR |= MCF_FEC_RCR_DRT;
+//			printf("\r\nHalf duplex Set\r\n");
+
+		}
+
+		// Nastaveni priznaku ze je Link
+		nif->if_flags |= IFF_LINK0;
+
+	} else {
+		/* Link is off. */
+		// Nastaveni priznaku ze neni Link
+		nif->if_flags &= ~IFF_LINK0;	  
+	}
+
+//	printf("%s, %s, %s, %x\r\n", 	value & (1 << 0) ? "Link ON" : "Link Off",
+//		   							value & (1 << 1) ? "Speed 10" : "Speed 100",
+//									value & (1 << 2) ? "Full Duplex" : "Half Duplex",
+//									value );
+
+	return last_status;
+}
+
+
+
 /*! \fn FecRxThread(void *arg)
  * \brief NIC receiver thread.
  *
@@ -1082,6 +1137,9 @@ THREAD(FecRxThread, arg)
 	FECINFO *ni = (FECINFO *)dev->dev_dcb;
 	IFNET *ifn = (IFNET *) dev->dev_icb;
 	NETBUF *nb;
+
+	/* Run at high priority. */
+    NutThreadSetPriority(9);
 
 	while(1)
 	{
@@ -1099,7 +1157,16 @@ THREAD(FecRxThread, arg)
 		/*
          * Wait for the arrival of new packets
          */
-		NutEventWait(&ni->rx_rdy, NUT_WAIT_INFINITE);
+//		NutEventWait(&ni->rx_rdy, NUT_WAIT_INFINITE);
+       if(NutEventWait(&ni->rx_rdy, 1000) < 0) {
+			// Timeout, time for Link test
+        	PHY_Test(dev);
+			continue;
+		} else {
+			if((ifn->if_flags & IFF_LINK0) == 0) {
+				PHY_Test(dev);
+			}
+		}
 
 		/* Enable watchdog, wait for receive and pass the received packet to the upper layer. */
 		if (EthMWDTSetVariableFN != NULL)
@@ -1155,15 +1222,44 @@ static int FecIOCtl(NUTDEVICE * dev, int req, void *conf)
         	ni->initialized = 0;
         }
         nif->if_flags = *lvp;
+
+        if (*lvp & IFF_PROMISC) {
+            /* Receive all packets enable. */
+        	MCF_FEC_RCR |= MCF_FEC_RCR_PROM;
+        } else {
+            /* Receive all packets disable. */
+        	MCF_FEC_RCR &= ~MCF_FEC_RCR_PROM;
+        }
+
         break;
+
     case SIOCGIFFLAGS:
         /* Get interface flags. */
+
+    	if(MCF_FEC_RCR & MCF_FEC_RCR_PROM) {
+    		nif->if_flags |= IFF_PROMISC;
+    	} else {
+    		nif->if_flags &= ~IFF_PROMISC;
+    	}
+
+
         *lvp = nif->if_flags;
         break;
+
     case SIOCSIFADDR:
         /* Set interface hardware address. */
         memcpy(nif->if_mac, conf, sizeof(nif->if_mac));
+
+		/* Set the Ethernet MAC Address registers */
+		MCF_FEC_PALR =	(((unsigned long)nif->if_mac[0]) << 24) |
+		  				(((unsigned long)nif->if_mac[1]) << 16) |
+						(((unsigned long)nif->if_mac[2]) << 8) |
+						(((unsigned long)nif->if_mac[3]) << 0);
+		MCF_FEC_PAUR = 	(((unsigned long)nif->if_mac[4]) << 24) |
+		  				(((unsigned long)nif->if_mac[5]) << 16);
+
         break;
+
     case SIOCGIFADDR:
         /* Get interface hardware address. */
         memcpy(conf, nif->if_mac, sizeof(nif->if_mac));

@@ -34,23 +34,34 @@
 #error "Do not include this file directly. Use dev/irqreg.h instead!"
 #endif
 
+#define IH_FEC_LEVEL			 	5
+
+// Usart0 (RS485) has more priority than Usart1 and Usart2(Debug)
+#define IH_USART0_LEVEL			 	3
+#define IH_USART1_LEVEL			 	3
+#define IH_USART2_LEVEL			 	3
+
+#define IH_QSPI_LEVEL			 	2
+
+#define IH_I2C_LEVEL			 	3
+
 /*
  * Interrupt level & priority setup
  *
  * IMPORTANT: Interrupt level and priority combination MUST be unique
  */
-#define IPL_QSPI_TF     (MCF_INTC_ICR_IL(2) | MCF_INTC_ICR_IP(4))
-#define IPL_UART0       (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(0))
-#define IPL_UART1       (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(1))
-#define IPL_UART2       (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(2))
-#define IPL_I2C0        (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(3))
-#define IPL_I2C1        (MCF_INTC_ICR_IL(3) | MCF_INTC_ICR_IP(4))
+#define IPL_QSPI_TF     (MCF_INTC_ICR_IL(IH_QSPI_LEVEL) | MCF_INTC_ICR_IP(4))
+#define IPL_UART0       (MCF_INTC_ICR_IL(IH_USART0_LEVEL) | MCF_INTC_ICR_IP(0))
+#define IPL_UART1       (MCF_INTC_ICR_IL(IH_USART1_LEVEL) | MCF_INTC_ICR_IP(1))
+#define IPL_UART2       (MCF_INTC_ICR_IL(IH_USART2_LEVEL) | MCF_INTC_ICR_IP(2))
+#define IPL_I2C0        (MCF_INTC_ICR_IL(IH_I2C_LEVEL) | MCF_INTC_ICR_IP(3))
+#define IPL_I2C1        (MCF_INTC_ICR_IL(IH_I2C_LEVEL) | MCF_INTC_ICR_IP(4))
 #define IPL_PIT0	    (MCF_INTC_ICR_IL(4) | MCF_INTC_ICR_IP(0))
 #define IPL_PIT1	    (MCF_INTC_ICR_IL(4) | MCF_INTC_ICR_IP(1))
-#define IPL_FEC_RB		(MCF_INTC_ICR_IL(5) | MCF_INTC_ICR_IP(5))
-#define IPL_FEC_RF		(MCF_INTC_ICR_IL(5) | MCF_INTC_ICR_IP(4))
-#define IPL_FEC_TB		(MCF_INTC_ICR_IL(5) | MCF_INTC_ICR_IP(3))
-#define IPL_FEC_TF		(MCF_INTC_ICR_IL(5) | MCF_INTC_ICR_IP(2))
+#define IPL_FEC_RB		(MCF_INTC_ICR_IL(IH_FEC_LEVEL) | MCF_INTC_ICR_IP(5))
+#define IPL_FEC_RF		(MCF_INTC_ICR_IL(IH_FEC_LEVEL) | MCF_INTC_ICR_IP(4))
+#define IPL_FEC_TB		(MCF_INTC_ICR_IL(IH_FEC_LEVEL) | MCF_INTC_ICR_IP(3))
+#define IPL_FEC_TF		(MCF_INTC_ICR_IL(IH_FEC_LEVEL) | MCF_INTC_ICR_IP(2))
 #define IPL_GPT_PAOV    (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(3))
 #define IPL_GPT_PAI     (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(4))
 #define IPL_CWD         (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(7))

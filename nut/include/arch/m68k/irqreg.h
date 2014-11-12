@@ -39,3 +39,25 @@
 #else
 #warning "Unknown M68K MCU Family defined"
 #endif
+
+/*
+ * MCF52259RM.pdf - 16.3.2 Interrupt Mask Registers (IMRHn, IMRLn)
+ *
+ * NOTE
+ *
+ * A spurious interrupt may occur if an interrupt source is being masked in the
+ * interrupt controller mask register (IMR) or a module’s interrupt mask
+ * register while the interrupt mask in the status register (SR[I]) is set to a value
+ * lower than the interrupt’s level. This is because by the time the status
+ * register acknowledges this interrupt, the interrupt has been masked. A
+ * spurious interrupt is generated because the CPU cannot determine the
+ * interrupt source.
+ * To avoid this situation for interrupts sources with levels 1–6, first write a
+ * higher level interrupt mask to the status register, before setting the mask in
+ * the IMR or the module’s interrupt mask register. After the mask is set, return
+ * the interrupt mask in the status register to its previous value. Because level
+ * 7 interrupts cannot be disabled in the status register prior to masking, use of
+ * the IMR or module interrupt mask registers to disable level 7 interrupts is
+ * not recommended.
+ */
+#define PREVENT_SPURIOUS_INTERRUPT(code) {NutEnterCritical();{code;} NutExitCritical();}

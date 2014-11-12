@@ -54,9 +54,10 @@ static int QspiIrqCtl(int cmd, void *param)
 
 SIGNAL(IH_QSPI_TF)
 {
-	if (MCF_QSPI_QIR & (MCF_QSPI_QIR_SPIFE))
+	if (MCF_QSPI_QIR & (MCF_QSPI_QIR_SPIF))
 	{
-		MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);
+	    MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIF;			//clear finished flag (interrupt reason)
+
 		CallHandler(&sig_QSPI_TF);
 	}
 }

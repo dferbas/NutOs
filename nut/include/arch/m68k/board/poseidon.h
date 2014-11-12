@@ -30,77 +30,53 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#include <arch/m68k.h>
-#include <dev/irqreg.h>
-
-static int IrqCtl(int cmd, void *param);
-static void IrqHandler(void *arg);
-
-IRQ_HANDLER sig_DEFAULT = {
-#ifdef NUT_PERFMON
-        0,
+#ifndef _DEV_BOARD_H_
+#error "Do not include this file directly. Use dev/board.h instead!"
 #endif
-        NULL,
-        IrqHandler,
-        IrqCtl
-};
 
-/*!
- * \brief Default interrupt entry.
+/*
+ * UART devices
  */
-//NUTSIGNAL(IH_DEFAULT, sig_DEFAULT)
+#include <dev/usartmcf5.h>
+#define DEV_UART0       devUartOldMcf5_0
+#define DEV_UART1       devUartOldMcf5_1
+#define DEV_UART2       devUartOldMcf5_2
 
-SIGNAL(IH_DEFAULT)
-{
-    CallHandler (&sig_DEFAULT);
-}
+#ifndef NUTUART0
+#define NUTUART0		DEV_UART0
+#endif
 
-/*!
- * \brief Default interrupt handler.
+#ifndef NUTUART1
+#define NUTUART1		DEV_UART1
+#endif
+
+#ifndef NUTUART2
+#define NUTUART2		DEV_UART2
+#endif
+
+/*
+ * Debug device.
  */
-static void IrqHandler(void *arg)
-{
-    //  void Put(char ch)
-    //  {
-    //      #define DEVNUM 1
-    //
-    //      /* Wait until the Tx register is empty */
-    //      while ((MCF_SCI_S1(DEVNUM) & MCF_SCI_S1_TDRE) == 0)
-    //          ;
-    //
-    //      /* Send the character */
-    //      MCF_SCI_D(DEVNUM) = (uint8_t) ch;
-    //  }
-    //
-    //  int Write(const void *buffer, int len)
-    //  {
-    //      int c = len;
-    //      const char *cp = (const char *) buffer;
-    //
-    //      while (c--) {
-    //          Put(*cp++);
-    //      }
-    //
-    //      return len;
-    //  }
-    //
-    //  Write("gogo", 4);
+#ifndef DEV_DEBUG
+#define DEV_DEBUG		devDebug0
+#endif
 
-
-    while (1)
-        ;
-}
-
-/*!
- * \brief Default interrupt control.
- *
- * \param cmd   Control command.
- *              - NUT_IRQCTL_INIT Initialize and disable interrupt.
- * \param param Pointer to optional parameter.
- *
- * \return 0 on success, -1 otherwise.
+/*
+ * RTC chip
  */
-static int IrqCtl(int cmd, void *param)
-{
-    return (cmd == NUT_IRQCTL_INIT) ? 0 : -1;
-}
+#include <dev/rtc.h>
+extern NUTRTC rtcMcf5225;
+
+#ifndef RTC_CHIP0
+#define RTC_CHIP0 rtcMcf5225
+#endif
+
+/*
+ * Ethernet device
+ */
+extern NUTDEVICE devMcf5Fec;
+
+#ifndef DEV_ETHER
+#define DEV_ETHER   devMcf5Fec
+#endif
+

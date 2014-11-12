@@ -91,6 +91,10 @@
 #include <arch/cm3/nxp/lpc17xx_iap.h>
 #elif defined(NUT_CONFIG_AT24)
 #include <dev/eeprom.h>
+#elif defined(NUT_CONFIG_M24AA256)
+#include <dev/eeprom_24aa256.h>
+#elif defined(NUT_CONFIG_24C02)
+#include <dev/eeprom_24C02.h>
 #endif
 
 /*!
@@ -133,6 +137,12 @@ int NutNvMemLoad(unsigned int addr, void *buff, size_t siz)
 #elif defined(NUT_CONFIG_AT24)
     EEInit();
     return EEReadData( addr, buff, siz);
+#elif defined(NUT_CONFIG_M24AA256)
+    // JS .. tohle se musi predelat. Timeout jsem vzal ze SIM2 aplikace
+    return (EEReadBlock( addr, buff, siz, ((siz / 100) + 1) * 20) >= 0) ? 0 : -1;
+#elif defined(NUT_CONFIG_24C02)
+    // JS .. tohle se musi predelat. Timeout jsem vzal ze SIM2 aplikace
+    return (EE_24C02ReadBlock( addr, buff, siz, ((siz / 100) + 1) * 20) >= 0) ? 0 : -1;
 #else
     return -1;
 #endif
@@ -172,6 +182,10 @@ int NutNvMemSave(unsigned int addr, const void *buff, size_t len)
     return Lpc17xxIapParamWrite(addr, buff, len);
 #elif defined(NUT_CONFIG_AT24)
     return EEWriteData( addr, buff, len);
+#elif defined(NUT_CONFIG_M24AA256)
+    return (EEWriteBlock( addr, buff, len) >= 0) ? 0 : -1;
+#elif defined(NUT_CONFIG_24C02)
+    return (EE_24C02WriteBlock( addr, buff, len) >= 0) ? 0 : -1;
 #else
     return -1;
 #endif

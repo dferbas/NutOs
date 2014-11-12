@@ -115,7 +115,7 @@ void NutThreadEntry(void)
 void NutThreadSwitch(void)
 {
 #define LOCAL_VARIABLES_SIZE (sizeof(SWITCHFRAME))
-    SWITCHFRAME sf;
+    volatile SWITCHFRAME sf;
 
     /* Save CPU context. */
     __asm__ volatile("move.w	%sr,%d1");
@@ -138,9 +138,8 @@ void NutThreadSwitch(void)
 
     /* Restore context (Stack Pointer, Frame Pointer, DA Registers, Status Register. */
     __asm__ volatile("move.l	%[td_sp],%%sp" ::[td_sp] "m" (runningThread->td_sp));
-    __asm__ volatile("move.l	%sp,%a0");
-    __asm__ volatile("adda.l	%[size],%%a0" ::[size] "i" (LOCAL_VARIABLES_SIZE));
-    __asm__ volatile("move.l	%a0,%fp");
+    __asm__ volatile("move.l	%sp,%fp");
+    __asm__ volatile("adda.l	%[size],%%fp" ::[size] "i" (LOCAL_VARIABLES_SIZE));
     __asm__ volatile("movem.l	%[sf_sr], %%d1-%%d7/%%a2-%%a5"::[sf_sr] "m" (sf.sr));
     __asm__ volatile("move.w	%d1,%sr");
 }

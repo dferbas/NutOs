@@ -106,7 +106,7 @@ THREAD( NutStart, arg)
      * This cannot be called sooner, because NonVolatile memory driver
      * may use interrupts, timers and thread switching.
      */
-    NutLoadConfig();
+//    NutLoadConfig(); //JS TODO: nemuze byt zde se stavajicim TWI driverem
 
 #ifdef NUT_INIT_MAIN
     /*

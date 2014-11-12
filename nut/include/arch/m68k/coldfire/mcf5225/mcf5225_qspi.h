@@ -27,12 +27,12 @@
 *********************************************************************/
 
 /* Register read/write macros */
-#define MCF_QSPI_QMR                         (*(uint16_t*)(0x40000340))
-#define MCF_QSPI_QDLYR                       (*(uint16_t*)(0x40000344))
-#define MCF_QSPI_QWR                         (*(uint16_t*)(0x40000348))
-#define MCF_QSPI_QIR                         (*(uint16_t*)(0x4000034C))
-#define MCF_QSPI_QAR                         (*(uint16_t*)(0x40000350))
-#define MCF_QSPI_QDR                         (*(uint16_t*)(0x40000354))
+#define MCF_QSPI_QMR                         (*(volatile uint16_t*)(0x40000340))
+#define MCF_QSPI_QDLYR                       (*(volatile uint16_t*)(0x40000344))
+#define MCF_QSPI_QWR                         (*(volatile uint16_t*)(0x40000348))
+#define MCF_QSPI_QIR                         (*(volatile uint16_t*)(0x4000034C))
+#define MCF_QSPI_QAR                         (*(volatile uint16_t*)(0x40000350))
+#define MCF_QSPI_QDR                         (*(volatile uint16_t*)(0x40000354))
 
 
 /* Bit definitions and macros for MCF_QSPI_QMR */
@@ -84,6 +84,6 @@
 #define MCF_QSPI_QDR_QSPI_CS2                (0x400)
 #define MCF_QSPI_QDR_QSPI_CS1                (0x200)
 #define MCF_QSPI_QDR_QSPI_CS0                (0x100)
-#define MCF_QSPI_QDR_CS(x)                 	 (((x)&0xF)<<8)   
+#define MCF_QSPI_QDR_CS(x)                 	 ((0xF<<8) &~(x))
 
 #endif /* __MCF5225_QSPI_H__ */

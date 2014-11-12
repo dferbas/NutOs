@@ -228,7 +228,7 @@ int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, 
     	dev->tw_mm_que = 0;
     }
 
-	NutEnterCritical(); /* Enter the critical section */
+    NutEnterCriticalLevel(IH_I2C_LEVEL); /* Enter the critical section */
 
 	MCF_I2C_I2CR(dev->dcb_base) |= MCF_I2C_I2CR_MTX; /* Set TX mode */
 	if (MCF_I2C_I2CR(dev->dcb_base) & MCF_I2C_I2CR_MSTA) { /* Is device in master mode? */
@@ -244,7 +244,7 @@ int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, 
     if (NutEventWait(&dev->tw_mm_que, tmo)) {
     	dev->tw_mm_error = TWERR_TIMEOUT;
     } else {
-        NutEnterCritical();
+    	NutEnterCriticalLevel(IH_I2C_LEVEL);
         if (dev->tw_mm_err) {
         	dev->tw_mm_error = dev->tw_mm_err;
         } else {

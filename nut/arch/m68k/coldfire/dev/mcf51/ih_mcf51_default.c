@@ -50,7 +50,7 @@ IRQ_HANDLER sig_DEFAULT = {
  */
 //NUTSIGNAL(IH_DEFAULT, sig_DEFAULT)
 
-__attribute__((interrupt_handler)) void IH_DEFAULT(void)
+SIGNAL(IH_DEFAULT)
 {
 	CallHandler (&sig_DEFAULT);
 }

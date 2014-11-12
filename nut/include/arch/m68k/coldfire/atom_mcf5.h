@@ -47,29 +47,36 @@
 
 /*
  * savpri - variable used to save SR register
- * compilator knows that register d0 is used
+ * 			following also works
+	uint16_t register _savpri asm ("d7"); \
+ * "d" constraint forces dn register to be used, because move.w sr,... can be only to/from data register
+ * {it is sufficient to have this constraint only in NutJumpOutCritical, in NutEnterCritical can be "=r")
+ * compilator knows that register d0 is used, because "d0" is listed in clobbered regs
+
  */
 #define NutEnterCritical() \
 { \
-	uint16_t volatile _savpri; \
+	uint16_t register _savpri; \
 	asm volatile ( \
 		"move.w	%%sr, %%d0\n" \
 		"move.w	%%d0,%[savpri]\n" \
 		"ori.l #0x700, %%d0\n" \
-		"move.w %%d0, %%sr\n" :: [savpri] "m" (_savpri) : "d0");
+		"move.w %%d0, %%sr\n" : [savpri] "=d" (_savpri) :: "d0");
 
-
-#define NutExitCritical() \
- \
+#define NutEnterCriticalLevel(level) \
+{ \
+	uint16_t register _savpri; \
 	asm volatile ( \
-		"move.w %[savpri], %%d0\n" \
-		"move.w %%d0,%%sr\n" :: [savpri] "m" (_savpri) : "d0"); \
-}
+		"move.w	%%sr, %%d0\n" \
+		"move.w	%%d0,%[savpri]\n" \
+		"andi.l #~0x700, %d0\n"\
+		"ori.l %[lvl], %%d0\n"\
+		"move.w %%d0, %%sr\n" : [savpri] "=d" (_savpri) : [lvl] "i" (level * 0x100) : "d0");
 
 #define NutJumpOutCritical() \
  \
 	asm volatile ( \
-		"move.w %[savpri], %%d0\n" \
-		"move.w %%d0,%%sr\n" :: [savpri] "m" (_savpri) : "d0"); \
+		"move.w %[savpri], %%sr\n" :: [savpri] "d" (_savpri)); \
 
+#define NutExitCritical() NutJumpOutCritical() }
 

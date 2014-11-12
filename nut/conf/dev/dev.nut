@@ -813,6 +813,52 @@ nutdev =
         options =
         {
             {
+                macro = "NUT_CONFIG_M24AA256",
+                brief = "Microchip 24AA256 EEPROM",
+                description = "If enabled, the Microchip 24AA256 EEPROM is used for non-volatile memory.",
+                provides = { "DEV_NVMEM" },
+                flavor = "booldata",
+                exclusivity =
+                {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
+                    "NUT_CONFIG_AT24",
+                    "NUT_CONFIG_X12RTC",
+                    "NUT_CONFIG_AT45D",
+                    "NUT_CONFIG_AT45DB",
+                    "NUT_CONFIG_AT49BV",
+                    "NUT_CONFIG_AT91EFC",
+                    "HW_FLASH_STM32",
+                    "NUT_CONFIG_LPC177x_8x_EEPROM",
+                    "NUT_CONFIG_LPC17xx_IAP"
+                },
+                default = "0",
+                file = "include/cfg/eeprom.h"
+            },
+            {
+                macro = "NUT_CONFIG_24C02",
+                brief = "Microchip 24C02 EEPROM",
+                description = "If enabled, the Microchip 24C02 EEPROM is used for non-volatile memory.",
+                provides = { "DEV_NVMEM" },
+                flavor = "booldata",
+                exclusivity =
+                {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
+                    "NUT_CONFIG_AT24",
+                    "NUT_CONFIG_X12RTC",
+                    "NUT_CONFIG_AT45D",
+                    "NUT_CONFIG_AT45DB",
+                    "NUT_CONFIG_AT49BV",
+                    "NUT_CONFIG_AT91EFC",
+                    "HW_FLASH_STM32",
+                    "NUT_CONFIG_LPC177x_8x_EEPROM",
+                    "NUT_CONFIG_LPC17xx_IAP"
+                },
+                default = "0",
+                file = "include/cfg/eeprom.h"
+            },
+            {
                 macro = "NUT_CONFIG_AT45D",
                 brief = "Atmel AT45D DataFlash",
                 description = "If enabled, the Atmel AT45D DataFlash is used for non-volatile memory."..
@@ -822,6 +868,8 @@ nutdev =
                 flavor = "booldata",
                 exclusivity =
                 {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
                     "NUT_CONFIG_AT24",
                     "NUT_CONFIG_X12RTC",
                     "NUT_CONFIG_AT45D",
@@ -843,6 +891,8 @@ nutdev =
                 flavor = "boolean",
                 exclusivity =
                 {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
                     "NUT_CONFIG_AT24",
                     "NUT_CONFIG_X12RTC",
                     "NUT_CONFIG_AT45D",
@@ -864,6 +914,8 @@ nutdev =
                 flavor = "boolean",
                 exclusivity =
                 {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
                     "NUT_CONFIG_AT24",
                     "NUT_CONFIG_X12RTC",
                     "NUT_CONFIG_AT45D",
@@ -886,6 +938,8 @@ nutdev =
                 flavor = "boolean",
                 exclusivity =
                 {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
                     "NUT_CONFIG_AT24",
                     "NUT_CONFIG_X12RTC",
                     "NUT_CONFIG_AT45D",
@@ -908,6 +962,8 @@ nutdev =
                 flavor = "boolean",
                 exclusivity =
                 {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
                     "NUT_CONFIG_AT24",
                     "NUT_CONFIG_X12RTC",
                     "NUT_CONFIG_AT45D",
@@ -930,6 +986,8 @@ nutdev =
                 flavor = "boolean",
                 exclusivity =
                 {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
                     "NUT_CONFIG_AT24",
                     "NUT_CONFIG_X12RTC",
                     "NUT_CONFIG_AT45D",
@@ -952,6 +1010,8 @@ nutdev =
                 flavor = "boolean",
                 exclusivity =
                 {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
                     "NUT_CONFIG_AT24",
                     "NUT_CONFIG_X12RTC",
                     "NUT_CONFIG_AT45D",
@@ -972,6 +1032,8 @@ nutdev =
                 flavor = "boolean",
                 exclusivity =
                 {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
                     "NUT_CONFIG_AT24",
                     "NUT_CONFIG_X12RTC",
                     "NUT_CONFIG_AT45D",
@@ -992,6 +1054,8 @@ nutdev =
                 flavor = "boolean",
                 exclusivity =
                 {
+                	"NUT_CONFIG_M24AA256", 
+                	"NUT_CONFIG_24C02",
                     "NUT_CONFIG_AT24",
                     "NUT_CONFIG_X12RTC",
                     "NUT_CONFIG_AT45D",
@@ -5052,5 +5116,37 @@ nutdev =
         description = "DS28CM00 - I²C/SMBus Silicon Serial Number",
         requires = {"DEV_TWI" },
         sources = { "ds28cm00.c" }
+    },
+
+
+    {
+        name = "nutdev_pca9555_multi_sla",
+        brief = "PCA9555 Multi Slave Driver",
+        description = "16-bit I2C-bus I/O port with interrupt.",
+		provides = { "DEV_IOEXP" },
+        requires = { "DEV_TWI", },
+        sources = { "pca9555_multi_sla.c" },
+    },
+
+    --
+    -- 1 Wire DS2482 multi slaves - Multi-Channel 1-Wire Master
+    --
+    {
+        name = "nutarch_one_wires",
+        brief = "1 Wire DS2482 multi slaves",
+        description = "1 Wire DS2482 - Multi-Channel 1-Wire Master",
+        requires = {"DEV_TWI" },
+        sources = { "ds2482_multi_sla.c" }
+    },
+
+    --
+    -- 32 Mbit SPI Serial Flash SST25VF
+    --
+    {
+        name = "nutarch_flash_SST25VF",
+        brief = "Flash SST25VF",
+        description = "32 Mbit SPI Serial Flash SST25VF",
+        requires = {"DEV_SPI" },
+        sources = { "flash_sst25vf.c" }
     },
 }

@@ -19,24 +19,24 @@ extern "C" {
 // default qspi boud rate in Hz
 #define QSPI_BAUD_RATE		400000
 
-#define PSP_SPI_SUCCESS 0
-#define PSP_SPI_ERROR   1
+#define QSPI_SUCCESS 0
+#define QSPI_ERROR   1
 
 typedef int  t_spi_ret;
 
-t_spi_ret psp_spi_tx1 ( uint8_t uid, uint8_t val );
-t_spi_ret psp_spi_tx ( uint8_t uid, uint8_t * p_src, uint32_t len );
-t_spi_ret psp_spi_rx ( uint8_t uid, uint8_t * p_dst, uint32_t len );
-void psp_spi_cs_lo ( uint8_t uid );
-void psp_spi_cs_hi ( uint8_t uid );
-void psp_spi_lock ( uint8_t unit );
-void psp_spi_unlock ( uint8_t unit );
-t_spi_ret psp_spi_set_baudrate ( uint8_t uid, uint32_t br );
-t_spi_ret psp_spi_get_baudrate ( uint8_t uid, uint32_t * p_br );
-t_spi_ret psp_spi_init ( uint8_t uid );
-t_spi_ret psp_spi_start ( uint8_t uid );
-t_spi_ret psp_spi_stop ( uint8_t uid );
-t_spi_ret psp_spi_delete ( uint8_t uid );
+t_spi_ret qspi_tx1 ( uint8_t uid, uint8_t val );
+t_spi_ret qspi_tx ( uint8_t uid, uint8_t * p_src, uint32_t len );
+t_spi_ret qspi_rx ( uint8_t uid, uint8_t * p_dst, uint32_t len );
+void qspi_cs_lo ( uint8_t uid );
+void qspi_cs_hi ( uint8_t uid );
+void qspi_lock ( uint8_t unit );
+void qspi_unlock ( uint8_t unit );
+t_spi_ret qspi_set_baudrate ( uint8_t uid, uint32_t br );
+t_spi_ret qspi_get_baudrate ( uint8_t uid, uint32_t * p_br );
+t_spi_ret qspi_init ( uint8_t uid );
+t_spi_ret qspi_start ( uint8_t uid );
+t_spi_ret qspi_stop ( uint8_t uid );
+t_spi_ret qspi_delete ( uint8_t uid );
 
 
 
