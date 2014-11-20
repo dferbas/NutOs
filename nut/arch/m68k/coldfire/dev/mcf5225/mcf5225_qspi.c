@@ -29,18 +29,16 @@ static inline void FillBuff(uint8_t *p_src, uint32_t len)
 {
 	uint32_t i;
 
-	//fill commands
-	MCF_QSPI_QAR = QSPI_COMMAND_ADDRESS;
-    for (i = 0; i < len; i++ )
+    for (i = 0; i < len; i++ ){
+    	MCF_QSPI_QAR = QSPI_COMMAND_ADDRESS + i;
         MCF_QSPI_QDR = MCF_QSPI_QDR_DATA(MCF_QSPI_QDR_BITSE
-        		//TODO otestovat (CS se nevraci po bytu)
-        		| MCF_QSPI_QDR_CONT
-        		//TODO        		/* | MCF_QSPI_QDR_DT | MCF_QSPI_QDR_DSCK */
-        		| MCF_QSPI_QDR_CS(MCF_QSPI_QDR_QSPI_CS0));			//assert SPI_CS0
-	//fill data
-	MCF_QSPI_QAR = QSPI_TRANSMIT_ADDRESS;
-    for (i = 0; i < len; i++ )
-        MCF_QSPI_QDR = (p_src == NULL) ? 0xFF : *p_src++;
+        		| MCF_QSPI_QDR_CONT);
+		//fill data
+		MCF_QSPI_QAR = QSPI_TRANSMIT_ADDRESS + i;
+
+        MCF_QSPI_QDR = (p_src == NULL) ? 0xFF : p_src[i];
+        tx_counter++;
+    }
 }
 
 static inline void SetupXmit(uint32_t len)
@@ -69,18 +67,27 @@ static inline void StartXmit(void)
 */
 t_spi_ret qspi_tx1 ( uint8_t uid, uint8_t val )
 {
-    MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIF;			//clear finished flag
-//    PREVENT_SPURIOUS_INTERRUPT(MCF_QSPI_QIR &= ~MCF_QSPI_QIR_SPIFE;)
-	MCF_QSPI_QIR &= ~MCF_QSPI_QIR_SPIFE;		//disable interrupts
+	// wait on mutex 'start transmit'
+	NutEventWait(&mutex_tran_start, NUT_WAIT_INFINITE);
+
+	tx_counter = 0;
+	rx_counter = 0;
 
 	FillBuff(&val, 1);
+
+    MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIF;
+    MCF_QSPI_QIR &= ~MCF_QSPI_QIR_SPIFE;
+
     SetupXmit(1);
     StartXmit();
 
     while (!(MCF_QSPI_QIR & MCF_QSPI_QIR_SPIF))	// polling
     	;/* Empty Body */
 
-//    PREVENT_SPURIOUS_INTERRUPT(MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);)
+//    MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);
+
+    // release mutex 'start transmit'
+    NutEventPost(&mutex_tran_start);
 
     return QSPI_SUCCESS;
 }
@@ -97,19 +104,16 @@ t_spi_ret qspi_tx1 ( uint8_t uid, uint8_t val )
 ** Return:
 **   QSPI_...
 */
-t_spi_ret qspi_tx ( uint8_t uid, uint8_t *p_src, uint32_t len )
+t_spi_ret qspi_tx ( uint8_t uid, uint8_t * p_src, uint32_t len )
 {
-    MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIF;		//clear finished flag (only status bit, cannot assert interrupt)
+	// wait on mutex 'start transmit'
+	NutEventWait(&mutex_tran_start, NUT_WAIT_INFINITE);
+
+	tx_counter = 0;
+	rx_counter = 0;
 
     if (len > 16) // interrupt method
     {
-    	// wait on mutex 'start transmit'
-    	NutEventWait(&mutex_tran_start, NUT_WAIT_INFINITE);
-
-        // initialization for interrupt 'end of queue'
-//        PREVENT_SPURIOUS_INTERRUPT(MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIFE;)
-        MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIFE;
-
         // save source data pointer to interrupt TX buffer
         p_tx_data = p_src;
         // save destination data pointer to interrupt RX buffer
@@ -117,37 +121,40 @@ t_spi_ret qspi_tx ( uint8_t uid, uint8_t *p_src, uint32_t len )
         // save length of receive data to interrupt data size
         size_data = len;
 
+        // initialization of interrupt 'end of queue'
+        MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);
+
        	// limited transmit data length
         len = (len > 16) ? 16 : len;
 
-        rx_counter = 0;				//nothing received
-
-    	FillBuff(p_src, len);
-        tx_counter = len;			//filled data
+        // transmit only first 16 bytes of TX data
+		FillBuff(p_src, len);
 
         SetupXmit(len);
+        // start transmit data
         StartXmit();
 
         // wait on mutex 'end transmit'
         NutEventWait(&mutex_tran_end, NUT_WAIT_INFINITE);
 
-        // release mutex 'start transmit'
-        NutEventPost(&mutex_tran_start);
     }
     else // polling method
     {
-	//    PREVENT_SPURIOUS_INTERRUPT(MCF_QSPI_QIR &= ~MCF_QSPI_QIR_SPIFE;)
-		MCF_QSPI_QIR &= ~MCF_QSPI_QIR_SPIFE;		//disable interrupts
+        FillBuff(p_src, len);
 
-    	FillBuff(p_src, len);
+        MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIF;
+        MCF_QSPI_QIR &= ~MCF_QSPI_QIR_SPIFE;
+
         SetupXmit(len);
         StartXmit();
 
         while (!(MCF_QSPI_QIR & MCF_QSPI_QIR_SPIF))
             ; /* Empty Body */
 
-//        PREVENT_SPURIOUS_INTERRUPT(MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);)
+//        MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);
     }
+	// release mutex 'start transmit'
+	NutEventPost(&mutex_tran_start);
 
     return QSPI_SUCCESS;
 }
@@ -164,20 +171,18 @@ t_spi_ret qspi_tx ( uint8_t uid, uint8_t *p_src, uint32_t len )
 ** Return:
 **   QSPI_...
 */
-t_spi_ret qspi_rx ( uint8_t uid, uint8_t *p_dst, uint32_t len )
+t_spi_ret qspi_rx ( uint8_t uid, uint8_t * p_dst, uint32_t len )
 {
 	uint8_t j;
 
-    MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIF;		//clear finished flag (only status bit, cannot assert interrupt)
+	// wait on mutex 'start transmit'
+	NutEventWait(&mutex_tran_start, NUT_WAIT_INFINITE);
+
+	tx_counter = 0;
+	rx_counter = 0;
 
     if (len > 16) // interrupt method
     {
-    	// wait on mutex 'start transmit'
-    	NutEventWait(&mutex_tran_start, NUT_WAIT_INFINITE);
-
-        // initialization for interrupt 'end of queue'
-//        PREVENT_SPURIOUS_INTERRUPT(MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIFE;)
-        MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIFE;
 
         // save source data pointer to interrupt TX buffer
         p_tx_data = NULL;
@@ -186,132 +191,45 @@ t_spi_ret qspi_rx ( uint8_t uid, uint8_t *p_dst, uint32_t len )
         // save length of receive data to interrupt data size
         size_data = len;
 
+        // initialization of interrupt 'end of queue'
+        MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);
+
        	// limited transmit data length
         len = (len > 16) ? 16 : len;
 
-        rx_counter = 0;
-
-    	FillBuff(NULL, len);
-        tx_counter = len;						//filled data
+        FillBuff(NULL, len);
 
         SetupXmit(len);
+        // start transmit data
         StartXmit();
 
         // wait on mutex 'end transmit'
         NutEventWait(&mutex_tran_end, NUT_WAIT_INFINITE);
-
-        // release mutex 'start transmit'
-        NutEventPost(&mutex_tran_start);
-
     }
     else // polling method
     {
-	//    PREVENT_SPURIOUS_INTERRUPT(MCF_QSPI_QIR &= ~MCF_QSPI_QIR_SPIFE;)
-		MCF_QSPI_QIR &= ~MCF_QSPI_QIR_SPIFE;		//disable interrupts
+        FillBuff(NULL, len);
 
-    	FillBuff(NULL, len);
-		SetupXmit(len);
-		StartXmit();
+        MCF_QSPI_QIR |= MCF_QSPI_QIR_SPIF;
+        MCF_QSPI_QIR &= ~MCF_QSPI_QIR_SPIFE;
+
+        SetupXmit(len);
+        StartXmit();
 
         while (!(MCF_QSPI_QIR & MCF_QSPI_QIR_SPIF))
             ; /* Empty Body */
 
-        //read received data
         MCF_QSPI_QAR = QSPI_RECEIVE_ADDRESS;
-        for (j = 0; j < len; j++) {
+        for (j=0; j < len; j++) {
             p_dst[j] = MCF_QSPI_QDR;
         }
 
-//        PREVENT_SPURIOUS_INTERRUPT(MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);)
+        MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);
     }
+	// release mutex 'start transmit'
+	NutEventPost(&mutex_tran_start);
 
     return QSPI_SUCCESS;
-}
-
-
-/*
- * QSPI ISR
- */
-void QspiInterrupt(void *arg)
-{
-	uint32_t len;
-
-   	MCF_QSPI_QAR = QSPI_RECEIVE_ADDRESS;
-	if (p_rx_data == NULL)
-		rx_counter = tx_counter;				//skip data
-	else
-	{
-		while (rx_counter < tx_counter)
-			p_rx_data[rx_counter++] = MCF_QSPI_QDR;
-	}
-
-    if (rx_counter == size_data) {
-    	// release mutex 'end transmit'
-    	NutEventPostFromIrq(&mutex_tran_end);
-    	return;
-    }
-
-	//compute next transfer size
-	len = (size_data - tx_counter) > 16 ? 16 : (size_data - tx_counter);
-	FillBuff(&p_tx_data[tx_counter], len);
-	if (len != 16)								// tx_counter == size_data
-		SetupXmit(size_data & 0xF);
-	tx_counter += len;
-
-	StartXmit();
-}
-
-/*
-** qspi_init
-**
-** Init SPI port
-**
-** Input:
-**   uid   - unit ID
-** Return:
-**   QSPI_...
-*/
-t_spi_ret qspi_init ( uint8_t uid )
-{
-	t_spi_ret ret = QSPI_SUCCESS;
-
-	// CS0 to high
-	MCF_GPIO_PORTQS |= MCF_GPIO_PORTQS_PORTQS3;
-
-    // Port QS Data Direction pin 3 (QSPI_CS0) as an output
-    MCF_GPIO_DDRQS |= MCF_GPIO_DDRQS_DDRQS3;
-
-	MCF_GPIO_PQSPAR |= MCF_GPIO_PQSPAR_QSPI_DOUT_DOUT |
-                          MCF_GPIO_PQSPAR_QSPI_DIN_DIN |
-                          MCF_GPIO_PQSPAR_QSPI_CLK_CLK
-                          /*| MCF_GPIO_PQSPAR_QSPI_CS0_CS0*/;
-
-    // Set as a Master always and set CPOL & CPHA, set number of bits to be transferred for each entry in the queue
-    MCF_QSPI_QMR = MCF_QSPI_QMR_MSTR /*| MCF_QSPI_QMR_CPHA | MCF_QSPI_QMR_CPOL */ | MCF_QSPI_QMR_BITS(QSPI_TRANS_SIZE);
-
-    // Set baud rate
-    ret |= qspi_set_baudrate(0, QSPI_BAUD_RATE);
-
-	// set delays (same as in Zypcom project)
-//TODO	MCF_QSPI_QDLYR = MCF_QSPI_QDLYR_OCD(3) | MCF_QSPI_QDLYR_DTL(1);
-
-	// Use active low as default
-    MCF_QSPI_QWR = MCF_QSPI_QWR_CSIV;
-
-    // Set interrupt flags and errors
-    /*PREVENT_SPURIOUS_INTERRUPT*/MCF_QSPI_QIR = (MCF_QSPI_QIR_WCEFB | MCF_QSPI_QIR_ABRTB | MCF_QSPI_QIR_ABRTL |
-    				  MCF_QSPI_QIR_WCEF | MCF_QSPI_QIR_ABRT | MCF_QSPI_QIR_SPIF);
-
-    // Register interrupt handler
-    NutRegisterIrqHandler(&sig_QSPI_TF, QspiInterrupt, NULL);
-
-    /* Enable Interrupts */
-   	NutIrqEnable(&sig_QSPI_TF);
-
-   	// put mutex 'start transmit' into signaled state
-   	NutEventPost(&mutex_tran_start);
-
-    return ret;
 }
 
 /*
@@ -392,8 +310,7 @@ t_spi_ret qspi_set_baudrate ( uint8_t uid, uint32_t br )
 	baudRate = (baudRate < 2) ? 2 : baudRate;		// set min possible baudrate
 	baudRate = (baudRate > 255) ? 255 : baudRate;	// set max possible baudrate
     if ((baudRate > 1 ) && (baudRate < 256)){
-        MCF_QSPI_QMR &= ~MCF_QSPI_QMR_BAUD(0xFF);
-        MCF_QSPI_QMR |= MCF_QSPI_QMR_BAUD((uint8_t)baudRate);
+        MCF_QSPI_QMR = (MCF_QSPI_QMR & ~MCF_QSPI_QMR_BAUD(0xFF)) | MCF_QSPI_QMR_BAUD((uint8_t)baudRate);
 
         return QSPI_SUCCESS;
     }
@@ -421,6 +338,58 @@ t_spi_ret qspi_get_baudrate ( uint8_t uid, uint32_t * p_br )
 	*p_br = ( NutGetCpuClock() / (2 * baud) );
 
 	return QSPI_SUCCESS;
+}
+
+/*
+** qspi_init
+**
+** Init SPI port
+**
+** Input:
+**   uid   - unit ID
+** Return:
+**   QSPI_...
+*/
+t_spi_ret qspi_init ( uint8_t uid )
+{
+	t_spi_ret ret = QSPI_SUCCESS;
+
+	// CS0 to high
+	MCF_GPIO_PORTQS |= MCF_GPIO_PORTQS_PORTQS3;
+
+	MCF_GPIO_PQSPAR |= MCF_GPIO_PQSPAR_QSPI_DOUT_DOUT |
+                          MCF_GPIO_PQSPAR_QSPI_DIN_DIN |
+                          MCF_GPIO_PQSPAR_QSPI_CLK_CLK
+                          /*| MCF_GPIO_PQSPAR_QSPI_CS0_CS0*/;
+
+    // Port QS Data Direction pin 3 (QSPI_PCS0) as an output
+    MCF_GPIO_DDRQS |= MCF_GPIO_DDRQS_DDRQS3;
+
+    // Set as a Master always and set CPOL & CPHA
+    MCF_QSPI_QMR = MCF_QSPI_QMR_MSTR /*| MCF_QSPI_QMR_CPHA | MCF_QSPI_QMR_CPOL */;
+    // Set number of bits to be transferred for each entry in the queue
+    MCF_QSPI_QMR |= MCF_QSPI_QMR_BITS(QSPI_TRANS_SIZE);
+
+    // Set baud rate
+    ret |= qspi_set_baudrate(0, QSPI_BAUD_RATE);
+
+    // Use active low as default
+    MCF_QSPI_QWR = MCF_QSPI_QWR_CSIV;
+
+    // Set interrupt mode
+    MCF_QSPI_QIR = (MCF_QSPI_QIR_WCEFB | MCF_QSPI_QIR_ABRTB |
+                      MCF_QSPI_QIR_ABRTL | MCF_QSPI_QIR_SPIFE |
+                      MCF_QSPI_QIR_WCEF | MCF_QSPI_QIR_ABRT |
+                      MCF_QSPI_QIR_SPIF);
+
+    // Register interrupt handler
+    NutRegisterIrqHandler(&sig_QSPI_TF, QspiInterrupt, NULL);
+   	NutIrqEnable(&sig_QSPI_TF);
+
+   	// put mutex 'start transmit' into signaled state
+   	NutEventPost(&mutex_tran_start);
+
+    return ret;
 }
 
 /*
@@ -466,4 +435,33 @@ t_spi_ret qspi_stop ( uint8_t uid )
 t_spi_ret qspi_delete ( uint8_t uid )
 {
   return QSPI_SUCCESS;
+}
+
+/*
+ * QSPI ISR
+ */
+void QspiInterrupt(void *arg)
+{
+	uint32_t i;
+
+   	MCF_QSPI_QAR = QSPI_RECEIVE_ADDRESS;
+   	for (i = rx_counter; i < tx_counter; i++ ) {
+   		if (p_rx_data != NULL) {
+   			p_rx_data[rx_counter] = MCF_QSPI_QDR;
+   		}
+   		rx_counter++;
+   	}
+
+   	FillBuff((p_tx_data != NULL) ? &p_tx_data[tx_counter] : NULL, (size_data - tx_counter) > 16 ? 16 : (size_data - tx_counter));
+
+    if (tx_counter == size_data)
+    	SetupXmit((size_data)%16);
+
+    if (rx_counter == size_data) {
+    	// release mutex 'end transmit'
+    	NutEventPostFromIrq(&mutex_tran_end);
+    	return;
+    }
+
+    StartXmit();
 }
