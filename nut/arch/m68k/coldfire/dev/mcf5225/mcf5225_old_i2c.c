@@ -16,23 +16,23 @@
 
 typedef struct {
 	uint8_t	dcb_base;
-	HANDLE tw_mm_mutex;      /* Exclusive master access. */
-	HANDLE tw_mm_que;        /* Threads waiting for master transfer done. */
-	volatile uint8_t tw_mm_err;   /* Current master mode error. */
-	uint8_t tw_mm_error;          /* Last master mode error. */
+	HANDLE tw_mm_mutex;      	/* Exclusive master access. */
+	HANDLE tw_mm_que;        	/* Threads waiting for master transfer done. */
+	volatile uint8_t tw_mm_err; /* Current master mode error. */
+	uint8_t tw_mm_error;        /* Last master mode error. */
 
-	uint8_t I2C1_SlaveAddr;            /* Variable for Slave address */
-	uint32_t AddrLenM;                   /* Length of input bufer's content */
-	uint32_t InpLenM;                   /* Length of input bufer's content */
-	uint32_t OutLenM;                   /* Length of output bufer's content */
-	uint32_t tw_mr_cnt;                   /* Number of received bytes */
-	uint8_t *DataPtrM;                  /* Pointer to data buffer for Master mode */
-	uint8_t *AddrPtrM;                  /* Pointer to output buffer for Master mode */
-	//uint32_t I2C1_SndRcvTemp;                  /* Temporary variable for SendChar (RecvChar) when they call SendBlock (RecvBlock) */
-	//uint8_t ChrTemp;                   /* Temporary variable for SendChar method */
-	volatile uint8_t tw_if_bsy;   	/* Bus busy flag */
-	uint8_t tw_rptst_rqst;   			/* Request for repeated start */
-	uint8_t tw_mm_sla;            /* Destination slave address. */
+	uint8_t I2C1_SlaveAddr;     /* Variable for Slave address */
+	uint32_t AddrLenM;          /* Length of input bufer's content */
+	uint32_t InpLenM;           /* Length of input bufer's content */
+	uint32_t OutLenM;           /* Length of output bufer's content */
+	uint32_t tw_mr_cnt;         /* Number of received bytes */
+	uint8_t *DataPtrM;          /* Pointer to data buffer for Master mode */
+	uint8_t *AddrPtrM;          /* Pointer to output buffer for Master mode */
+	//uint32_t I2C1_SndRcvTemp; /* Temporary variable for SendChar (RecvChar) when they call SendBlock (RecvBlock) */
+	//uint8_t ChrTemp;          /* Temporary variable for SendChar method */
+	volatile uint8_t tw_if_bsy; /* Bus busy flag */
+	uint8_t tw_rptst_rqst;   	/* Request for repeated start */
+	uint8_t tw_mm_sla;          /* Destination slave address. */
 } TWIDCB;
 
 static TWIDCB dcb_twi[2];
@@ -117,7 +117,7 @@ static void TwInterrupt(void *arg)
 	}
 }
 
-static void reanableDevice(int dcbBase){
+static void reenableDevice(int dcbBase){
 	/* clear control register */
 	MCF_I2C_I2CR(dcbBase) = 0;
 
@@ -139,6 +139,7 @@ static void reanableDevice(int dcbBase){
 	MCF_I2C_I2CR(dcbBase) = MCF_I2C_I2CR_IEN;
 }
 
+//TODO dodelat \param
 /*!
  * \brief Transmit and/or receive data as a master.
  *
@@ -151,16 +152,6 @@ static void reanableDevice(int dcbBase){
  *               must be specified as a 7-bit address. For example, the
  *               PCF8574A may be configured to slave addresses from 0x38
  *               to 0x3F.
- * \param txdata Points to the data to transmit. Ignored, if the number
- *               of data bytes to transmit is zero.
- * \param txlen  Number of data bytes to transmit. If zero, then the
- *               interface will not send any data to the slave device
- *               and will directly enter the master receive mode.
- * \param rxdata Points to a buffer, where the received data will be
- *               stored. Ignored, if the maximum number of bytes to
- *               receive is zero.
- * \param rxsiz  Maximum number of bytes to receive. Set to zero, if
- *               no bytes are expected from the slave device.
  * \param tmo    Timeout in milliseconds. To disable timeout, set this
  *               parameter to NUT_WAIT_INFINITE.
  *
@@ -181,26 +172,22 @@ int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, 
 	dev->tw_mm_err = 0;
 	dev->tw_mr_cnt = 0;
 	dev->tw_mm_sla = (uint8_t) (sla << 1); /* Set slave address */
-	uint8_t slave_addr = (uint8_t) (dev->tw_mm_sla); /* Prepare slave address */
-    if (write)
+	uint8_t slave_addr = (uint8_t) (dev->tw_mm_sla); /* Prepare slave address (default = write) */
+
+	dev->AddrPtrM = (uint8_t *) addr;		/* Save pointer to address for transmit */
+	dev->AddrLenM = addrsiz; 				/* Set length of data */
+
+   	dev->DataPtrM = (uint8_t *) data;		/* Save pointer to data for transmit or receive */
+
+	if (write)
     {
-    	dev->AddrLenM = addrsiz; /* Set lenght of data */
-    	dev->AddrPtrM = (uint8_t *) addr; /* Save pointer to data for transmit */
-
-    	dev->OutLenM = siz; /* Set lenght of data */
-    	dev->DataPtrM = (uint8_t *) data; /* Save pointer to data for transmit */
-
-    	dev->InpLenM = 0; /* Set lenght of data */
+    	dev->OutLenM = siz;					/* Set length of data to transmit */
+    	dev->InpLenM = 0;
     }
     else
     {
-    	dev->AddrLenM = addrsiz; /* Set lenght of data */
-    	dev->AddrPtrM = (uint8_t *) addr; /* Save pointer to data for transmit */
-
-    	dev->OutLenM = 0; 	/* Set lenght of data */
-
-    	dev->InpLenM = siz; /* Set lenght of data */
-    	dev->DataPtrM = (uint8_t *) data; /* Save pointer to data for reception */
+    	dev->OutLenM = 0;
+    	dev->InpLenM = siz;					/* Set length of data to receive */
 
     	if (dev->InpLenM && dev->AddrLenM)
     		dev->tw_rptst_rqst = 1;
@@ -208,11 +195,11 @@ int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, 
     		dev->tw_rptst_rqst = 0;
 
     	if (dev->AddrLenM == 0)
-    		slave_addr |= 0x01;
+    		slave_addr |= 0x01;				/* -> read */
     }
 
 	if((MCF_I2C_I2SR(dev->dcb_base) & MCF_I2C_I2SR_IBB) || dev->tw_if_bsy) { /* Is the bus busy */
-		reanableDevice(dev->dcb_base);
+		reenableDevice(dev->dcb_base);
 
 		if(dev->dcb_base == 0){
 			NutIrqEnable(&sig_I2C0);
@@ -230,11 +217,11 @@ int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, 
 
     NutEnterCriticalLevel(IH_I2C_LEVEL); /* Enter the critical section */
 
-	MCF_I2C_I2CR(dev->dcb_base) |= MCF_I2C_I2CR_MTX; /* Set TX mode */
-	if (MCF_I2C_I2CR(dev->dcb_base) & MCF_I2C_I2CR_MSTA) { /* Is device in master mode? */
-		MCF_I2C_I2CR(dev->dcb_base) |= MCF_I2C_I2CR_RSTA; /* If yes then repeat start cycle generated */
+	MCF_I2C_I2CR(dev->dcb_base) |= MCF_I2C_I2CR_MTX;		/* Set TX mode */
+	if (MCF_I2C_I2CR(dev->dcb_base) & MCF_I2C_I2CR_MSTA) {	/* Is device in master mode? */
+		MCF_I2C_I2CR(dev->dcb_base) |= MCF_I2C_I2CR_RSTA;	/* If yes then repeat start cycle generated */
 	} else {
-		MCF_I2C_I2CR(dev->dcb_base) |= MCF_I2C_I2CR_MSTA; /* If no then start signal generated */
+		MCF_I2C_I2CR(dev->dcb_base) |= MCF_I2C_I2CR_MSTA;	/* If no then start signal generated */
 	}
 	MCF_I2C_I2DR(dev->dcb_base) = slave_addr;
 
@@ -380,7 +367,7 @@ int TwInit(uint8_t sla)
 	TwIOCtl(TWI_SETSPEED + (sla & DCB_BASE_MASK), &speed);
 	TwIOCtl(TWI_GETSPEED + (sla & DCB_BASE_MASK), &speed);
 
-	reanableDevice(dev->dcb_base);
+	reenableDevice(dev->dcb_base);
 
 
 	if(dev->dcb_base == 0){

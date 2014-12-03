@@ -33,7 +33,7 @@ extern int TwMasterWrite(uint8_t sla, CONST void *addr, uint8_t addrlen, void *t
 static void EeBusy(void)
 {
 	int i = EEPROM_BUSY_TESTS;
-	while(TwMasterWrite(I2C_SLA_24AA256, 0, 0, 0, 0, EEPROM_BUSY_TIMEOUT) != 0 && i-- != 0);
+	while (TwMasterWrite(I2C_SLA_24AA256, 0, 0, 0, 0, EEPROM_BUSY_TIMEOUT) != 0 && i-- != 0);
 }
 /*!
  * \brief Receive Block data from Eeprom.

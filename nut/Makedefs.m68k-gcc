@@ -39,7 +39,7 @@
 include $(top_srcdir)/Makevars.m68k-gcc
 
 # Override compiler options to create debug code.
-CFLAGS_OPT   = -Os -fdata-sections -ffunction-sections
+CFLAGS_OPT   = -Os -fdata-sections -ffunction-sections #-fomit-frame-pointer
 
 # Override compiler options to create mode detailed listings
 CFLAGS_ASM = -Wa,-aghlms=$(@:.o=.lst)
