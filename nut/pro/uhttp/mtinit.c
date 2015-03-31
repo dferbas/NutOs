@@ -80,7 +80,7 @@ static MEDIA_TYPE_ENTRY mt_defaults[] = {
     { ISC_LINK_INITIAL(MEDIA_TYPE_ENTRY), mtc_image, NULL, MTFLAG_INITIAL, MediaTypeHandlerBinary, "gif" },
 #endif
 #ifdef HTTP_MEDIATYPE_CSS
-    { ISC_LINK_INITIAL(MEDIA_TYPE_ENTRY), mtc_text, NULL, MTFLAG_INITIAL, MediaTypeHandlerText, "css" },
+    { ISC_LINK_INITIAL(MEDIA_TYPE_ENTRY), mtc_text, "css", MTFLAG_INITIAL, MediaTypeHandlerText, "css" },
 #endif
 #ifdef HTTP_MEDIATYPE_BMP
     { ISC_LINK_INITIAL(MEDIA_TYPE_ENTRY), mtc_image, NULL, MTFLAG_INITIAL, MediaTypeHandlerBinary, "bmp" }
