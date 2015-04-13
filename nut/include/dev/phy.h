@@ -71,6 +71,7 @@
 #define KS8851      0x00008870  /* Located in CIDER (0xC0) register */
 /* Micrel PHY tranceiver */
 #define KSZ8051		0x00221556 /* KSZ8051MNL/RLN */
+#define KSZ8081		0x00221560 /* KSZ8081MNX/RNB */
 
 /* ST Microelectronics PHY tranceiver */
 #define STE100P     0x1C040010  /* Hitex STM32-comStick */

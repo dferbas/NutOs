@@ -145,6 +145,7 @@
 /*
  * GPIO API
  */
+#define GPIO_CFG_PERIPHERAL_MASK    0x00000003
 #define GPIO_CFG_INPUT              0x00000000
 #define GPIO_CFG_ALT1               0x00000001
 #define GPIO_CFG_ALT2               0x00000002

@@ -120,7 +120,7 @@ int GpioPinConfigSet(int bank, int bit, uint32_t flags)
  */
 int GpioPortConfigSet(int bank, uint32_t mask, uint32_t flags)
 {
-    uint32_t role = flags & (0x03 | GPIO_CFG_OUTPUT);
+    uint32_t role = flags & (GPIO_CFG_PERIPHERAL_MASK | GPIO_CFG_OUTPUT);
     uint16_t role_mask;
     uint16_t pmc_mask;
     int i;
@@ -141,11 +141,11 @@ int GpioPortConfigSet(int bank, uint32_t mask, uint32_t flags)
         MCF_GPIO_DD(bank) &= ~mask;
     }
 
-    /* Then configure pin role */
+	/* Then configure pin role */
     for (pmc_mask = 0, role_mask = 0, i = 0; i < 8; i++) {
         if (mask & _BV(i)) {
-            role_mask |= (role & 0x3) << (2 * i);
-            pmc_mask |= 0x03 << (2 * i);
+            role_mask |= (role & GPIO_CFG_PERIPHERAL_MASK) << (2 * i);
+            pmc_mask |= GPIO_CFG_PERIPHERAL_MASK << (2 * i);
         }
     }
 

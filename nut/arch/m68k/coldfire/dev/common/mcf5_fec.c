@@ -450,6 +450,12 @@ static int FecReset(IFNET *nif)
 	int rc = 0;
 	int wait;
 	uint32_t regvalue;
+	
+#if defined (MCU_MCF5225)	
+	/* Set Reset Phy pin to output */
+	GpioPinSetHigh(PORTC, 3);
+	GpioPinConfigSet(PORTC, 3, GPIO_CFG_ALT1 | GPIO_CFG_OUTPUT);
+#endif
 
 	/* ECR[ETHER_EN] is cleared (initialization time) */
 	MCF_FEC_ECR = 0;
@@ -490,6 +496,7 @@ static int FecReset(IFNET *nif)
 	/* Disable loopback */
 	MCF_FEC_RCR &= ~MCF_FEC_RCR_LOOP;
 
+	NutSleep(100);
 
 #if defined (MCU_MCF5225)
 	/* Configure MII port for MCF52259 GPIO: */
@@ -501,13 +508,12 @@ static int FecReset(IFNET *nif)
 	MCF_GPIO_PNQPAR = (MCF_GPIO_PNQPAR & ~((3 << 6) | (3 << 10))) | (MCF_GPIO_PNQPAR_IRQ3_FEC_MDIO | MCF_GPIO_PNQPAR_IRQ5_FEC_MDC);
 #else // MCU_MCF51CN
 	MCF_SOPT3 = MCF_SOPT3_PCS_OSCOUT << MCF_SOPT3_PCS_BITNUM;
-	/* Configure MII port for MCF51CN */
-	GpioPortConfigSet(PORTA, 0xFF, GPIO_CFG_ALT1 | GPIO_CFG_PULLUP);
 	/* MII_TX_ER pin P0RB2 used as gpio chip select in SM2-RM SPI FRAM */
 	GpioPortConfigSet(PORTB, 0xFB, GPIO_CFG_ALT1 | GPIO_CFG_PULLUP);
 	GpioPortConfigSet(PORTC, 0x07, GPIO_CFG_ALT1 | GPIO_CFG_PULLUP);
+	/* Configure MII port for MCF51CN */
+	GpioPortConfigSet(PORTA, 0xFF, GPIO_CFG_ALT1 | GPIO_CFG_PULLUP);
 #endif
-
 
 #ifdef PhyProbe
 	if(1)
@@ -517,21 +523,17 @@ static int FecReset(IFNET *nif)
 	NutRegisterPhy( 1, PhyWrite, PhyRead);
 
 #if defined (MCU_MCF51CN)
-	/* Set Reset Phy pin to output */
-	GpioPinSetHigh(PORTC, 3); 
-	GpioPinConfigSet(PORTC, 3, GPIO_CFG_ALT1);
-	MCF_GPIO_DD(PORTC) |= 0x8;
 
 	/* Wait for running phy after reset. */
 	NutSleep(200);
 
-	/* If Phy does not respond, restart Phy. It happends when connect to power source and voltage oscillate. */
+	/* If PHY does not respond, restart PHY. It can happen that PHY is not properly started (when power source is applied and voltage oscillates). */
 	if (PhyRead(PHY_REG_BMSR) == 0xFFFF){
 		DBG("PHY RESTART\n");
 		GpioPinSetLow(PORTC, 3);
-		NutSleep(10); // reset time 10ms
+		NutSleep(10); 				// PHY reset time 10ms
 		GpioPinSetHigh(PORTC, 3);
-		for (wait = 25;; wait--) { // wait until phy start
+		for (wait = 25;; wait--) { // wait until PHY starts
 			if (PhyRead(PHY_REG_BMSR) != 0xFFFF) {
 				break;
 			}

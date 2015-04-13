@@ -165,6 +165,7 @@ phy_status_descr_t phy_status_descr[] = {
 
     /* Micrel KSZ8051 */
     { KSZ8051,   { {30, 0x0001}, {30, 0x0002}, {0, 0}, {30, 0x0004}, {0, 0} } },
+    { KSZ8081,   { {30, 0x0001}, {30, 0x0002}, {0, 0}, {30, 0x0004}, {0, 0} } },
 
     /* STM */
 /*    { ST802RT1,  { {0,0}       , {17, 0x0200}, {0, 0}, {17, 0x0100}, {0, 0} } },*/
@@ -215,8 +216,9 @@ int NutPhyCtl( uint16_t ctl, uint32_t *par)
                 phyw( PHY_BMCR, PHY_BMCR_RES);
 
                 /* Wait till reset bit flips back to 0 */
-                while( (phyr( PHY_BMCR) & PHY_BMCR_RES) && wait<10) {
-                    NutDelay(100);
+                while( (phyr( PHY_BMCR) & PHY_BMCR_RES) && wait < 10) {
+                	//TODO: use NutSleep ?
+                	NutMicroDelay(10000/*100000*/);		//wait 10 (formerly 100) ms
                     wait++;
                 }
                 if(wait >= 10) {
