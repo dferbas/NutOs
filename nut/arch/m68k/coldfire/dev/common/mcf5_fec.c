@@ -445,16 +445,24 @@ static int FecBdInit(FECINFO *ni)
  *
  * \return 0 on success, -1 otherwise.
  */
-static int FecReset(IFNET *nif)
+static int FecReset(IFNET *nif, int do_reset)
 {
 	int rc = 0;
 	int wait;
 	uint32_t regvalue;
 	
-#if defined (MCU_MCF5225)	
+#if defined (MCU_MCF51CN)
 	/* Set Reset Phy pin to output */
 	GpioPinSetHigh(PORTC, 3);
 	GpioPinConfigSet(PORTC, 3, GPIO_CFG_ALT1 | GPIO_CFG_OUTPUT);
+	
+	MCF_SOPT3 = MCF_SOPT3_PCS_OSCOUT << MCF_SOPT3_PCS_BITNUM;
+
+	/* MII_TX_ER pin P0RB2 used as gpio chip select in SM2-RM SPI FRAM, for ETH_mod not used*/
+	GpioPortConfigSet(PORTB, 0xFB, GPIO_CFG_ALT1);
+	GpioPortConfigSet(PORTC, 0x07, GPIO_CFG_ALT1);
+	/* Configure MII port for MCF51CN */
+	GpioPortConfigSet(PORTA, 0xFF, GPIO_CFG_ALT1);
 #endif
 
 	/* ECR[ETHER_EN] is cleared (initialization time) */
@@ -496,8 +504,6 @@ static int FecReset(IFNET *nif)
 	/* Disable loopback */
 	MCF_FEC_RCR &= ~MCF_FEC_RCR_LOOP;
 
-	NutSleep(100);
-
 #if defined (MCU_MCF5225)
 	/* Configure MII port for MCF52259 GPIO: */
 //	GpioPortConfigSet(PORTTI, 0xFF, GPIO_CFG_PERIPHERAL0);	// primary function
@@ -507,12 +513,8 @@ static int FecReset(IFNET *nif)
 	MCF_GPIO_PTJPAR = 0xFF;
 	MCF_GPIO_PNQPAR = (MCF_GPIO_PNQPAR & ~((3 << 6) | (3 << 10))) | (MCF_GPIO_PNQPAR_IRQ3_FEC_MDIO | MCF_GPIO_PNQPAR_IRQ5_FEC_MDC);
 #else // MCU_MCF51CN
-	MCF_SOPT3 = MCF_SOPT3_PCS_OSCOUT << MCF_SOPT3_PCS_BITNUM;
-	/* MII_TX_ER pin P0RB2 used as gpio chip select in SM2-RM SPI FRAM */
-	GpioPortConfigSet(PORTB, 0xFB, GPIO_CFG_ALT1 | GPIO_CFG_PULLUP);
-	GpioPortConfigSet(PORTC, 0x07, GPIO_CFG_ALT1 | GPIO_CFG_PULLUP);
-	/* Configure MII port for MCF51CN */
-	GpioPortConfigSet(PORTA, 0xFF, GPIO_CFG_ALT1 | GPIO_CFG_PULLUP);
+	/* Waiting for charge condenser on PHY reset. It takes 50ms charge to 1,85V. See printscreen from oscilloscope */
+	NutSleep(50);
 #endif
 
 #ifdef PhyProbe
@@ -523,10 +525,6 @@ static int FecReset(IFNET *nif)
 	NutRegisterPhy( 1, PhyWrite, PhyRead);
 
 #if defined (MCU_MCF51CN)
-
-	/* Wait for running phy after reset. */
-	NutSleep(200);
-
 	/* If PHY does not respond, restart PHY. It can happen that PHY is not properly started (when power source is applied and voltage oscillates). */
 	if (PhyRead(PHY_REG_BMSR) == 0xFFFF){
 		DBG("PHY RESTART\n");
@@ -534,6 +532,7 @@ static int FecReset(IFNET *nif)
 		NutSleep(10); 				// PHY reset time 10ms
 		GpioPinSetHigh(PORTC, 3);
 		for (wait = 25;; wait--) { // wait until PHY starts
+			NutSleep(100);
 			if (PhyRead(PHY_REG_BMSR) != 0xFFFF) {
 				break;
 			}
@@ -541,14 +540,16 @@ static int FecReset(IFNET *nif)
 				DBG("PHY NOT STARTED!\n");
 				return -1;
 			}
-			NutSleep(200);
 		}
 	}
 #endif
 
 	/* Activate reset, wait for completion. */
-	regvalue = 1;
-	rc = NutPhyCtl(PHY_CTL_RESET, &regvalue);
+	if (do_reset)
+	{
+		regvalue = 1;
+		rc = NutPhyCtl(PHY_CTL_RESET, &regvalue);
+	}
 
 	/* Enable power down mode. */
 #if 0	//not implemented in phy.c
@@ -1145,6 +1146,8 @@ THREAD(FecRxThread, arg)
 
 	while(1)
 	{
+		int	do_reset = 0;
+
 		/* Disable Watchdog */
 		if (EthMWDTSetVariableFN != NULL)
 			EthMWDTSetVariableFN(0); //stop time guarding (prepare for wait state)
@@ -1153,8 +1156,12 @@ THREAD(FecRxThread, arg)
 		 * Wait for Link (Auto-nego) & Initialize FEC
 		 */
         while(!ni->initialized)
-        	if (FecReset(ifn) == 0)
-        		FecStart(ni, ifn->if_mac);
+        {
+        	//if 1st call fails, successive calls do PHY sw reset
+        	do_reset = FecReset(ifn, do_reset);
+        	if (do_reset == 0)
+        		FecStart(ni, ifn->if_mac);		//will set ni->initialized
+        }
 
 		/*
          * Wait for the arrival of new packets

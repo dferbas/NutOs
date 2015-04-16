@@ -210,18 +210,18 @@ int NutPhyCtl( uint16_t ctl, uint32_t *par)
     {
         case PHY_CTL_RESET:
             if (p16) {
-                int wait = 0;
+                int wait = 100;
 
                 /* Set Reset bit in BMCR register */
                 phyw( PHY_BMCR, PHY_BMCR_RES);
 
                 /* Wait till reset bit flips back to 0 */
-                while( (phyr( PHY_BMCR) & PHY_BMCR_RES) && wait < 10) {
-                	//TODO: use NutSleep ?
-                	NutMicroDelay(10000/*100000*/);		//wait 10 (formerly 100) ms
-                    wait++;
+                while( (phyr( PHY_BMCR) & PHY_BMCR_RES) && wait > 0) {
+                	NutSleep(1);  // TODO: test NutSleep, for ETH_mod sleep not used, PHY_BMCR_RES is zeroed promtly
+//                	NutMicroDelay(10000/*100000*/);		//wait 10 (formerly 100) ms
+                    wait--;
                 }
-                if(wait >= 10) {
+                if(wait <= 0) {
                     rc = -1;
                 }
             }
