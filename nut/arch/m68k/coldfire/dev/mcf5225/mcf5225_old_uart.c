@@ -459,17 +459,21 @@ static uint32_t McfUsartGetSpeed(void)
  */
 static int McfUsartSetSpeed(uint32_t rate)
 {
-    uint16_t sv;
+    uint32_t divider, divider_reminder, divisor;
+
+    divisor = rate * 32;
+    divider =  NutGetCpuClock() / divisor;
+    divider_reminder = NutGetCpuClock() % divisor;
+
+    if ((divider_reminder * 2) > divisor) // pokud je zbytek po delelni vetsi nez polovina delitele (vynasobeno dvema), zaokrohli divider nahoru (pricti jedna)
+        divider ++;
+
+    usartControlRegister.ubg1 = (uint8_t) ((divider & 0xFF00) >> 8);
+    usartControlRegister.ubg2 = (uint8_t) (divider & 0x00FF);
 
     McfUsartDisable();
-
-    sv = (uint16_t) (NutGetCpuClock() / (rate * 32));
-
-    usartControlRegister.ubg1 = (uint8_t) ((sv & 0xFF00) >> 8);
     MCF_UARTn_UBG1 = usartControlRegister.ubg1;
-    usartControlRegister.ubg2 = (uint8_t) (sv & 0x00FF);
     MCF_UARTn_UBG2 = usartControlRegister.ubg2;
-
     McfUsartEnable();
 
     return 0;
