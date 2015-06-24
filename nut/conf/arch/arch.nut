@@ -1341,6 +1341,26 @@ nutarch =
                 makedefs = { "MCU=51cn" }
             },
             {
+                macro = "MCU_MCF51QE128",
+                brief = "Freescale MCF51QE128",
+                description = "32-bit RISC microcontroller, V1 Coldfire Core, 128K flash, 24K SRAM"..
+                              "10/100 Ethernet MAC, MII, 3xSCI(UART), 2xIIC, 2xSPI, ADC, RTC, 2xModulo Timer, 2xTimer/PWM."..
+                              "Mini FlexBUS, Keyboard Interrupts, 1xExternal Interrupt, Rapid GPIO",
+                flavor = "boolean",
+                exclusivity = mcu_names,
+                file = "include/cfg/arch.h",
+                requires = { "TOOL_CC_M68K" },
+                provides = {
+                    "HW_TARGET",
+                    "HW_MCU_M68K",
+                    "HW_MCU_COLDFIRE",
+                    "HW_MCU_COLDFIRE_V1",
+                    "HW_MCU_MCF51QE",
+                    "HW_MCU_MCF51QE128",
+                },
+                makedefs = { "MCU=51qe" }
+            },
+            {
                 macro = "MCU_MCF52259",
                 brief = "Freescale MCF52259",
                 description = "32-bit RISC microcontroller, V2 Coldfire Core, 10/100 Ethernet MAC"..

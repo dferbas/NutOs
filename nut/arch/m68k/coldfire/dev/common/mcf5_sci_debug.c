@@ -133,7 +133,21 @@ static char Get(uintptr_t devnum, uint32_t *timeout)
     return MCF_SCI_D(devnum);
 }
 
+#if defined(MCU_MCF51QE)
+/* SM2-AD, SM2-PC hbus halfduplex Receiving */
+static void Sci2SetToReceiveMode(void)
+{
+	GpioPinSetHigh(PORTC, 4);
+	GpioPinSetLow(PORTC, 5);
+}
 
+/* SM2-AD, SM2-PC hbus halfduplex Transmitting */
+static void Sci2SetToTransmitMode(void)
+{
+	GpioPinSetLow(PORTC, 4);
+	GpioPinSetHigh(PORTC, 5);
+}
+#endif
 
 /*!
  * \brief Send a buffer contents to the debug device.
@@ -162,13 +176,29 @@ static char Get(uintptr_t devnum, uint32_t *timeout)
  */
 static int Write(NUTFILE * fp, const void *buffer, int len)
 {
+
     int c = len;
     const char *cp = (const char *) buffer;
     uintptr_t devnum = fp->nf_dev->dev_base;
 
+#if defined(MCU_MCF51QE)
+    if (devnum == 2) // half duplex
+    	Sci2SetToTransmitMode();
+//    NutMicroDelay(100);
+#endif
+
     while (c--) {
         Put(devnum, *cp++);
     }
+
+#if defined(MCU_MCF51QE)
+    if (devnum == 2){ // half duplex
+		/* Wait until Transmission Complete Flag */
+		while ((MCF_SCI_S1(devnum) & MCF_SCI_S1_TC) == 0)
+			;
+		Sci2SetToReceiveMode();
+    }
+#endif
 
     return len;
 }
@@ -248,31 +278,61 @@ static int Init(NUTDEVICE * dev)
     int baud = SCI_DEBUG_INITSPEED;
     register uint16_t ubgs;
 
+    /* Enable SCI Port on GPIO */
+#if defined(MCU_MCF51CN)
+
     /* Calculate baud settings */
     ubgs = (uint16_t)(sysclk / (baud * 16));
 
-
-    /* Enable SCI Port on GPIO */
     switch (devnum) {
-    case 1:
-        GpioPinConfigSet(SCI1_TXD_PORT, SCI1_TXD_PIN, SCI1_TXD_PERIPHERAL | GPIO_CFG_PULLUP);
-        // TODO: udelat konfigurovatelne pro pripad, ze nekdo bojuje o kazdej pin
-        GpioPinConfigSet(SCI1_RXD_PORT, SCI1_RXD_PIN, SCI1_RXD_PERIPHERAL | GPIO_CFG_PULLUP);
-        break;
 
-    case 2:
-        GpioPinConfigSet(SCI2_TXD_PORT, SCI2_TXD_PIN, SCI2_TXD_PERIPHERAL | GPIO_CFG_PULLUP);
-        GpioPinConfigSet(SCI2_RXD_PORT, SCI2_RXD_PIN, SCI2_RXD_PERIPHERAL | GPIO_CFG_PULLUP);
-        break;
+		case 1:
+			GpioPinConfigSet(SCI1_TXD_PORT, SCI1_TXD_PIN, SCI1_TXD_PERIPHERAL | GPIO_CFG_PULLUP);
+			// TODO: udelat konfigurovatelne pro pripad, ze nekdo bojuje o kazdej pin
+			GpioPinConfigSet(SCI1_RXD_PORT, SCI1_RXD_PIN, SCI1_RXD_PERIPHERAL | GPIO_CFG_PULLUP);
+			break;
 
-    case 3:
-        GpioPinConfigSet(SCI3_TXD_PORT, SCI3_TXD_PIN, SCI3_TXD_PERIPHERAL | GPIO_CFG_PULLUP);
-        GpioPinConfigSet(SCI3_RXD_PORT, SCI3_RXD_PIN, SCI3_RXD_PERIPHERAL | GPIO_CFG_PULLUP);
-        break;
+		case 2:
+			GpioPinConfigSet(SCI2_TXD_PORT, SCI2_TXD_PIN, SCI2_TXD_PERIPHERAL | GPIO_CFG_PULLUP);
+			GpioPinConfigSet(SCI2_RXD_PORT, SCI2_RXD_PIN, SCI2_RXD_PERIPHERAL | GPIO_CFG_PULLUP);
+			break;
 
-    default:
-        return 0;
+		case 3:
+			GpioPinConfigSet(SCI3_TXD_PORT, SCI3_TXD_PIN, SCI3_TXD_PERIPHERAL | GPIO_CFG_PULLUP);
+			GpioPinConfigSet(SCI3_RXD_PORT, SCI3_RXD_PIN, SCI3_RXD_PERIPHERAL | GPIO_CFG_PULLUP);
+			break;
+
+		default:
+			return 0;
+	}
+
+#elif defined(MCU_MCF51QE)
+
+	/* Calculate baud settings */
+	ubgs = (uint16_t)(sysclk / (baud * 16 * 2));
+
+	switch (devnum) {
+
+		case 1:
+			/* Eneble SCI System clock gating */
+			MCF_SCGC1 |= MCF_SCGC1_SCI1;
+			break;
+
+		case 2:
+			/* Eneble SCI System clock gating */
+			MCF_SCGC1 |= MCF_SCGC1_SCI2;
+			/* Set Hbus halfduplex Pins as outputs. */
+			GpioPinConfigSet(PORTC, 4, GPIO_CFG_OUTPUT);
+			GpioPinConfigSet(PORTC, 5, GPIO_CFG_OUTPUT);
+
+			Sci2SetToReceiveMode();
+			break;
+
+    	default:
+    		return 0;
     }
+#endif
+
 
     /* Reset Transmitter */
 //    MCF_UART_UCR(devnum) = MCF_UART_UCR_RESET_TX;

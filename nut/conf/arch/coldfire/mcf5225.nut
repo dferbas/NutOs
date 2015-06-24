@@ -95,6 +95,13 @@ nutarch_m68k_coldfire_mcf5225 =
                 provides = { "HW_I2C1" },
                 file = "include/cfg/peripherals.h"
             },
+            {
+                macro = "FEC",
+                type = "integer",
+                default = 1,
+                provides = { "HW_FEC" },
+                file = "include/cfg/peripherals.h"
+            },
         }
     },
     

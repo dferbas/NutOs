@@ -33,12 +33,23 @@
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 
+static int IrqCtl1_ovfl(int cmd, void *param);
 static int IrqCtl1_Ch0(int cmd, void *param);
 static int IrqCtl1_Ch1(int cmd, void *param);
 static int IrqCtl1_Ch2(int cmd, void *param);
+static int IrqCtl2_ovfl(int cmd, void *param);
 static int IrqCtl2_Ch0(int cmd, void *param);
 static int IrqCtl2_Ch1(int cmd, void *param);
 static int IrqCtl2_Ch2(int cmd, void *param);
+
+IRQ_HANDLER sig_TPM1_OVFL = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtl1_ovfl
+    };
 
 IRQ_HANDLER sig_TPM1_CH0 = {
 #ifdef NUT_PERFMON
@@ -65,6 +76,15 @@ IRQ_HANDLER sig_TPM1_CH2 = {
         NULL,
         NULL,
         IrqCtl1_Ch2
+    };
+
+IRQ_HANDLER sig_TPM2_OVFL = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtl2_ovfl
     };
 
 IRQ_HANDLER sig_TPM2_CH0 = {
@@ -95,6 +115,11 @@ IRQ_HANDLER sig_TPM2_CH2 = {
     };
 
 
+static int IrqCtl1_ovfl(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_TPM1_OVFL, cmd, param, &MCF_TPM_SC(1), MCF_TPM_SC_TOIE, 1);
+}
+
 static int IrqCtl1_Ch0(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM1_CH0, cmd, param, &MCF_TPM_CSC(1, 0), MCF_TPM_CSC_CHnIE, 1);
@@ -108,6 +133,11 @@ static int IrqCtl1_Ch1(int cmd, void *param)
 static int IrqCtl1_Ch2(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM1_CH2, cmd, param, &MCF_TPM_CSC(1, 2), MCF_TPM_CSC_CHnIE, 1);
+}
+
+static int IrqCtl2_ovfl(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_TPM2_OVFL, cmd, param, &MCF_TPM_SC(2), MCF_TPM_SC_TOIE, 1);
 }
 
 static int IrqCtl2_Ch0(int cmd, void *param)
@@ -124,6 +154,14 @@ static int IrqCtl2_Ch2(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM2_CH2, cmd, param, &MCF_TPM_CSC(2, 2), MCF_TPM_CSC_CHnIE, 1);
 }
+
+SIGNAL(IH_TPM1_OVFL)
+{
+	/* Clear counter by writing to MCF_TPM_SC. */
+	MCF_TPM_SC(1) &= ~MCF_TPM_SC_TOF;
+    CallHandler(&sig_TPM1_OVFL);
+}/* ?????*/
+
 
 SIGNAL(IH_TPM1_CH0)
 {
@@ -144,6 +182,13 @@ SIGNAL(IH_TPM1_CH2)
 	/* Clear CHnF by reading TPMxCnSC while this bit is set and then writing a logic 0 to it. */
 	MCF_TPM_CSC(1, 2) &= ~MCF_TPM_CSC_CHnF;
     CallHandler(&sig_TPM1_CH2);
+}
+
+SIGNAL(IH_TPM2_OVFL)
+{
+	/* Clear counter by writing to MCF_TPM_SC. */
+	MCF_TPM_SC(2) &= ~MCF_TPM_SC_TOF;
+    CallHandler(&sig_TPM2_OVFL);
 }
 
 SIGNAL(IH_TPM2_CH0)

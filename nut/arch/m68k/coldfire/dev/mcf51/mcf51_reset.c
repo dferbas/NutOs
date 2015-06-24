@@ -30,19 +30,14 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#include <dev/reset.h>
 
-#include <stdint.h>
-#include <cfg/arch.h>
+void Mcf51_Reset(void)
+{
+    // JS TODO - not implemented
+}
 
-#if defined (MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
-#elif defined (MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
-#elif defined (MCU_MCF51QE)
-#include <arch/m68k/coldfire/mcf51qe/mcf51qe.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
-#endif
+int Mcf51_ResetCause(void)
+{
+    return NUT_RSTTYP_UNKNOWN;
+}

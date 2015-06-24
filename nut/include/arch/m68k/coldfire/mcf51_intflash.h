@@ -30,19 +30,28 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#ifndef INTFLASH_MCF51_H_
+#define INTFLASH_MCF51_H_
 
 #include <stdint.h>
-#include <cfg/arch.h>
 
-#if defined (MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
-#elif defined (MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
-#elif defined (MCU_MCF51QE)
-#include <arch/m68k/coldfire/mcf51qe/mcf51qe.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
-#endif
+/* address in memory map to write in FLASH */
+#define FLASH_MIN_ADDRESS	 				0x00000000
+
+/* End address for region of flash */
+#define FLASH_MAX_ADDRESS					0x0001FFFF
+
+/* Flash erase page size 1024 Bytes */
+#define FLASH_PAGE_ERASE_SIZE		1024 // size of sector to erase
+
+/* Flash protected page size 4096 Bytes */
+#define FLASH_PAGE_PROTECT_SIZE		0x1000 // size of protected sector
+
+int Mcf51IntFlashInit(void);
+uint8_t Mcf51IntFlashProtectRegister(void);
+int Mcf51IntFlashRead(uint32_t dst, uint32_t *data, uint32_t size);
+int Mcf51IntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size);
+int Mcf51IntFlashSectorErase(uint32_t addr);
+int Mcf51IntFlashMassErase(void);
+
+#endif /* INTFLASH_MCF51_H_ */

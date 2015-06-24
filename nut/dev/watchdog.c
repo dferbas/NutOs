@@ -59,8 +59,8 @@ uint32_t NutWatchDogStart(uint32_t ms, uint32_t xmode)
     return Lpc17xxWatchDogStart(ms, xmode);
 #elif defined(MCU_MCF5225)
 	return Mcf5225WatchDogStart(ms);
-#elif defined(MCU_MCF51CN)
-	return Mcf51cnCopStart(ms);
+#elif defined(MCU_MCF51CN) || defined(MCU_MCF51QE)
+	return Mcf51CopStart(ms);
 #else
     return 0;
 #endif
@@ -81,8 +81,8 @@ void NutWatchDogRestart(void)
     Lpc17xxWatchDogRestart();
 #elif defined(MCU_MCF5225)
 	Mcf5225WatchDogRestart();
-#elif defined(MCU_MCF51CN)
-	Mcf51cnCopRestart();
+#elif defined(MCU_MCF51CN) || defined(MCU_MCF51QE)
+	Mcf51CopRestart();
 #endif
 }
 
@@ -101,8 +101,8 @@ void NutWatchDogDisable(void)
     Lpc17xxWatchDogDisable();
 #elif defined(MCU_MCF5225)
 	Mcf5225WatchDogDisable();
-#elif defined(MCU_MCF51CN)
-	Mcf51cnCopDisable();
+#elif defined(MCU_MCF51CN) || defined(MCU_MCF51QE)
+	Mcf51CopDisable();
 #endif
 }
 
@@ -121,8 +121,8 @@ void NutWatchDogEnable(void)
     Lpc17xxWatchDogEnable();
 #elif defined(MCU_MCF5225)
 	Mcf5225WatchDogEnable();
-#elif defined(MCU_MCF51CN)
-	Mcf51cnCopEnable();
+#elif defined(MCU_MCF51CN) || defined(MCU_MCF51QE)
+	Mcf51CopEnable();
 #endif
 }
 

@@ -29,35 +29,27 @@
  *
  * For additional information see http://www.ethernut.de/
  */
-
+#include <cfg/clock.h>
 #include <arch/m68k.h>
-#include <dev/irqreg.h>
-
-static int IrqCtl(int cmd, void *param);
-
-IRQ_HANDLER sig_ADC = {
-#ifdef NUT_PERFMON
-        0,
-#endif
-        NULL,
-        NULL,
-        IrqCtl
-    };
+#include <sys/nutdebug.h>
 
 
-static int IrqCtl(int cmd, void *param)
+void Mcf51qeIcsInitClock(void)
 {
-    return IrqCtlCommon(&sig_ADC, cmd, param, &MCF_ADC_SC1, MCF_ADC_SC1_AIEN, 1);
+	  /*  System clock initialization */
+	  /* ICSC1: CLKS=0,RDIV=3,IREFS=0,IRCLKEN=1,IREFSTEN=0 */
+	  MCF_ICS_C1 = 0x1AU;                       /* Initialization of the ICS control register 1 */
+	  /* ICSC2: BDIV=0,RANGE=1,HGO=1,LP=0,EREFS=1,ERCLKEN=0,EREFSTEN=0 */
+	  MCF_ICS_C2 = 0x34U;                       /* Initialization of the ICS control register 2 */
+	  while(!(MCF_ICS_SC & MCF_ICS_SC_OSCINIT)) { /* Wait until the initialization of the external crystal oscillator is completed */
+		  MCF_SRS = 0x00U;                        /* Reset watchdog counter */
+	  }
+	  /* ICSSC: DRST_DRS=1,DMX32=0 */
+	  MCF_ICS_SC = (unsigned char)((MCF_ICS_SC & (unsigned char)~0xA0U) | (unsigned char)0x40U); /* Initialization of the ICS status and control */
+	  while((MCF_ICS_SC & 0xC0U) != 0x40U) {    /* Wait until the FLL switches to Mid range DCO mode */
+		  MCF_SRS = 0x00U;                        /* Reset watchdog counter */
+	  }
+
+	  /* INTC_WCR: ENB=0,MASK=0 */
+	  MCF_INTC_WCR = 0x00U;
 }
-
-
-SIGNAL(IH_ADC)
-{
-    /*
-     * Interrupt flag (MCF_ADC_SC1_COCO bit) is cleared when converted value (MCF_ADC_R) is read.
-     * This must be ensured by assigned signal handler.
-     */
-
-    CallHandler(&sig_ADC);
-}
-

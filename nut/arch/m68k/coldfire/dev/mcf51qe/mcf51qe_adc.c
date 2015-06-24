@@ -29,20 +29,35 @@
  *
  * For additional information see http://www.ethernut.de/
  */
+#include <arch/m68k.h>
+#include <dev/irqreg.h>
+#include <dev/gpio.h>
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+uint16_t Mcf51qeAdcValue(void)
+{
+	MCF_ADC_SC1  = 0x5F; // One conversion only (continuous conversions disabled)
+	return MCF_ADC_R;
+}
 
-#include <stdint.h>
-#include <cfg/arch.h>
 
-#if defined (MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
-#elif defined (MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
-#elif defined (MCU_MCF51QE)
-#include <arch/m68k/coldfire/mcf51qe/mcf51qe.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
-#endif
+void Mcf51qeAdcInit(void (*handler) (void *), void *handler_arg)
+{
+	MCF_SCGC1 |= MCF_SCGC1_ADC; // enable system clock
+	NutRegisterIrqHandler(&sig_ADC, handler, handler_arg);
+	MCF_APCTL2 = MCF_APCTL2_ADPC10 | MCF_APCTL2_ADPC11 | MCF_APCTL2_ADPC12;
+	MCF_ADC_CFG  =  MCF_ADC_CFG_MODE(0x1) | MCF_ADC_CFG_ADLSMP | MCF_ADC_CFG_ADLPC | MCF_ADC_CFG_ADIV(0x3); // 12bit conversion
+	MCF_ADC_CV  = 0;
+	MCF_ADC_SC2  = 0;
+	MCF_ADC_SC1  = 0x5F; // One conversion only (continuous conversions disabled)
+//	NutIrqEnable(&sig_ADC);
+}
+
+void Mcf51qeAdcStartConversion(uint8_t channel, uint8_t mode)
+{
+//	uint8_t conf;
+//	conf = (MCF_ADC_CFG & ~MCF_ADC_CFG_MODE_MASK) | MCF_ADC_CFG_MODE(mode);
+//	MCF_ADC_CFG = conf;
+//	//Input channel 1 selected as ADC input channel
+	MCF_ADC_SC1 = 0 | MCF_ADC_SC1_AIEN | MCF_ADC_SC1_ADCH(channel); //this starts AD conversion
+}
+

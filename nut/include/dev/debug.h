@@ -152,6 +152,9 @@ extern NUTDEVICE devDebug2;
 extern NUTDEVICE devDebug1;
 extern NUTDEVICE devDebug2;
 extern NUTDEVICE devDebug3;
+#elif defined(MCU_MCF51QE)
+extern NUTDEVICE devDebug1;
+extern NUTDEVICE devDebug2;
 #elif defined(__AVR32__)
 extern NUTDEVICE devDebug0;
 extern NUTDEVICE devDebug1;

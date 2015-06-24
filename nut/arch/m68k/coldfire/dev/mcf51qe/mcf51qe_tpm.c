@@ -29,20 +29,28 @@
  *
  * For additional information see http://www.ethernut.de/
  */
+#include <arch/m68k.h>
+#include <dev/irqreg.h>
+#include <dev/gpio.h>
+#include <sys/timer.h>
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#define MODULO_COUNTER_SIZE 0x100
 
-#include <stdint.h>
-#include <cfg/arch.h>
+/* System timer ticks, one tick per 1ms */
+void Mcf51qeTpmInitClock(void (*handler) (void *))
+{
+	uint16_t mod;
 
-#if defined (MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
-#elif defined (MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
-#elif defined (MCU_MCF51QE)
-#include <arch/m68k/coldfire/mcf51qe/mcf51qe.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
-#endif
+	/* Enable Peripheral clock gating */
+	MCF_SCGC1 |= MCF_SCGC1_TPM1;
+	MCF_TPM_SC(1) = 0;
+
+	mod = ((NutGetCpuClock() / 2) / 1000);
+	MCF_TPM_MOD(1) = mod;
+
+	NutRegisterIrqHandler(&sig_TPM1_OVFL, handler, 0);
+
+	/* PS 000 - Clock source divided by 1,  CLKS 01 - Bus rate clock, Enable Overflow IRQ */
+	MCF_TPM_SC(1) = MCF_TPM_SC_PS(0x0) | MCF_TPM_SC_CLKSx(0x01) | MCF_TPM_SC_TOIE;
+}
+

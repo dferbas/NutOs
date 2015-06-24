@@ -62,6 +62,15 @@ static ureg_t flow_control;
 static uint8_t rx_errors;
 static uint8_t tx_errors;
 
+static uint_fast8_t hdx_control;
+
+#if defined(MCU_MCF51QE) && (BASE == 2)
+#define SciSetToReceiveMode()	Sci2SetToReceiveMode()
+#define SciSetToTransmitMode()	Sci2SetToTransmitMode()
+#else
+#define SciSetToReceiveMode()
+#define SciSetToTransmitMode()
+#endif
 
 /*
  * \brief Scin transmit data register empty interrupt handler.
@@ -97,6 +106,8 @@ static void Mcf5SciTxReady(void *arg)
          * and return without sending anything.
          */
     	MCF_SCI_C2(BASE) &= ~(MCF_SCI_C2_TIE);
+		if (hdx_control)
+			SciSetToReceiveMode();
         return;
     }
 #endif /* UART_NO_SW_FLOWCONTROL */
@@ -145,15 +156,21 @@ static void Mcf5SciTxReady(void *arg)
 
     if (rbf->rbf_cnt == 0){
 
-//    	if (MCF_SCI_S1(BASE) & MCF_SCI_S1_TC)
+    	if (MCF_SCI_C2(BASE) & MCF_SCI_C2_TIE)
 		{
 			// If transmit complete, disable transmitter and interrupts
-			MCF_SCI_C2(BASE) &= ~(MCF_SCI_C2_TIE); //MCF_SCI_C2_TCIE |
+			MCF_SCI_C2(BASE) &= ~(MCF_SCI_C2_TIE);
 
 			/*
 			 * Nothing left to transmit, wakeup waiting thread
 			 */
 			NutEventPostFromIrq(&rbf->rbf_que);
+    	}
+    	else // MCF_SCI_C2(BASE) & MCF_SCI_C2_TCIE
+    	{
+    		MCF_SCI_C2(BASE) &= ~MCF_SCI_C2_TCIE;
+			if (hdx_control)
+				SciSetToReceiveMode();
     	}
 
     }
@@ -329,7 +346,11 @@ static int Mcf5SciSetSpeed(uint32_t rate)
 	uint32_t sysclk = NutGetCpuClock();
 
 	/* Calculate baud settings */
+#if defined(MCU_MCF51CN)
 	ubgs = (uint16_t)(sysclk / (rate * 16));
+#elif defined(MCU_MCF51QE)
+    ubgs = (uint16_t)(sysclk / (rate * 16 * 2));
+#endif
 
 	MCF_SCI_BD(BASE) = ubgs;
 
@@ -509,6 +530,12 @@ static uint32_t Mcf5SciGetFlowControl(void)
         rc &= ~USART_MF_XONXOFF;
     }
 
+    if (hdx_control) {
+		rc |= USART_MF_HALFDUPLEX;
+	} else {
+		rc &= ~USART_MF_HALFDUPLEX;
+	}
+
     return rc;
 }
 
@@ -544,6 +571,21 @@ static int Mcf5SciSetFlowControl(uint32_t flags)
     }
 
     /*
+	 * Set duplex mode.
+	 */
+	if (flags & USART_MF_HALFDUPLEX) {
+		hdx_control = 1;
+#if defined(MCU_MCF51QE) && (BASE == 2)
+		/* Set Hbus halfduplex Pins as outputs. */
+		GpioPinConfigSet(PORTC, 4, GPIO_CFG_OUTPUT);
+		GpioPinConfigSet(PORTC, 5, GPIO_CFG_OUTPUT);
+
+		SciSetToReceiveMode();
+#endif
+	} else {
+		hdx_control = 0;
+	}
+    /*
      * Verify the result.
      */
     if (Mcf5SciGetFlowControl() != flags) {
@@ -561,8 +603,16 @@ static int Mcf5SciSetFlowControl(uint32_t flags)
  */
 static void Mcf5SciTxStart(void)
 {
-    /* Enable Transmit to activate interrupt TxReady */
-	NutIrqEnable(&sig_sci_tx);
+	if (hdx_control){
+		SciSetToTransmitMode();
+		/* Transmission Complete Interrupt Enable */
+		MCF_SCI_C2(BASE) |= MCF_SCI_C2_TCIE | MCF_SCI_C2_TIE;
+	}
+	else {
+		/* Transmit Interrupt Enable */
+		NutIrqEnable(&sig_sci_tx);
+	}
+
 }
 
 /*!
@@ -617,16 +667,31 @@ static int Mcf5SciInit(void)
     /*
      *  GPIO Configuration
      */
+#if defined(MCU_MCF51CN)
     result |= GpioPinConfigSet(TXD_PORT, TXD_PIN, TXD_PERIPHERAL | GPIO_CFG_PULLUP);
     result |= GpioPinConfigSet(RXD_PORT, RXD_PIN, RXD_PERIPHERAL | GPIO_CFG_PULLUP);
-
+#elif defined(MCU_MCF51QE)
+	#if (BASE == 1)
+		/* Eneble SCI System clock gating */
+		MCF_SCGC1 |= MCF_SCGC1_SCI1;
+	#elif (BASE == 2)
+		/* Eneble SCI System clock gating */
+		MCF_SCGC1 |= MCF_SCGC1_SCI2;
+	#endif
+#endif
     /*
      * SCI Configuration
      */
 
-//    result |= Mcf5SciSetDataBits(8);
-//    result |= Mcf5SciSetStopBits(1);
-//    result |= Mcf5SciSetParity(0);
+	result |= Mcf5SciSetFlowControl(0
+#ifdef HDX_ENABLED
+				 | USART_MF_HALFDUPLEX
+#endif
+		);
+
+//	result |= Mcf5SciSetDataBits(8);
+//	result |= Mcf5SciSetStopBits(1);
+//	result |= Mcf5SciSetParity(0);
     result |= Mcf5SciSetSpeed(USART_INITSPEED);
 
 

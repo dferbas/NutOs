@@ -41,6 +41,9 @@
 #elif defined(MCU_MCF51CN)
 #define NutEnableTimerIrq()     NutIrqEnable(&sig_MTIM1)
 #define NutDisableTimerIrq()    NutIrqDisable(&sig_MTIM1)
+#elif defined(MCU_MCF51QE)
+#define NutEnableTimerIrq()     NutIrqEnable(&sig_TPM1_CH0)
+#define NutDisableTimerIrq()    NutIrqDisable(&sig_TPM1_CH0)
 #else
 #warning "Unknown Coldfire MCU Family defined"
 #endif

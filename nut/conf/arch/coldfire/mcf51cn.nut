@@ -57,6 +57,13 @@ nutarch_m68k_coldfire_mcf51cn =
                 provides = { "HW_SCI3" },
                 file = "include/cfg/peripherals.h"
             },
+            {
+                macro = "FEC",
+                type = "integer",
+                default = 1,
+                provides = { "HW_FEC" },
+                file = "include/cfg/peripherals.h"
+            },
         }
     },
     
@@ -123,25 +130,15 @@ nutarch_m68k_coldfire_mcf51cn =
         provides = { 
                     "DEV_IRQ_ADC",
                     "DEV_IRQ_SCI",
+                    "DEV_IRQ_FEC",
                    },
         sources = { 
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_mtim.c",
-          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_tpm.c",
-          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_adc.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_rtc.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_spi.c",
           			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_sci.c",
+          			"m68k/coldfire/dev/common/ih_mcf5_fec.c",
         		  },
-    },
-
-    --
-    -- Internal Flash
-    --
-    {
-        name = "nutarch_m68k_coldfire_devices_intflash",
-        brief = "Internal Flash",
-        description = "Code snippet for modiffying internal flash memory.",
-        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_intflash.c" },
     },
 
     -- 
@@ -181,24 +178,6 @@ nutarch_m68k_coldfire_mcf51cn =
         provides = { "NUT_OSTIMER_DEV" },
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_ostimer.c" },
     },
-
-    --
-    -- Watchdog Timer
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf51_cop",
-        brief = "Watchdog (COP)",
-        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_cop.c" },
-    },
-
-    --
-    -- Reset Controller
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf51cn_reset",
-        brief = "Reset Controller",
-        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_reset.c" },
-    },
     
     --
     -- Real Time Counter
@@ -233,5 +212,14 @@ nutarch_m68k_coldfire_mcf51cn =
         brief = "A/D Converter (ADC12)",
         description = "12-bit analog-to-digital converter.",
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_adc.c" },
-    },    
+    },   
+    
+    --
+    -- Fast Ethernet Controller
+    --
+    {
+        name = "nutarch_m68k_coldfire_mcf5_fec",
+        brief = "Fast Ethernet Controller (FEC)",
+        sources = { "m68k/coldfire/dev/common/mcf5_fec.c" },
+    }, 
 }

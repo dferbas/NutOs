@@ -32,7 +32,7 @@
 
 #include <arch/m68k.h>
 
-uint32_t Mcf51cnCopStart(uint32_t ms)
+uint32_t Mcf51CopStart(uint32_t ms)
 {
     /*
      * Not supported by CPU
@@ -50,13 +50,22 @@ uint32_t Mcf51cnCopStart(uint32_t ms)
     return 0;
 }
 
-void Mcf51cnCopRestart(void)
+void Mcf51CopRestart(void)
 {
+#if defined(MCU_MCF51QE)
+	/* The COP counter is reset by writing any value to the address of SRS.
+	 * This write does not affect the data in the read-only SRS. */
+	MCF_SRS = 0x00;
+#elif defined(MCU_MCF51CN)
+	/* The COP counter is reset by writing 0x55 and 0xAA (in this order)
+	 * to the address of SRS during the selected time-out period.
+	 * Writes do not affect the data in the read-only SRS. */
     MCF_SRS = 0x55;
     MCF_SRS = 0xAA;
+#endif
 }
 
-void Mcf51cnCopDisable(void)
+void Mcf51CopDisable(void)
 {
     /*
      * Not supported by CPU
@@ -68,7 +77,7 @@ void Mcf51cnCopDisable(void)
      */
 }
 
-void Mcf51cnCopEnable(void)
+void Mcf51CopEnable(void)
 {
     /*
      * Not supported by CPU

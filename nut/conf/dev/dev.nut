@@ -4213,6 +4213,18 @@ nutdev =
         sources = { "nvmem_at45d.c" }
     },
     {
+        name = "nutdev_at25df",
+        brief = "AT25DF Serial DataFlash Memory",
+        description = "Supports multiple chips.",
+        sources = { "at25df.c" },
+    },
+    {
+        name = "nutdev_dac_mcp4921",
+        brief = "MCP4921 Serial Digital to Analog Converter",
+        description = "12-Bit DAC with SPI Interface",
+        sources = { "dac_mcp4921.c" },
+    },
+    {
         name = "nutdev_at45db",
         brief = "AT45DB Serial DataFlash Memory",
         description = "Supports multiple chips.\n\n"..
@@ -5082,6 +5094,28 @@ nutdev =
                 description = "24AA256 slave address (0x50..0x57)",
                 default = "0x51",
                	file = "include/cfg/eeprom_24AA256.h"
+            },
+        },
+    },
+    
+    --
+    -- AT24C16 - 2048KB Two-wire Serial EEPROM
+    --
+    {
+        name = "nutarch_eeprom_at24c16",
+        brief = "EEPROM AT24C16",
+        description = "AT24C16 - 2048KB Two-wire Serial EEPROM",
+        requires = {"DEV_TWI" },
+        provides = { "DEV_NVMEM_I2C" },
+        sources = { "eeprom_at24c16.c" },
+        options =
+        {
+            {
+                macro = "I2C_SLA_AT24C16",
+                brief = "Slave Address",
+                description = "AT24C16 slave address (0x50..0x57)",
+                default = "0x50",
+               	file = "include/cfg/eeprom_at24c16.h"
             },
         },
     },

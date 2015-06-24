@@ -30,19 +30,38 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
+#ifndef _DEV_IRQREG_H_
+#error "Do not include this file directly. Use dev/irqreg.h instead!"
 #endif
 
-#include <stdint.h>
-#include <cfg/arch.h>
+/*
+ * Interrupt handlers
+ */
+extern IRQ_HANDLER sig_IIC1;
+extern IRQ_HANDLER sig_IIC2;
+//extern IRQ_HANDLER sig_MTIM1;
+//extern IRQ_HANDLER sig_MTIM2;
+extern IRQ_HANDLER sig_TPM1_OVFL;
+extern IRQ_HANDLER sig_TPM1_CH0;
+extern IRQ_HANDLER sig_TPM1_CH1;
+extern IRQ_HANDLER sig_TPM1_CH2;
+extern IRQ_HANDLER sig_TPM2_OVFL;
+extern IRQ_HANDLER sig_TPM2_CH0;
+extern IRQ_HANDLER sig_TPM2_CH1;
+extern IRQ_HANDLER sig_TPM2_CH2;
+extern IRQ_HANDLER sig_SCI1_RX;
+extern IRQ_HANDLER sig_SCI1_TX;
+extern IRQ_HANDLER sig_SCI2_RX;
+extern IRQ_HANDLER sig_SCI2_TX;
+//extern IRQ_HANDLER sig_SCI3_RX;
+//extern IRQ_HANDLER sig_SCI3_TX;
+extern IRQ_HANDLER sig_ADC;
+//extern IRQ_HANDLER sig_RTC;
+extern IRQ_HANDLER sig_SPI1;
+extern IRQ_HANDLER sig_SPI2;
 
-#if defined (MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
-#elif defined (MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
-#elif defined (MCU_MCF51QE)
-#include <arch/m68k/coldfire/mcf51qe/mcf51qe.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
-#endif
+/*
+ * Common Interrupt control
+ */
+extern int IrqCtlCommon(IRQ_HANDLER *sig_handler, int cmd, void *param, volatile void *reg_imr, uint32_t imr_mask, uint8_t imr_size);
+

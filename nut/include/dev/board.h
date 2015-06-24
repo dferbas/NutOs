@@ -190,6 +190,8 @@
 #include <arch/m68k/board/sm2_mu.h>
 #elif defined(POWERNET_MOD)
 #include <arch/m68k/board/powernet_mod.h>
+#elif defined(SM2_AD_PC)
+#include <arch/m68k/board/sm2_ad_pc.h>
 #elif defined(POSEIDON)
 #include <arch/m68k/board/poseidon.h>
 #elif defined(ZERO_EK)

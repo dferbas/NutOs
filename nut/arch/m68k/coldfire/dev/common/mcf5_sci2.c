@@ -34,6 +34,7 @@
 #include <cfg/uart.h>
 #include <arch/m68k.h>
 #include <dev/usart.h>
+#include <dev/gpio.h>
 
 #define BASE    2
 
@@ -121,6 +122,26 @@ NUTDEVICE devSciMcf5_2 = {
 };
 
 /*@}*/
+
+#define HDX_ENABLED
+
+#if defined(MCU_MCF51QE)
+/* SM2-AD, SM2-PC hbus halfduplex Receiving */
+static void Sci2SetToReceiveMode(void)
+{
+	GpioPinSetHigh(PORTC, 4);
+	GpioPinSetLow(PORTC, 5);
+}
+
+/* SM2-AD, SM2-PC hbus halfduplex Transmitting */
+static void Sci2SetToTransmitMode(void)
+{
+	GpioPinSetLow(PORTC, 4);
+	GpioPinSetHigh(PORTC, 5);
+}
+#endif
+
+
 
 /*
  * Peripheral GPIO Configuration

@@ -87,11 +87,10 @@ struct _AT25D_INFO {
     uint_fast8_t at25d_srval;
 };
 
-extern NUTSPINODE at25df;
+extern NUTSPINODE dacMcp4921;
 extern NUTDEVICE devDataFlash0;
 
 
 int At25dfInit(NUTDEVICE* dev);
-static uint8_t At25dStatus(NUTSPINODE * node);
 
 #endif

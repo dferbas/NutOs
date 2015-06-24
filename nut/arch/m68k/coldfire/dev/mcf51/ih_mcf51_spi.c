@@ -30,19 +30,50 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#include <arch/m68k.h>
+#include <dev/irqreg.h>
 
-#include <stdint.h>
-#include <cfg/arch.h>
+static int IrqCtl1(int cmd, void *param);
+static int IrqCtl2(int cmd, void *param);
 
-#if defined (MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
-#elif defined (MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
-#elif defined (MCU_MCF51QE)
-#include <arch/m68k/coldfire/mcf51qe/mcf51qe.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
+IRQ_HANDLER sig_SPI1 = {
+#ifdef NUT_PERFMON
+        0,
 #endif
+        NULL,
+        NULL,
+        IrqCtl1
+    };
+
+IRQ_HANDLER sig_SPI2 = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtl2
+    };
+
+static int IrqCtl1(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_SPI1, cmd, param, &MCF_SPI_C1(1), MCF_SPI_C1_SPIE, 1);
+}
+
+static int IrqCtl2(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_SPI2, cmd, param, &MCF_SPI_C1(2), MCF_SPI_C1_SPIE, 1);
+}
+
+SIGNAL(IH_SPI1)
+{
+    /* Interrupt is cleared in driver by reading to SPI data register. */
+
+    CallHandler(&sig_SPI1);
+}
+
+SIGNAL(IH_SPI2)
+{
+    /* Interrupt is cleared in driver by reading to SPI data register. */
+
+    CallHandler(&sig_SPI2);
+}

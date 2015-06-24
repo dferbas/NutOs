@@ -116,6 +116,13 @@ nutarch_m68k_coldfire =
         description = "MCF51CN family",
         script = "arch/coldfire/mcf51cn.nut"
     },
+    {
+        name = "nutarch_m68k_coldfire_mcf51qe",
+        brief = "MCF51QE Family",
+        requires = { "HW_MCU_MCF51QE" },
+        description = "MCF51QE family",
+        script = "arch/coldfire/mcf51qe.nut"
+    },
 	{
         name = "nutarch_m68k_coldfire_mcf5225",
         brief = "MCF5225 Family",

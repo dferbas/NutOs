@@ -7,6 +7,7 @@ nutarch_m68k_coldfire_devices =
         name = "nutarch_m68k_coldfire_mcf5_ihndlr",
         brief = "Interrupt Handler",
         description = "Peripheral interrupt handlers for MCF5 family.",
+        requires = { "HW_FEC" },
         provides = { 
                     "DEV_IRQ_FEC",
                    },
@@ -961,6 +962,7 @@ nutarch_m68k_coldfire_devices =
     {
         name = "nutarch_m68k_coldfire_mcf5_fec",
         brief = "Fast Ethernet Controller (FEC)",
+        requires = { "HW_FEC" },
         sources = { "m68k/coldfire/dev/common/mcf5_fec.c" },
     },
 }

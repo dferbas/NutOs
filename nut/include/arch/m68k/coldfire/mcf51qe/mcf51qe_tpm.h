@@ -34,15 +34,36 @@
 #error "Do not include this file directly. Use arch/m68k.h instead!"
 #endif
 
-#include <stdint.h>
-#include <cfg/arch.h>
+/*** TPMSC - TPM Status and Control Register; 0xFFFF8040, 0xFFFF8050, 0xFFFF8060 ***/
+#define MCF_TPM_SC(x) 					   	(*(volatile uint8_t*)(0xFFFF8040 + ((x - 1) * 0x10)))
+#define MCF_TPM_SC_CPWMS                    0x20
+#define MCF_TPM_SC_TOIE                     0x40
+#define MCF_TPM_SC_TOF                      0x80
+#define MCF_TPM_SC_PS(x)					(((x)&0x7)<<0)
+#define MCF_TPM_SC_PS_MASK                  0x07
+#define MCF_TPM_SC_CLKSx(x)					(((x)&0x3)<<3)
+#define MCF_TPM_SC_CLKSx_MASK               0x18
 
-#if defined (MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
-#elif defined (MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
-#elif defined (MCU_MCF51QE)
-#include <arch/m68k/coldfire/mcf51qe/mcf51qe.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
-#endif
+
+/*** TPMCNT - TPM Timer Counter Register; 0xFFFF8041, 0xFFFF8051, 0xFFFF8061 ***/
+#define MCF_TPM_CNT(x)						(*(volatile uint16_t*)(0xFFFF8041 + ((x - 1) * 0x10)))
+
+
+/*** TPMMOD - TPM Timer Counter Modulo Register; 0xFFFF8043, 0xFFFF8053, 0xFFFF8063 ***/
+#define MCF_TPM_MOD(x)						(*(volatile uint16_t*)(0xFFFF8043 + ((x - 1) * 0x10)))
+
+
+/*** TPMC1SC - TPM Timer Channel n Status and Control Register; 0xFFFF8045, 0xFFFF8055, 0xFFFF8065 ***/
+#define MCF_TPM_CSC(x, n)					(*(volatile uint8_t*)(0xFFFF8048 + ((x - 1) * 0x10) + ((n) * 0x3)))
+#define MCF_TPM_CSC_CHnIE                  	0x40
+#define MCF_TPM_CSC_CHnF                   	0x80
+#define MCF_TPM_CSC_ELSnx(x)				(((x)&0x3)<<2)
+#define MCF_TPM_CSC_ELSnx_MASK             	0x0C
+#define MCF_TPM_CSC_MSnx(x)					(((x)&0x3)<<4)
+#define MCF_TPM_CSC_MSnx_MASK              	0x30
+
+
+/*** TPMCV - TPM Timer Channel n Value Register; 0xFFFF8046, 0xFFFF8056, 0xFFFF8066 ***/
+#define MCF_TPM_CV(x, n)					(*(volatile uint16_t*)(0xFFFF8049 + ((x - 1) * 0x10) + ((n) * 0x3)))
+
+void Mcf51qeTpmInitClock(void (*handler) (void *));

@@ -30,19 +30,33 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#include <arch/m68k.h>
+#include <dev/irqreg.h>
 
-#include <stdint.h>
-#include <cfg/arch.h>
+static int IrqCtl(int cmd, void *param);
 
-#if defined (MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
-#elif defined (MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
-#elif defined (MCU_MCF51QE)
-#include <arch/m68k/coldfire/mcf51qe/mcf51qe.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
+IRQ_HANDLER sig_ADC = {
+#ifdef NUT_PERFMON
+        0,
 #endif
+        NULL,
+        NULL,
+        IrqCtl
+    };
+
+
+static int IrqCtl(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_ADC, cmd, param, &MCF_ADC_SC1, MCF_ADC_SC1_AIEN, 1);
+}
+
+
+SIGNAL(IH_ADC)
+{
+    /*
+     * Interrupt flag (MCF_ADC_SC1_COCO bit) is cleared when converted value (MCF_ADC_R) is read.
+     * This must be ensured by assigned signal handler.
+     */
+    CallHandler(&sig_ADC);
+}
+

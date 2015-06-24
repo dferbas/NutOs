@@ -38,6 +38,8 @@
 #include <arch/m68k/coldfire/mcf5225/irqreg_mcf5225.h>
 #elif defined(MCU_MCF51CN)
 #include <arch/m68k/coldfire/mcf51cn/irqreg_mcf51cn.h>
+#elif defined(MCU_MCF51QE)
+#include <arch/m68k/coldfire/mcf51qe/irqreg_mcf51qe.h>
 #else
 #warning "Unknown Coldfire MCU Family defined"
 #endif

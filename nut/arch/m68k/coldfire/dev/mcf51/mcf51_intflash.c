@@ -34,7 +34,7 @@
 
 #define BM_FLASH_ERR_MASK 0x30
 
-__attribute__ ((section (".data.flash_ram"))) volatile int Mcf51cnIntFlashRamCMD(uint8_t cmd) {
+__attribute__ ((section (".data.flash_ram"))) volatile int Mcf51IntFlashRamCMD(uint8_t cmd) {
 	MCF_FCMD = cmd;
 	MCF_FSTAT = 0x80U;
 	if ((MCF_FSTAT & BM_FLASH_ERR_MASK) == 0U) {
@@ -47,18 +47,18 @@ __attribute__ ((section (".data.flash_ram"))) volatile int Mcf51cnIntFlashRamCMD
 	return 0;
 }
 
-uint8_t Mcf51cnIntFlashProtectRegister(void) {
+uint8_t Mcf51IntFlashProtectRegister(void) {
 	return MCF_FPROT;
 }
 
-int Mcf51cnIntFlashInit(void) {
+int Mcf51IntFlashInit(void) {
 
 	MCF_FSTAT = 0x30; /* Clear FPVIOL & FACERR flag */
 	MCF_FCDIV = 0x50; /* Initialize FCDIV register */
 	return 0;
 }
 
-int Mcf51cnIntFlashRead(uint32_t dst, uint32_t *data, uint32_t size) {
+int Mcf51IntFlashRead(uint32_t dst, uint32_t *data, uint32_t size) {
 	uint32_t *p_dst = (uint32_t *) dst;
 	uint32_t *p_data = data;
 	while ((uint32_t) p_dst < dst + size * sizeof(uint32_t)) {
@@ -69,7 +69,7 @@ int Mcf51cnIntFlashRead(uint32_t dst, uint32_t *data, uint32_t size) {
 	return 0;
 }
 
-int Mcf51cnIntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size) {
+int Mcf51IntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size) {
 	int i;
 	uint32_t *flash = (uint32_t *) dst;
 	if ((dst > 0x0001FFFFUL) || (((dst + size) - 1U) > 0x0001FFFFUL)) {
@@ -95,7 +95,7 @@ int Mcf51cnIntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size) {
 			return -1;
 		}
 		flash++;
-		if(Mcf51cnIntFlashRamCMD(0x25) != 0)
+		if(Mcf51IntFlashRamCMD(0x25) != 0)
 			break;
 	}
 	NutExitCritical();
@@ -111,7 +111,7 @@ int Mcf51cnIntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size) {
 /*
  * Erase Sector (128 sectors of 1024 bytes each)
  */
-int Mcf51cnIntFlashSectorErase(uint32_t addr) {
+int Mcf51IntFlashSectorErase(uint32_t addr) {
 	if (addr > 0x0001FFFFUL) {
 		return -1; //ERR_RANGE;
 	}
@@ -124,7 +124,7 @@ int Mcf51cnIntFlashSectorErase(uint32_t addr) {
 		MCF_FSTAT = BM_FLASH_ERR_MASK; /* Clear FPVIOL & FACERR flag */
 	}
 	*(volatile uint32_t *) (addr) = 0x0; /* Write data to the flash memory */
-	Mcf51cnIntFlashRamCMD(0x40);
+	Mcf51IntFlashRamCMD(0x40);
 	NutExitCritical();
 	if ((MCF_FSTAT & BM_FLASH_ERR_MASK) != 0U) {
 		if ((MCF_FSTAT & MCF_FSTAT_FPVIOL) != 0U) {
@@ -140,7 +140,7 @@ int Mcf51cnIntFlashSectorErase(uint32_t addr) {
 /*
  * Erase entire flash
  */
-int Mcf51cnIntFlashMassErase(void) {
+int Mcf51IntFlashMassErase(void) {
 	if ((MCF_FSTAT & MCF_FSTAT_FCCF) == 0U) {
 		return -1; //ERR_BUSY;
 	}
@@ -150,7 +150,7 @@ int Mcf51cnIntFlashMassErase(void) {
 		MCF_FSTAT = BM_FLASH_ERR_MASK; /* Clear FPVIOL & FACERR flag */
 	}
 	*(volatile uint32_t *) (0x0) = 0x0; /* Write data to the flash memory */
-	Mcf51cnIntFlashRamCMD(0x41);
+	Mcf51IntFlashRamCMD(0x41);
 	NutExitCritical();
 	if ((MCF_FSTAT & BM_FLASH_ERR_MASK) != 0U) {
 		if ((MCF_FSTAT & MCF_FSTAT_FPVIOL) != 0U) {

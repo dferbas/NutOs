@@ -30,28 +30,33 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef INTFLASH_MCF51CN_H_
-#define INTFLASH_MCF51CN_H_
+#ifndef _DEV_BOARD_H_
+#error "Do not include this file directly. Use dev/board.h instead!"
+#endif
 
-#include <stdint.h>
+/*
+ * Debug device.
+ */
+#include <dev/debug.h>
 
-/* address in memory map to write in FLASH */
-#define FLASH_MIN_ADDRESS	 				0x00000000
+//#define EARLY_STDIO_DEV devDebug2
 
-/* End address for region of flash */
-#define FLASH_MAX_ADDRESS					0x0001FFFF
+#ifndef DEV_DEBUG
+#define DEV_DEBUG       devDebug2
+#endif
 
-/* Flash erase page size 1024 Bytes */
-#define FLASH_PAGE_ERASE_SIZE		1024 // size of sector to erase
+#ifndef DEV_DEBUG_NAME
+#define DEV_DEBUG_NAME  "sci2"
+#endif
 
-/* Flash protected page size 4096 Bytes */
-#define FLASH_PAGE_PROTECT_SIZE		0x1000 // size of protected sector
+/*
+ * UART devices
+ */
+#include <dev/scimcf5.h>
+#define DEV_UART1       devSciMcf5_1
+#define DEV_UART2       devSciMcf5_2
+#define DEV_UART3       devSciMcf5_3
+#define DEV_UART1_NAME  "sci1"
+#define DEV_UART2_NAME  "sci2"
+#define DEV_UART3_NAME  "sci3"
 
-int Mcf51cnIntFlashInit(void);
-uint8_t Mcf51cnIntFlashProtectRegister(void);
-int Mcf51cnIntFlashRead(uint32_t dst, uint32_t *data, uint32_t size);
-int Mcf51cnIntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size);
-int Mcf51cnIntFlashSectorErase(uint32_t addr);
-int Mcf51cnIntFlashMassErase(void);
-
-#endif /* INTFLASH_MCF51CN_H_ */

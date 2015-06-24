@@ -1,5 +1,7 @@
+#ifndef _DEV_AT45DB_H_
+#define _DEV_AT45DB_H_
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright (C) 2006 by egnite Software GmbH. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,19 +32,10 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#include <sys/types.h>
+#include <dev/spibus.h>
 
-#include <stdint.h>
-#include <cfg/arch.h>
+extern NUTSPINODE dacMcp4921;
+extern NUTDEVICE devDacMcp4921;
 
-#if defined (MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
-#elif defined (MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
-#elif defined (MCU_MCF51QE)
-#include <arch/m68k/coldfire/mcf51qe/mcf51qe.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
 #endif

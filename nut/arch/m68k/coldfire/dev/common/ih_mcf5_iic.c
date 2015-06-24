@@ -30,14 +30,51 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#include <dev/reset.h>
+#include <arch/m68k.h>
+#include <dev/irqreg.h>
 
-void Mcf51cn_Reset(void)
+
+static int IrqCtl1(int cmd, void *param);
+static int IrqCtl2(int cmd, void *param);
+
+IRQ_HANDLER sig_IIC1 = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtl1
+    };
+
+IRQ_HANDLER sig_IIC2 = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtl2
+    };
+
+static int IrqCtl1(int cmd, void *param)
 {
-    // JS TODO - not implemented
+    return IrqCtlCommon(&sig_IIC1, cmd, param, &MCF_IIC_CR(1), MCF_IIC_CR_IICIE, 1);
 }
 
-int Mcf51cn_ResetCause(void)
+static int IrqCtl2(int cmd, void *param)
 {
-    return NUT_RSTTYP_UNKNOWN;
+    return IrqCtlCommon(&sig_IIC2, cmd, param, &MCF_IIC_CR(2), MCF_IIC_CR_IICIE, 1);
 }
+
+SIGNAL(IH_IIC_X)
+{
+	if (MCF_IIC_SR(1) & MCF_IIC_SR_IICIF){
+		MCF_IIC_SR(1) |= MCF_IIC_SR_IICIF;
+		CallHandler(&sig_IIC1);
+	}
+
+	if (MCF_IIC_SR(2) & MCF_IIC_SR_IICIF){
+		MCF_IIC_SR(2) |= MCF_IIC_SR_IICIF;
+		CallHandler(&sig_IIC2);
+	}
+}
+

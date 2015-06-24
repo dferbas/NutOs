@@ -38,6 +38,8 @@
 #include <arch/m68k/coldfire/mcf5225/gpio_mcf5225.h>
 #elif defined(MCU_MCF51CN)
 #include <arch/m68k/coldfire/mcf51cn/gpio_mcf51cn.h>
+#elif defined(MCU_MCF51QE)
+#include <arch/m68k/coldfire/mcf51qe/gpio_mcf51qe.h>
 #else
 #warning "Unknown Coldfire MCU Family defined"
 #endif

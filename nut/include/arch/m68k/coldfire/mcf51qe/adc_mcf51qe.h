@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2014 by Embedded Technologies s.r.o
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,19 +30,15 @@
  * For additional information see http://www.ethernut.de/
  */
 
-#ifndef _ARCH_M68K_H_
-#error "Do not include this file directly. Use arch/m68k.h instead!"
-#endif
+#ifndef ADC_MCF51QE_H_
+#define ADC_MCF51QE_H_
 
-#include <stdint.h>
-#include <cfg/arch.h>
+#include <arch/m68k.h>
 
-#if defined (MCU_MCF5225)
-#include <arch/m68k/coldfire/mcf5225/mcf5225.h>
-#elif defined (MCU_MCF51CN)
-#include <arch/m68k/coldfire/mcf51cn/mcf51cn.h>
-#elif defined (MCU_MCF51QE)
-#include <arch/m68k/coldfire/mcf51qe/mcf51qe.h>
-#else
-#warning "Unknown Coldfire MCU Family defined"
-#endif
+uint16_t Mcf51qeAdcValue(void);
+
+void Mcf51qeAdcInit(void (*handler) (void *), void *handler_arg);
+
+void Mcf51qeAdcStartConversion(uint8_t channel, uint8_t mode);
+
+#endif  /* ADC_MCF51QE_H_ */

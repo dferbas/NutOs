@@ -130,14 +130,16 @@
 #define MOUNT_OFFSET_AT45D0   0
 #define MOUNT_TOP_RESERVE_AT45D0 0
 
-
 /*! \brief Parameter table of known DataFlash types. */
 AT25D_INFO at25d_info[] = {
+    {7, 2048, 128, 0x43}, /* AT25DF021-SSH-B - 256kB */
     {12, 2048, 4096, 0x48}, /* AT25DF641 - 8MB */
 };
 
 /*! \brief Number of known Dataflash types. */
 uint_fast8_t at25d_known_types = sizeof(at25d_info) / sizeof(AT25D_INFO);
+
+static uint8_t At25dStatus(NUTSPINODE * node);
 
 /*!
  * \brief Send DataFlash command.
@@ -227,7 +229,7 @@ static int At25dWaitReady(NUTSPINODE * node, uint32_t tmo, int poll)
 {
     uint8_t sr;
 
-    while (((sr = At25dStatus(node)) & 0x01) == 0) {
+    while (((sr = At25dStatus(node)) & 0x01)) {
         if (!poll) {
             NutSleep(1);
         }
@@ -274,6 +276,58 @@ static uint8_t At25dStatus(NUTSPINODE * node)
     return (uint8_t) rc;
 }
 
+/*!
+ * \brief Query the status of the DataFlash.
+ *
+ * \param node  Specifies the SPI node.
+ *
+ * \return 0 on success or -1 in case of an error.
+ */
+static uint8_t At25dStatusNoProtect(NUTSPINODE * node)
+{
+    int rc;
+    uint8_t cmd[2] = { 0x01, 0x00 };
+    NUTSPIBUS *bus;
+
+    NUTASSERT(node != NULL);
+    NUTASSERT(node->node_bus != NULL);
+    bus = (NUTSPIBUS *) node->node_bus;
+
+    NUTASSERT(bus->bus_alloc != NULL);
+    NUTASSERT(bus->bus_transfer != NULL);
+    NUTASSERT(bus->bus_wait != NULL);
+    NUTASSERT(bus->bus_release != NULL);
+
+    rc = (*bus->bus_alloc) (node, 1000);
+    if (rc == 0) {
+        rc = (*bus->bus_transfer) (node, cmd, cmd, 2);
+        if (rc == 0) {
+            (*bus->bus_wait) (node, NUT_WAIT_INFINITE);
+            rc = cmd[1];
+        }
+        (*bus->bus_release) (node);
+    }
+    return (uint8_t) rc;
+}
+
+/*!
+ * \brief Query the status of the DataFlash.
+ *
+ * \param node  Specifies the SPI node.
+ *
+ * \return 0 on success or -1 in case of an error.
+ */
+static void At25dRemoveProtect(NUTSPINODE * node)
+{
+	uint8_t status = At25dStatus(node);
+
+	if (status & 0xC)
+	{
+		At25dCommand(node, DFCMD_WRITE_ENABLE, 0, 1, NULL, NULL, 0);
+		At25dStatusNoProtect(node);
+	}
+
+}
 
 /*!
  * \brief Initialize dataflash at specified interface and chip select.
@@ -362,49 +416,48 @@ int SpiAt25PageWrite (NUTDEVICE * dev, uint32_t pgn, const void *data, int len){
     limit = ((AT25D_INFO *) blkio->blkio_info)->at25d_pages;
     sector = 256;
 
+    At25dRemoveProtect(node);
+
     while (len) {
         if (step > len) {
             step = len;
         }
-    //TODO: write real code
-    //1. Block erase 4k
-    //2. write page
-    //3. wait ready
-    //4. repeat 2,3,4 up to 8 times
 
-    //erase page
-    if (At25dCommand(node, DFCMD_WRITE_ENABLE, 0, 1, NULL,NULL,0)){
-        break;
-    };
-    if (At25dCommand(node, DFCMD_BLOCK_ERASE_4K,pgn << pshft, 4, NULL,NULL, 0)){
-            break;
-        }
-        if (At25dWaitReady(node, AT25_WRITE_POLLS, 1)) {
-            break;
-        }
-    while(len) {
-        if(sector > len) {
-            sector = len;
-        };
-        if (At25dCommand(node, DFCMD_WRITE_ENABLE, 0, 1, NULL,NULL,0)){
-            break;
-        };
-        if (At25dCommand(node, DFCMD_WRITE, (pgn << pshft)+(uint8_t*)data-dp, 4, dp, NULL, step)){
-            break;
-        };
-            if (At25dWaitReady(node, AT25_WRITE_POLLS, 1)) {
-                break;
-            }
-            if (rc < 0) {
-                rc = 0;
-            }
-            rc += sector;
-            dp += sector;
-            len -= sector;
-            if (++pgn >= limit) {
-                break;
-            }
-    }
+		//erase block if first page of erase block
+		if ((pgn & 0x1F) == 0) {
+			if (At25dCommand(node, DFCMD_WRITE_ENABLE, 0, 1, NULL,NULL,0)){
+				break;
+			};
+			if (At25dCommand(node, DFCMD_BLOCK_ERASE_4K,pgn << pshft, 4, NULL,NULL, 0)){
+				break;
+			}
+			if (At25dWaitReady(node, AT25_WRITE_POLLS, 1)) {
+				break;
+			}
+		}
+		while(len) {
+			if(sector > len) {
+				sector = len;
+			};
+			if (At25dCommand(node, DFCMD_WRITE_ENABLE, 0, 1, NULL,NULL,0)){
+				break;
+			};
+			if (At25dCommand(node, DFCMD_WRITE, (pgn << pshft)+(uint8_t*)data-dp, 4, dp, NULL, step)){
+				break;
+			};
+				if (At25dWaitReady(node, AT25_WRITE_POLLS, 1)) {
+					break;
+				}
+				if (rc < 0) {
+					rc = 0;
+				}
+				rc += sector;
+				dp += sector;
+				len -= sector;
+				if (++pgn >= limit) {
+					break;
+				}
+		}
     }
     return rc;
 };
