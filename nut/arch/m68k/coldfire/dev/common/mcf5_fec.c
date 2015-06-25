@@ -870,8 +870,8 @@ static void FecPutPacket(FECINFO * ni, char *p_packet, int size)
 
 	NUTASSERT(size >= FEC_TX_BUFFERS_MIN);
 
-	if (size & 1)
-		size++;
+	//if (size & 1) //DF test - frame with odd and even size should work in the same way
+	//	size++;
 
 	/* Get first empty buffer descriptor */
 	bd = &ni->tx_bd_fec[ni->tx_pos_push];
@@ -922,8 +922,9 @@ static void FecPutPacketNetbuf(FECINFO * ni, NETBUF *nb)
 			bd->flags |= MCF_FEC_TX_BD_LAST_IN_FRAME | MCF_FEC_TX_BD_TRANSMIT_CRC;
 
 		    /* Aling frame size due to CRC alignment */
-		    if (frame_size & 1)
-		    	bd->length++;
+
+			//if (frame_size & 1) //DF test - frame with odd and even size should work in the same way
+		    //	bd->length++;
 
 		    /* Save netbuf pointer. It will be freed after send. */
 			ni->tx_buf[ni->tx_pos_push] = nb;
