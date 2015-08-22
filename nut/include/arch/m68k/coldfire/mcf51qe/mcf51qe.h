@@ -41,7 +41,7 @@
 #include "mcf51qe_spi.h"
 #include "mcf51qe_iic.h"
 #include "mcf51qe_adc.h"
-#include "../mcf5_iic.h"
+#include "mcf51qe_iic.h"
 
 /**************** registers I/O map ****************/
 

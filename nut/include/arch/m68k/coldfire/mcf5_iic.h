@@ -17,7 +17,7 @@
 #define DCB_BASE_TWI2 	0x80
 #define DCB_BASE_MASK 	0x80
 
-#define DCB_BASE(addr) 	((((addr) & DCB_BASE_MASK) >> 7) + 1)
+#define DCB_BASE(addr) 	(((addr) & DCB_BASE_MASK) >> 7)
 #define TWI_THREAD_WAIT 100
 
 int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, uint16_t siz, uint32_t tmo, uint8_t write);

@@ -21,15 +21,12 @@ typedef struct {
 	volatile uint8_t tw_mm_err; /* Current master mode error. */
 	uint8_t tw_mm_error;        /* Last master mode error. */
 
-	uint8_t iic_SlaveAddr;     	/* Variable for Slave address */
 	uint32_t AddrLenM;          /* Length of input bufer's content */
 	uint32_t InpLenM;           /* Length of input bufer's content */
 	uint32_t OutLenM;           /* Length of output bufer's content */
 	uint32_t tw_mr_cnt;         /* Number of received bytes */
 	uint8_t *DataPtrM;          /* Pointer to data buffer for Master mode */
 	uint8_t *AddrPtrM;          /* Pointer to output buffer for Master mode */
-	//uint32_t IIC1_SndRcvTemp; /* Temporary variable for SendChar (RecvChar) when they call SendBlock (RecvBlock) */
-	//uint8_t ChrTemp;          /* Temporary variable for SendChar method */
 	volatile uint8_t tw_if_bsy; /* Bus busy flag */
 	uint8_t tw_rptst_rqst;   	/* Request for repeated start */
 	uint8_t tw_mm_sla;          /* Destination slave address. */
@@ -160,7 +157,7 @@ static void reenableDevice(int dcbBase){
 int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, uint16_t siz, uint32_t tmo, uint8_t write)
 {
     int rc = -1;
-    TWIDCB *dev = &dcb_twi[DCB_BASE(sla) - 1];
+    TWIDCB *dev = &dcb_twi[DCB_BASE(sla)];
 
 	/* This routine is marked reentrant, so lock the interface. */
 	if (NutEventWait(&dev->tw_mm_mutex, 500)) {
@@ -168,9 +165,11 @@ int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, 
 		return -1;
 	}
 
+/*
+TODO: DF - commented out, check
 	uint8_t control = MCF_IIC_CR(dev->dcb_base);
 	control++;
-
+*/
     /* Set all parameters for master mode. */
 	dev->tw_mm_err = 0;
 	dev->tw_mr_cnt = 0;
@@ -204,7 +203,7 @@ int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, 
 	if((MCF_IIC_SR(dev->dcb_base) & MCF_IIC_SR_BUSY) || dev->tw_if_bsy) { /* Is the bus busy */
 		reenableDevice(dev->dcb_base);
 
-		if(dev->dcb_base == 1){
+		if(dev->dcb_base == 0){
 			NutIrqEnable(&sig_IIC1);
 		}
 		else{
@@ -352,16 +351,15 @@ int TwIOCtl(int req, void *conf)
  */
 int TwInit(uint8_t sla)
 {
-	TWIDCB *dev = &dcb_twi[DCB_BASE(sla) - 1];
+	TWIDCB *dev = &dcb_twi[DCB_BASE(sla)];
 	dev->dcb_base = DCB_BASE(sla);
 	dev->tw_if_bsy = 0; /* Clear busy flag */
-	dev->iic_SlaveAddr = 0x10U; /* Set variable for slave address */
 	dev->InpLenM = 0U; /* No data to be received */
 
 	 uint32_t speed = 100000;
 
 	 /* Enable the IIC signals */
-	 if(dev->dcb_base == 1){
+	 if(dev->dcb_base == 0){
 		 MCF_SCGC1 |= MCF_SCGC1_IIC1; // enable system clock
 	 }
 	 else{
@@ -375,7 +373,7 @@ int TwInit(uint8_t sla)
 	reenableDevice(dev->dcb_base);
 
 
-	if(dev->dcb_base == 1){
+	if(dev->dcb_base == 0){
 		NutRegisterIrqHandler(&sig_IIC1, TwInterrupt, dev);
 		NutIrqEnable(&sig_IIC1);
 	}
