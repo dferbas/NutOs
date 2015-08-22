@@ -4054,6 +4054,7 @@ nutdev =
         name = "nutdev_avrtarget",
         brief = "AVR Serial Programming",
         description = "Routines for programming AVR targets via SPI.\n",
+        requires = { "HW_MCU_AVR" },
         provides = { "DEV_SPI" },
         sources = { "avrtarget.c" },
         options =

@@ -107,31 +107,6 @@ nutarch_m68k_coldfire =
     },
 
     --
-    -- Coldfire MCU Directory
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf51cn",
-        brief = "MCF51CN Family",
-        requires = { "HW_MCU_MCF51CN" },
-        description = "MCF51CN family",
-        script = "arch/coldfire/mcf51cn.nut"
-    },
-    {
-        name = "nutarch_m68k_coldfire_mcf51qe",
-        brief = "MCF51QE Family",
-        requires = { "HW_MCU_MCF51QE" },
-        description = "MCF51QE family",
-        script = "arch/coldfire/mcf51qe.nut"
-    },
-	{
-        name = "nutarch_m68k_coldfire_mcf5225",
-        brief = "MCF5225 Family",
-        requires = { "HW_MCU_MCF5225" },
-        description = "MCF5225 family",
-        script = "arch/coldfire/mcf5225.nut"
-    },
-    
-    --
     -- Coldfire Common Devices
     --
     {

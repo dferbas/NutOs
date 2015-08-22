@@ -128,17 +128,13 @@ nutarch_m68k_coldfire_mcf51cn =
         brief = "Interrupt Handler",
         description = "Peripheral interrupt handlers for MCF51CN family.",
         provides = { 
-                    "DEV_IRQ_ADC",
-                    "DEV_IRQ_SCI",
-                    "DEV_IRQ_FEC",
+                    "DEV_IRQ_TIM",
+                    "DEV_IRQ_RTC",
                    },
         sources = { 
-          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_mtim.c",
-          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_rtc.c",
-          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_spi.c",
-          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_sci.c",
-          			"m68k/coldfire/dev/common/ih_mcf5_fec.c",
-        		  },
+                    "m68k/coldfire/dev/mcf51cn/ih_mcf51cn_mtim.c",
+                    "m68k/coldfire/dev/mcf51cn/ih_mcf51cn_rtc.c",
+        	  },
     },
 
     -- 
@@ -152,12 +148,14 @@ nutarch_m68k_coldfire_mcf51cn =
     },
     
     --
-    -- Modulo Timer
+    -- System Timer
     --
     {
-        name = "nutarch_m68k_coldfire_mcf51cn_mtim",
-        brief = "Modulo Timer (MTIM)",
-        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_mtim.c" },
+        name = "nutarch_m68k_coldfire_mcf51cn_ostimer",
+        brief = "System Timer",
+        requires = { "DEV_IRQ_TIM"},
+        provides = { "NUT_OSTIMER_DEV" },
+        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_ostimer.c" },
     },
     
     --
@@ -166,17 +164,17 @@ nutarch_m68k_coldfire_mcf51cn =
     {
         name = "nutarch_m68k_coldfire_mcf51cn_tpm",
         brief = "Timer/PWM Module (TPM)",
+        requires = { "DEV_IRQ_TPM"},
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_tpm.c" },
     },
 
     --
-    -- System Timer
+    -- Modulo Timer
     --
     {
-        name = "nutarch_m68k_coldfire_mcf51cn_ostimer",
-        brief = "System Timer",
-        provides = { "NUT_OSTIMER_DEV" },
-        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_ostimer.c" },
+        name = "nutarch_m68k_coldfire_mcf51cn_mtim",
+        brief = "Modulo Timer (MTIM)",
+        sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_mtim.c" },
     },
     
     --
@@ -197,7 +195,7 @@ nutarch_m68k_coldfire_mcf51cn =
     {
         name = "nutarch_m68k_coldfire_mcf51cn_spi",
         brief = "Serial Peripheral Interface (SPI)",
-        description = "Deprecated, non-standard SPI driver created during rapid developement. \n"..
+        description = "Deprecated, non-standard SPI driver created during rapid development. \n"..
                       "It is used only by FRAM FM25L04B and by SPI Serial Flash SST25VF020B. \n\n"..
                       "TODO: This driver must be recoded to use standard SPIBUS framework",
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_spi.c" },
@@ -213,13 +211,4 @@ nutarch_m68k_coldfire_mcf51cn =
         description = "12-bit analog-to-digital converter.",
         sources = { "m68k/coldfire/dev/mcf51cn/mcf51cn_adc.c" },
     },   
-    
-    --
-    -- Fast Ethernet Controller
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf5_fec",
-        brief = "Fast Ethernet Controller (FEC)",
-        sources = { "m68k/coldfire/dev/common/mcf5_fec.c" },
-    }, 
 }

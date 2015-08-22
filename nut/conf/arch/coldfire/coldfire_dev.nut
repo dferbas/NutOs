@@ -12,8 +12,8 @@ nutarch_m68k_coldfire_devices =
                     "DEV_IRQ_FEC",
                    },
         sources = { 
-          			"m68k/coldfire/dev/common/ih_mcf5_fec.c",
-        		  },
+                    "m68k/coldfire/dev/common/ih_mcf5_fec.c",
+                  },
     },
     
     --
@@ -186,7 +186,7 @@ nutarch_m68k_coldfire_devices =
                       "functions for the generic USART driver framework.",
         requires = { "HW_SCI_COLDFIRE", "DEV_IRQ_SCI", "HW_SCI1" },
         provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
-	    sources = { "m68k/coldfire/dev/common/mcf5_sci1.c" },
+        sources = { "m68k/coldfire/dev/common/mcf5_sci1.c" },
         options =
         {
             {

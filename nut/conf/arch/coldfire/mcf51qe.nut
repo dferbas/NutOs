@@ -1,7 +1,7 @@
 
 nutarch_m68k_coldfire_mcf51qe =
 {
-   	--
+    --
     -- MCU Family
     --
     {
@@ -91,25 +91,6 @@ nutarch_m68k_coldfire_mcf51qe =
         sources = { "m68k/coldfire/dev/mcf51qe/mcf51qe_gpio.c"}
     },
     
-    --
-    -- Interrupt Handler
-    --
-    {
-        name = "nutarch_m68k_coldfire_mcf51qe_ihndlr",
-        brief = "Interrupt Handler",
-        description = "Peripheral interrupt handlers for MCF51QE family.",
-        provides = { 
-                    "DEV_IRQ_SCI",
-                    "DEV_IRQ_SPI",
-                    "DEV_IRQ_IIC",
-                   },
-        sources = { 
-          			"m68k/coldfire/dev/mcf51cn/ih_mcf51cn_sci.c",
-          			"m68k/coldfire/dev/mcf51/ih_mcf51_spi.c",
-          			"m68k/coldfire/dev/common/ih_mcf5_iic.c",
-        		  },
-    },
-
     -- 
     -- Internal Clock Source
     --
@@ -126,6 +107,7 @@ nutarch_m68k_coldfire_mcf51qe =
     {
         name = "nutarch_m68k_coldfire_mcf51qe_ostimer",
         brief = "System Timer",
+        requires = { "DEV_IRQ_TIM"},
         provides = { "NUT_OSTIMER_DEV" },
         sources = { "m68k/coldfire/dev/mcf51qe/mcf51qe_ostimer.c" },
     },
@@ -136,44 +118,16 @@ nutarch_m68k_coldfire_mcf51qe =
     {
         name = "nutarch_m68k_coldfire_mcf51qe_tpm",
         brief = "Timer/PWM Module (TPM)",
+        requires = { "DEV_IRQ_TPM"},
         sources = { "m68k/coldfire/dev/mcf51qe/mcf51qe_tpm.c" },
     },
 
     --
-    --  Serial Peripheral Interface
-    --    
-    {
-        name = "nutarch__m68k_coldfire_mcf51_spi",
-        brief = "Serial Peripheral Interface",
-        description = "Serial Peripheral Interface",
-        provides = { "SPIBUS_CONTROLLER" },
-        sources =
-        {
-        	"m68k/coldfire/dev/mcf51/mcf51_spi1.c",
-            "m68k/coldfire/dev/mcf51/mcf51_spi2.c",
-        },
-    },
-    
-    --
-    -- IIC - Inter-Integrated Circuit
-    --
-    {
-        name = "nutarch_mcf5_iic",
-        brief = "Inter-Integrated Circuit",
-        description = "IIC for MCF5 family.",
-        requires = {"DEV_IRQ_IIC"},
-        provides = { "DEV_TWI" },
-        sources = { "m68k/coldfire/dev/common/mcf5_iic.c" }
-    },
-    
-    --
     -- Analog to Digital Converter
     --
     {
-        name = "nutarch_m68k_coldfire_mcf51_adc",
-        brief = "Analog to Digital Converter (ADC)",
+        name = "nutarch_m68k_coldfire_mcf51qe_adc",
+        brief = "A/D Converter (ADC)",
         sources = { "m68k/coldfire/dev/mcf51qe/mcf51qe_adc.c" },
     },
-    
-    
 }
