@@ -67,7 +67,7 @@
  * Buffer descriptors config
  */
 #ifdef TX_PACKET_ASSEMBLE
-#if defined (MCU_MCF5225)
+# if defined (MCU_MCF5225)
 #  define FEC_TX_BUFFERS				(2*1 + 1)		// SM2-MU no fragments (one buffer only)
 # else
 #  define FEC_TX_BUFFERS				(1*1 + 1)		// no fragments (one buffer only)
@@ -94,7 +94,7 @@
 # error("FEC_RX_BUFFERS or FEC_RX_BUFSIZ too small")
 #endif
 
-// Switch on red led 
+// Switch on red led
 uint8_t alarmFec;
 
 uint8_t resetPHY = 0;
@@ -450,12 +450,12 @@ static int FecReset(IFNET *nif, int do_reset)
 	int rc = 0;
 	int wait;
 	uint32_t regvalue;
-	
+
 #if defined (MCU_MCF51CN)
 	/* Set Reset Phy pin to output */
 	GpioPinSetHigh(PORTC, 3);
 	GpioPinConfigSet(PORTC, 3, GPIO_CFG_ALT1 | GPIO_CFG_OUTPUT);
-	
+
 	MCF_SOPT3 = MCF_SOPT3_PCS_OSCOUT << MCF_SOPT3_PCS_BITNUM;
 
 	/* MII_TX_ER pin P0RB2 used as gpio chip select in SM2-RM SPI FRAM, for ETH_mod not used*/
@@ -921,7 +921,7 @@ static void FecPutPacketNetbuf(FECINFO * ni, NETBUF *nb)
 			/* Set last-in-frame flags */
 			bd->flags |= MCF_FEC_TX_BD_LAST_IN_FRAME | MCF_FEC_TX_BD_TRANSMIT_CRC;
 
-		    /* Aling frame size due to CRC alignment */
+		    /* Align frame size due to CRC alignment */
 
 			//if (frame_size & 1) //DF test - frame with odd and even size should work in the same way
 		    //	bd->length++;
@@ -1093,9 +1093,9 @@ int PHY_Test(NUTDEVICE *dev)
 	if(status == last_status) {
 		// Zadna zmena stavu ethernetu
 		return last_status;
-	}	
+	}
 	last_status = status;
-	
+
 	if(status & PHY_STATUS_HAS_LINK) {
 		/* Link is on. */
 
@@ -1118,7 +1118,7 @@ int PHY_Test(NUTDEVICE *dev)
 	} else {
 		/* Link is off. */
 		// Nastaveni priznaku ze neni Link
-		nif->if_flags &= ~IFF_LINK0;	  
+		nif->if_flags &= ~IFF_LINK0;
 	}
 
 //	printf("%s, %s, %s, %x\r\n", 	value & (1 << 0) ? "Link ON" : "Link Off",

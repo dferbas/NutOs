@@ -140,6 +140,5 @@ NUTDEVICE devSciMcf5_1 = {
 #define sig_sci_rx	sig_SCI1_RX
 #define sig_sci_tx	sig_SCI1_TX
 #define dcb_sci		dcb_sci1
-#define reg_sci		reg_sci1
 
 #include "mcf5_sci.c"

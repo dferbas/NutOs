@@ -161,6 +161,5 @@ static void Sci2SetToTransmitMode(void)
 #define sig_sci_rx	sig_SCI2_RX
 #define sig_sci_tx	sig_SCI2_TX
 #define dcb_sci		dcb_sci2
-#define reg_sci		reg_sci2
 
 #include "mcf5_sci.c"
