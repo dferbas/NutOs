@@ -25,6 +25,10 @@ nutarch_m68k_coldfire_mcf51_mcf51cn =
         provides = {
                 "HW_ADC12_COLDFIRE",
                 "HW_SCI_COLDFIRE",
+                "HW_SCI1",
+                "HW_SCI2",
+                "HW_SCI3",
+                "HW_FEC"
         },
         options =
         {
@@ -35,34 +39,6 @@ nutarch_m68k_coldfire_mcf51_mcf51cn =
                 type = "integer",
                 default = 1,
                 file = "include/cfg/arch.h"
-            },
-            {
-                macro = "SCI1",
-                type = "integer",
-                default = 1,
-                provides = { "HW_SCI1" },
-                file = "include/cfg/peripherals.h"
-            },
-            {
-                macro = "SCI2",
-                type = "integer",
-                default = 1,
-                provides = { "HW_SCI2" },
-                file = "include/cfg/peripherals.h"
-            },
-            {
-                macro = "SCI3",
-                type = "integer",
-                default = 1,
-                provides = { "HW_SCI3" },
-                file = "include/cfg/peripherals.h"
-            },
-            {
-                macro = "FEC",
-                type = "integer",
-                default = 1,
-                provides = { "HW_FEC" },
-                file = "include/cfg/peripherals.h"
             },
         }
     },
@@ -125,7 +101,7 @@ nutarch_m68k_coldfire_mcf51_mcf51cn =
     --
     {
         name = "nutarch_m68k_coldfire_mcf51cn_ihndlr",
-        brief = "Interrupt Handler",
+        brief = "Interrupt Handlers",
         description = "Peripheral interrupt handlers for MCF51CN family.",
         provides = { 
                     "DEV_IRQ_TIM",

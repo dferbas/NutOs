@@ -32,7 +32,6 @@
 
 #include <arch/m68k.h>
 #include <arch/m68k/coldfire/mcf51cn/adc_mcf51cn.h>
-#include <cfg/peripherals.h>
 #include <dev/gpio.h>
 #include <dev/irqreg.h>
 #include <stdio.h>

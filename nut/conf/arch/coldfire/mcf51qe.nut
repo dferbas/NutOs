@@ -10,6 +10,8 @@ nutarch_m68k_coldfire_mcf51_mcf51qe =
         provides = {
                 "HW_ADC12_COLDFIRE",
                 "HW_SCI_COLDFIRE",
+                "HW_SCI1",
+                "HW_SCI2",
                 "SPI_BUS_DRIVER_AD_PC_ONLY",
         },
         options =
@@ -21,20 +23,6 @@ nutarch_m68k_coldfire_mcf51_mcf51qe =
                 type = "integer",
                 default = 1,
                 file = "include/cfg/arch.h"
-            },
-            {
-                macro = "SCI1",
-                type = "integer",
-                default = 1,
-                provides = { "HW_SCI1" },
-                file = "include/cfg/peripherals.h"
-            },
-            {
-                macro = "SCI2",
-                type = "integer",
-                default = 1,
-                provides = { "HW_SCI2" },
-                file = "include/cfg/peripherals.h"
             },
         }
     },

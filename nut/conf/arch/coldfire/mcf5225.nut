@@ -144,7 +144,7 @@ nutarch_m68k_coldfire_mcf52_mcf5225 =
     --
     {
         name = "nutarch_m68k_coldfire_mcf5225_ihndlr",
-        brief = "Interrupt Handler",
+        brief = "Interrupt Handlers",
         description = "Peripheral interrupt handlers for MCF5225 family.",
         provides = { 
                     "DEV_IRQ_I2C",
@@ -198,7 +198,7 @@ nutarch_m68k_coldfire_mcf52_mcf5225 =
         brief = "UART0 Driver Old",
         description = "Hardware specific USART driver. Implements hardware "..
                       "functions for the generic driver framework.\n\n"..
-                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
+                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO pins are hard wired",
         provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
         sources = { "m68k/coldfire/dev/mcf5225/mcf5225_old_uart0.c" }
     },
@@ -211,7 +211,7 @@ nutarch_m68k_coldfire_mcf52_mcf5225 =
         brief = "UART1 Driver Old",
         description = "Hardware specific USART driver. Implements hardware "..
                       "functions for the generic driver framework.\n\n"..
-                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
+                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO pins are hard wired",
         provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
         sources = { "m68k/coldfire/dev/mcf5225/mcf5225_old_uart1.c" }
     },
@@ -224,7 +224,7 @@ nutarch_m68k_coldfire_mcf52_mcf5225 =
         brief = "UART2 Driver Old",
         description = "Hardware specific USART driver. Implements hardware "..
                       "functions for the generic driver framework.\n\n"..
-                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO ping are hard wired",
+                      "DO NOT USE THIS DRIVER. It is used only for SolarMonitor and Posedon products and all GPIO pins are hard wired",
         provides = { "DEV_UART", "DEV_UART_SPECIFIC" },
         sources = { "m68k/coldfire/dev/mcf5225/mcf5225_old_uart2.c" }
     },
@@ -263,7 +263,7 @@ nutarch_m68k_coldfire_mcf52_mcf5225 =
     },
     
     --
-    -- I2c
+    -- I2C
     --
     {
         name = "nutarch_mcf5225_old_i2c",
