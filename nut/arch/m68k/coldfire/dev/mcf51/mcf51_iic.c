@@ -11,6 +11,8 @@
 #include <dev/twif.h>
 
 #include <arch/m68k.h>
+#include <arch/m68k/coldfire/mcf51_iic.h>
+
 
 #define NUT_THREAD_TWI_TRANSACT_STACK   	1000			// TODO .. tune it
 

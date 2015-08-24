@@ -34,14 +34,14 @@
 #error "Do not include this file directly. Use arch/m68k.h instead!"
 #endif
 
+#include "mcf51cn_sci.h"
+#include "mcf51cn_tpm.h"
 #include "mcf51cn_adc.h"
+#include "mcf51cn_iic.h"
+#include "mcf51cn_spi.h"
 #include "mcf51cn_scr.h"
 #include "mcf51cn_fec.h"
 #include "mcf51cn_gpio.h"
-#include "mcf51cn_iic.h"
 #include "mcf51cn_mcg.h"
 #include "mcf51cn_mtim.h"
 #include "mcf51cn_rtc.h"
-#include "mcf51cn_sci.h"
-#include "mcf51cn_spi.h"
-#include "mcf51cn_tpm.h"

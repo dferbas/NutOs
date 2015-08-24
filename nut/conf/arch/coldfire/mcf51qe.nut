@@ -1,5 +1,5 @@
 
-nutarch_m68k_coldfire_mcf51qe =
+nutarch_m68k_coldfire_mcf51_mcf51qe =
 {
     --
     -- MCU Family
@@ -10,6 +10,7 @@ nutarch_m68k_coldfire_mcf51qe =
         provides = {
                 "HW_ADC12_COLDFIRE",
                 "HW_SCI_COLDFIRE",
+                "SPI_BUS_DRIVER_AD_PC_ONLY",
         },
         options =
         {
@@ -42,7 +43,7 @@ nutarch_m68k_coldfire_mcf51qe =
     -- Runtime Initialization
     --
     {
-        name = "nutarch_m68k_coldfire_mcf51_init",
+        name = "nutarch_m68k_coldfire_mcf51qe_init",
         brief = "Initialization",
         description = "System startup code for Coldfire V1 Core MCUs.",
         sources = { 

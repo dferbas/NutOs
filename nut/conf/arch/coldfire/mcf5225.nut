@@ -38,7 +38,7 @@ mcf5225_uart2_rxd_pins_descr = "Choose UART2 RXD Pin:\n\tPUC1 (URXD2)\n\tPUB3 (U
 mcf5225_uart2_rts_pins_descr = "Choose UART2 RTS Pin:\n\tPUC2 (URTS2)"
 mcf5225_uart2_cts_pins_descr = "Choose UART2 CTS Pin:\n\tPUC3 (UCTS2)"
 
-nutarch_m68k_coldfire_mcf5225 =
+nutarch_m68k_coldfire_mcf52_mcf5225 =
 {
    	--
     -- MCU Family

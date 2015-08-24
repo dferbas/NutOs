@@ -14,7 +14,7 @@ mcf51cn_sci3_rxd_pins = { "PTE7", "PTA4" }
 mcf51cn_sci3_txd_pins_descr = "Choose SCI3 TXD Pin:\n\tPTE6 (KBI2P6)\n\tPTA3"
 mcf51cn_sci3_rxd_pins_descr = "Choose SCI3 RXD Pin:\n\tPTE7 (KBI2P7)\n\tPTA4"
 
-nutarch_m68k_coldfire_mcf51cn =
+nutarch_m68k_coldfire_mcf51_mcf51cn =
 {
    	--
     -- MCU Family
@@ -71,7 +71,7 @@ nutarch_m68k_coldfire_mcf51cn =
     -- Runtime Initialization
     --
     {
-        name = "nutarch_m68k_coldfire_mcf51_init",
+        name = "nutarch_m68k_coldfire_mcf51cn_init",
         brief = "Initialization",
         description = "System startup code for Coldfire V1 Core MCUs.",
         sources = { 

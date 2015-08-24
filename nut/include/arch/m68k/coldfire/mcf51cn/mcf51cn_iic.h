@@ -50,13 +50,13 @@
 #define MCF_IIC_FDR_MULT(x)                 (((x) & 0x03) << 6)
 
 /* IIC Control Register 1 */
-#define MCF_IIC_CR1(x)                      (*(volatile uint8_t *)(0xFFFF8202 + ((x) * 0x20)))
-#define MCF_IIC_CR1_RSTA                    0x04
-#define MCF_IIC_CR1_TXAK                    0x08
-#define MCF_IIC_CR1_TX                      0x10
-#define MCF_IIC_CR1_MST                     0x20
-#define MCF_IIC_CR1_IICIE                   0x40
-#define MCF_IIC_CR1_IICEN                   0x80
+#define MCF_IIC_CR(x)                       (*(volatile uint8_t *)(0xFFFF8202 + ((x) * 0x20)))
+#define MCF_IIC_CR_RSTA                     0x04
+#define MCF_IIC_CR_TXAK                     0x08
+#define MCF_IIC_CR_TX                       0x10
+#define MCF_IIC_CR_MST                      0x20
+#define MCF_IIC_CR_IICIE                    0x40
+#define MCF_IIC_CR_IICEN                    0x80
 
 /* IIC Status Register */
 #define MCF_IIC_SR(x)                       (*(volatile uint8_t *)(0xFFFF8203 + ((x) * 0x20)))

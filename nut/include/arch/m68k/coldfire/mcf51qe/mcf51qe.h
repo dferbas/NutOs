@@ -38,10 +38,9 @@
 #include "mcf51qe_ics.h"
 #include "mcf51qe_sci.h"
 #include "mcf51qe_tpm.h"
-#include "mcf51qe_spi.h"
-#include "mcf51qe_iic.h"
 #include "mcf51qe_adc.h"
 #include "mcf51qe_iic.h"
+#include "mcf51qe_spi.h"
 
 /**************** registers I/O map ****************/
 
