@@ -49,9 +49,9 @@ vector48:   .long   IH_TPM2_CH0                 // 0x120 TPM2_ch0
 vector49:   .long   IH_TPM2_CH1                 // 0x124 TPM2_ch1
 vector4A:   .long   IH_TPM2_CH2                 // 0x128 TPM2_ch2
 vector4B:   .long   IH_DEFAULT                  // 0x12C TPM2_ovfl
-vector4C:   .long   IH_SPI1                  	// 0x130 SPI1
+vector4C:   .long   IH_SPI1                    	// 0x130 SPI1
 vector4D:   .long   IH_SPI2	                  	// 0x134 SPI2
-vector4E:   .long   IH_MTIM2	                // 0x138 MTIM2_ovfl
+vector4E:   .long   IH_MTIM2	                  // 0x138 MTIM2_ovfl
 vector4F:   .long   IH_DEFAULT                  // 0x13C SCI1_err
 vector50:   .long   IH_SCI1_RX                  // 0x140 SCI1_rx
 vector51:   .long   IH_SCI1_TX                  // 0x144 SCI1_tx
@@ -83,11 +83,11 @@ vector6A:   .long   IH_DEFAULT                  // 0x1A8 Level 4
 vector6B:   .long   IH_DEFAULT                  // 0x1AC Level 3
 vector6C:   .long   IH_DEFAULT                  // 0x1B0 Level 2
 vector6D:   .long   IH_DEFAULT                  // 0x1B4 Level 1
-vector6E:   .long   IH_DEFAULT                  // 0x1B8 IIC1
-vector6F:   .long   IH_DEFAULT                  // 0x1BC IIC2
-vector70:   .long   IH_ADC                  	// 0x1C0 ADC1
+vector6E:   .long   IH_IIC1                     // 0x1B8 IIC1
+vector6F:   .long   IH_IIC2                     // 0x1BC IIC2
+vector70:   .long   IH_ADC                    	// 0x1C0 ADC1
 vector71:   .long   IH_DEFAULT                  // 0x1C4 KBI1
-vector72:   .long   IH_RTC                  	// 0x1C8 RTC
+vector72:   .long   IH_RTC                    	// 0x1C8 RTC
 
 //------------------------------------------------------------------------------
 // Section 0 - Basic CPU initialization (family dependant code)
