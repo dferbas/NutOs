@@ -300,37 +300,37 @@ int TwMasterError(void)
  * \note Timeout is limited to the granularity of the system timer.
  *
  */
-int TwIOCtl(int req, void *conf)
+int TwIOCtl(int req, void *p_conf)
 {
 	// chose which TWI control
-	uint8_t dbcBase = DCB_BASE(req);
+	uint8_t dcbBase = DCB_BASE(req);
 	req &= ~DCB_BASE_MASK;
 
 #define IC_SIZE 64
 	uint8_t rc = 0, ic = 0x1F, i;
-    uint16_t divaderTable[IC_SIZE] = {28, 30, 34, 40, 44, 48, 56, 68, 80, 88, 104, 128, 144, 160, 192, 240,
+    uint16_t dividerTable[IC_SIZE] = {28, 30, 34, 40, 44, 48, 56, 68, 80, 88, 104, 128, 144, 160, 192, 240,
         		288, 320, 384, 480, 576, 640, 768, 960, 1152, 1280, 1536, 1920, 2304, 2560, 3072, 3840,
         		20, 22, 24, 26, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 112, 128,
         		160, 192, 224, 256, 320, 384, 448, 512, 640, 768, 896, 1024, 1280, 1536, 1792, 2048};
-    uint32_t *speedHz = (uint32_t *) conf;
-    uint16_t selectedDivader = 0xFFFF;
-    uint16_t countedDivader = NutGetCpuClock() / (*speedHz);
+    uint32_t *p_speedHz = (uint32_t *) p_conf;
+    uint16_t selectedDivider = 0xFFFF;
+    uint16_t countedDivider = NutGetCpuClock() / (*p_speedHz);
 
     switch (req) {
 
     case TWI_SETSPEED:
-    	for (i = 0; i < IC_SIZE; ++i) {
-			if (divaderTable[i] >= countedDivader
-					&& divaderTable[i] < selectedDivader) {
-				selectedDivader = divaderTable[i];
+    	for (i = 0; i < IC_SIZE; i++) {
+			if (dividerTable[i] >= countedDivider
+					&& dividerTable[i] < selectedDivider) {
+				selectedDivider = dividerTable[i];
 				ic = i;
 			}
 		}
-		MCF_IIC_FDR(dbcBase) = MCF_IIC_FDR_ICR(ic);
+		MCF_IIC_FDR(dcbBase) = MCF_IIC_FDR_ICR(ic);
         break;
     case TWI_GETSPEED:
-    	selectedDivader = divaderTable[MCF_IIC_FDR(dbcBase)];
-    	*speedHz = NutGetCpuClock() / (selectedDivader);
+    	selectedDivider = dividerTable[MCF_IIC_FDR(dcbBase)];
+    	*speedHz = NutGetCpuClock() / selectedDivider;
 		break;
     default:
         rc = -1;
@@ -369,8 +369,8 @@ int TwInit(uint8_t sla)
 	 }
 
 	/* set the frequency near 100 000Hz, see MCF5QE128RM table for details */
-	TwIOCtl(TWI_SETSPEED + (sla & DCB_BASE_MASK), &speed);
-	TwIOCtl(TWI_GETSPEED + (sla & DCB_BASE_MASK), &speed);
+	TwIOCtl(TWI_SETSPEED | (sla & DCB_BASE_MASK), &speed);
+	TwIOCtl(TWI_GETSPEED | (sla & DCB_BASE_MASK), &speed);
 
 	reenableDevice(dev->dcb_base);
 
