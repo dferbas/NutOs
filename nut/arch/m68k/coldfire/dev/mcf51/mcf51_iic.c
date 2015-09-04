@@ -44,7 +44,7 @@ static void TwInterrupt(void *arg)
 	uint8_t Status; /* Safe status register */
 	TWIDCB *dev = arg;
 
-//	MCF_IIC_SR(dev->dcb_base) &= ~MCF_IIC_SR_IIF; /* Clear interrupt flag and ARBL flag if set (by means of the read modify write effect) */
+//	MCF_IIC_SR(dev->dcb_base) = MCF_IIC_SR_IIF; /* Clear interrupt flag if set (by means of writing 1 to its bit) */
 
 	Status = MCF_IIC_SR(dev->dcb_base);
 	if (MCF_IIC_CR(dev->dcb_base) & MCF_IIC_CR_MST) { /* Is device in master mode? */
@@ -128,8 +128,8 @@ static void reenableDevice(int dcbBase){
 
 	(void) MCF_IIC_DR(dcbBase);
 
-	/* clear status register */
-	MCF_IIC_SR(dcbBase) = 0;
+	/* clear status register (IAAS=x, ARBL=1, IICIF=1) */
+	MCF_IIC_SR(dcbBase) = 0xFF;
 
 	/* clear control register */
 	MCF_IIC_CR(dcbBase) = 0;
@@ -307,14 +307,16 @@ int TwIOCtl(int req, void *p_conf)
 	req &= ~DCB_BASE_MASK;
 
 #define IC_SIZE 64
-	uint8_t rc = 0, ic = 0x1F, i;
-    uint16_t dividerTable[IC_SIZE] = {28, 30, 34, 40, 44, 48, 56, 68, 80, 88, 104, 128, 144, 160, 192, 240,
-        		288, 320, 384, 480, 576, 640, 768, 960, 1152, 1280, 1536, 1920, 2304, 2560, 3072, 3840,
-        		20, 22, 24, 26, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 112, 128,
-        		160, 192, 224, 256, 320, 384, 448, 512, 640, 768, 896, 1024, 1280, 1536, 1792, 2048};
-    uint32_t *p_speedHz = (uint32_t *) p_conf;
-    uint16_t selectedDivider = 0xFFFF;
-    uint16_t countedDivider = NutGetCpuClock() / (*p_speedHz);
+	uint8_t rc = 0, ic = IC_SIZE - 1, i;
+
+	uint16_t dividerTable[IC_SIZE] =  {20,  22,  24,  26,  28,  30,  34,  40,  28,  32,  36,  40,  44,  48,  56,  68,
+			                           48,  56,  64,  72,  80,  88, 104, 128,  80,  96, 112, 128, 144, 160, 192, 240,
+			                          160, 192, 224, 256, 288, 320, 384, 480, 320, 384, 448, 512, 576, 640, 768, 960,
+			                          640, 768, 896,1024,1152,1280,1536,1920,1280,1536,1792,2048,2304,2560,3072,3840 };
+
+    uint32_t *speedHz = (uint32_t *) p_conf;
+    uint16_t selectedDivider = dividerTable[ic];		//maximal divider
+    uint16_t countedDivider = NutGetCpuClock() / (*speedHz);
 
     switch (req) {
 
@@ -356,6 +358,7 @@ int TwInit(uint8_t sla)
 	TWIDCB *dev = &dcb_twi[DCB_BASE(sla)];
 	dev->dcb_base = DCB_BASE(sla);
 	dev->tw_if_bsy = 0; /* Clear busy flag */
+
 	dev->InpLenM = 0U; /* No data to be received */
 
 	 uint32_t speed = 100000;
