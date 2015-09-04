@@ -57,36 +57,37 @@ IRQ_HANDLER sig_IIC2 = {
 
 static int IrqCtl1(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_IIC1, cmd, param, &MCF_IIC_CR(1), MCF_IIC_CR_IICIE, 1);
+    return IrqCtlCommon(&sig_IIC1, cmd, param, &MCF_IIC_CR(0), MCF_IIC_CR_IICIE, 1);
 }
 
 static int IrqCtl2(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_IIC2, cmd, param, &MCF_IIC_CR(2), MCF_IIC_CR_IICIE, 1);
+    return IrqCtlCommon(&sig_IIC2, cmd, param, &MCF_IIC_CR(1), MCF_IIC_CR_IICIE, 1);
 }
+
 
 #if defined (MCU_MCF51CN)
 SIGNAL(IH_IIC1)
 {
+	MCF_IIC_SR(0) = MCF_IIC_SR_IICIF;
 	CallHandler(&sig_IIC1);
-	MCF_IIC_SR(1) |= MCF_IIC_SR_IICIF;
 }
 
 SIGNAL(IH_IIC2)
 {
+	MCF_IIC_SR(1) = MCF_IIC_SR_IICIF;
 	CallHandler(&sig_IIC2);
-	MCF_IIC_SR(2) |= MCF_IIC_SR_IICIF;
 }
 #elif defined (MCU_MCF51QE)
 SIGNAL(IH_IIC_X)
 {
-	if (MCF_IIC_SR(1) & MCF_IIC_SR_IICIF){
-		MCF_IIC_SR(1) |= MCF_IIC_SR_IICIF;
+	if (MCF_IIC_SR(0) & MCF_IIC_SR_IICIF){
+		MCF_IIC_SR(0) = MCF_IIC_SR_IICIF;
 		CallHandler(&sig_IIC1);
 	}
 
-	if (MCF_IIC_SR(2) & MCF_IIC_SR_IICIF){
-		MCF_IIC_SR(2) |= MCF_IIC_SR_IICIF;
+	if (MCF_IIC_SR(1) & MCF_IIC_SR_IICIF){
+		MCF_IIC_SR(1) = MCF_IIC_SR_IICIF;
 		CallHandler(&sig_IIC2);
 	}
 }
