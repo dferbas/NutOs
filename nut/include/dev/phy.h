@@ -66,12 +66,11 @@
 //#define DP83848     0x20005CA0  /* STM3210C-EVAL */
 
 /* Micrel PHY tranceiver */
-#define KS8721      0x00221610  /* Olimex SAM7-EX256 */
+#define KSZ8051		0x00221556  /* Powernet module */
+#define KSZ8081		0x00221560  /* SM2-RM, SM2-RM-GSM */
+#define KSZ8721     0x00221610  /* Olimex SAM7-EX256 */
 /* Micrel EMAC-PHY combinations */
-#define KS8851      0x00008870  /* Located in CIDER (0xC0) register */
-/* Micrel PHY tranceiver */
-#define KSZ8051		0x00221556 /* KSZ8051MNL/RLN */
-#define KSZ8081		0x00221560 /* KSZ8081MNX/RNB */
+#define KSZ8851     0x00008870  /* Located in CIDER (0xC0) register */
 
 /* ST Microelectronics PHY tranceiver */
 #define STE100P     0x1C040010  /* Hitex STM32-comStick */

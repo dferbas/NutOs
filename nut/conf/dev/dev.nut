@@ -2603,8 +2603,10 @@ nutdev =
                               "DP83838: 0x20005C90 (EVK1100, EVK1105)\n"..
                               "DP83848: 0x20005CA0\n"..
                               "Micrel\n"..
-                              "KS8721: 0x00221610 (Olimex SAM7-EX256)\n"..
-                              "KS8851: 0x00008870\n"..
+                              "KSZ8051: 0x00221556 (KSZ8051MNL/RLN)\n"..
+                              "KSZ8081: 0x00221560 (KSZ8081MNX/RNB)\n"..
+                              "KSZ8721: 0x00221610 (Olimex SAM7-EX256)\n"..
+                              "KSZ8851: 0x00008870\n"..
                               "STMicroelectronics\n"..
                               "STE100P: 0x1C040010 (Hitex STM32-comStick)\n"..
                               "SMSC\n"..
@@ -2625,8 +2627,10 @@ nutdev =
                     "DM9000B",
                     "DP83838",
                     "DP83848",
-                    "KS8721",
-                    "KS8851",
+                    "KSZ8051",
+                    "KSZ8081",
+                    "KSZ8721",
+                    "KSZ8851",
                     "STE100P",
                     "LAN8700",
                     "LAN8710",
