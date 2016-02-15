@@ -34,16 +34,20 @@
 #error "Do not include this file directly. Use dev/irqreg.h instead!"
 #endif
 
-#define IH_FEC_LEVEL			 	5
+#define IH_QSPI_LEVEL			 	2
 
 // Usart0 (RS485) has more priority than Usart1 and Usart2(Debug)
 #define IH_USART0_LEVEL			 	3
 #define IH_USART1_LEVEL			 	3
 #define IH_USART2_LEVEL			 	3
 
-#define IH_QSPI_LEVEL			 	2
-
 #define IH_I2C_LEVEL			 	3
+
+#define IH_PIT_LEVEL			 	4
+
+#define IH_FEC_LEVEL			 	5
+
+#define IH_GPT_LEVEL			 	7
 
 /*
  * Interrupt level & priority setup
@@ -51,19 +55,27 @@
  * IMPORTANT: Interrupt level and priority combination MUST be unique
  */
 #define IPL_QSPI_TF     (MCF_INTC_ICR_IL(IH_QSPI_LEVEL) | MCF_INTC_ICR_IP(4))
+
 #define IPL_UART0       (MCF_INTC_ICR_IL(IH_USART0_LEVEL) | MCF_INTC_ICR_IP(0))
 #define IPL_UART1       (MCF_INTC_ICR_IL(IH_USART1_LEVEL) | MCF_INTC_ICR_IP(1))
 #define IPL_UART2       (MCF_INTC_ICR_IL(IH_USART2_LEVEL) | MCF_INTC_ICR_IP(2))
 #define IPL_I2C0        (MCF_INTC_ICR_IL(IH_I2C_LEVEL) | MCF_INTC_ICR_IP(3))
 #define IPL_I2C1        (MCF_INTC_ICR_IL(IH_I2C_LEVEL) | MCF_INTC_ICR_IP(4))
-#define IPL_PIT0	    (MCF_INTC_ICR_IL(4) | MCF_INTC_ICR_IP(0))
-#define IPL_PIT1	    (MCF_INTC_ICR_IL(4) | MCF_INTC_ICR_IP(1))
+
+#define IPL_PIT0	    (MCF_INTC_ICR_IL(IH_PIT_LEVEL) | MCF_INTC_ICR_IP(0))
+#define IPL_PIT1	    (MCF_INTC_ICR_IL(IH_PIT_LEVEL) | MCF_INTC_ICR_IP(1))
+
 #define IPL_FEC_RB		(MCF_INTC_ICR_IL(IH_FEC_LEVEL) | MCF_INTC_ICR_IP(5))
 #define IPL_FEC_RF		(MCF_INTC_ICR_IL(IH_FEC_LEVEL) | MCF_INTC_ICR_IP(4))
 #define IPL_FEC_TB		(MCF_INTC_ICR_IL(IH_FEC_LEVEL) | MCF_INTC_ICR_IP(3))
 #define IPL_FEC_TF		(MCF_INTC_ICR_IL(IH_FEC_LEVEL) | MCF_INTC_ICR_IP(2))
-#define IPL_GPT_PAOV    (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(3))
-#define IPL_GPT_PAI     (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(4))
+
+#define IPL_GPT_C0F     (MCF_INTC_ICR_IL(IH_GPT_LEVEL) | MCF_INTC_ICR_IP(0))
+#define IPL_GPT_C1F     (MCF_INTC_ICR_IL(IH_GPT_LEVEL) | MCF_INTC_ICR_IP(1))
+#define IPL_GPT_C2F     (MCF_INTC_ICR_IL(IH_GPT_LEVEL) | MCF_INTC_ICR_IP(2))
+#define IPL_GPT_C3F     (MCF_INTC_ICR_IL(IH_GPT_LEVEL) | MCF_INTC_ICR_IP(3))
+#define IPL_GPT_PAOV    (MCF_INTC_ICR_IL(IH_GPT_LEVEL) | MCF_INTC_ICR_IP(4))
+#define IPL_GPT_PAI     (MCF_INTC_ICR_IL(IH_GPT_LEVEL) | MCF_INTC_ICR_IP(5))
 #define IPL_CWD         (MCF_INTC_ICR_IL(7) | MCF_INTC_ICR_IP(7))
 
 /*
@@ -79,6 +91,10 @@ extern IRQ_HANDLER sig_UART1;
 extern IRQ_HANDLER sig_UART2;
 extern IRQ_HANDLER sig_GPT_PAOV;
 extern IRQ_HANDLER sig_GPT_PAI;
+extern IRQ_HANDLER sig_GPT_C0F;
+extern IRQ_HANDLER sig_GPT_C1F;
+extern IRQ_HANDLER sig_GPT_C2F;
+extern IRQ_HANDLER sig_GPT_C3F;
 extern IRQ_HANDLER sig_FEC_RB;
 extern IRQ_HANDLER sig_FEC_RF;
 extern IRQ_HANDLER sig_FEC_TB;

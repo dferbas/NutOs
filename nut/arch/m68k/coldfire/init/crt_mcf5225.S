@@ -79,10 +79,10 @@ vector68:   .long   IH_DEFAULT
 vector69:   .long   IH_DEFAULT
 vector6A:   .long   IH_GPT_PAI
 vector6B:   .long   IH_GPT_PAOV
-vector6C:   .long   IH_DEFAULT
-vector6D:   .long   IH_DEFAULT
-vector6E:   .long   IH_DEFAULT
-vector6F:   .long   IH_DEFAULT
+vector6C:   .long   IH_GPT_C0F
+vector6D:   .long   IH_GPT_C1F
+vector6E:   .long   IH_GPT_C2F
+vector6F:   .long   IH_GPT_C3F
 vector70:   .long   IH_DEFAULT
 vector71:   .long   IH_DEFAULT
 vector72:   .long   IH_DEFAULT

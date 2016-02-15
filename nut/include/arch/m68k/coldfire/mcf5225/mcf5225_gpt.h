@@ -59,12 +59,22 @@
 #define MCF_GPT_GPTDDR                       (*(volatile uint8_t *)(0x401A001E))
 #define MCF_GPT_GPTC(x)                      (*(volatile uint16_t*)(0x401A0010 + ((x)*0x2)))
 
+/* GPT Channels */
+#define MCF_GPT_CHANNEL0                     0
+#define MCF_GPT_CHANNEL1                     1
+#define MCF_GPT_CHANNEL2                     2
+#define MCF_GPT_CHANNEL3                     3
+#define MCF_GPT_CHANNEL_COUNT                (MCF_GPT_CHANNEL3 + 1)
+
 /* MCF_GPT_GPTIOS */
-#define MCF_GPT_GPTIOS_IOS(x)                (((x)&0xF)<<0)
+/*
 #define MCF_GPT_GPTIOS_IOS0                  (0x1)
 #define MCF_GPT_GPTIOS_IOS1                  (0x2)
 #define MCF_GPT_GPTIOS_IOS2                  (0x4)
+*/
 #define MCF_GPT_GPTIOS_IOS3                  (0x8)
+
+#define MCF_GPT_GPTIOS_IOS(ch)               ((1 << ch) & 0xF)
 
 /* MCF_GPT_GPTCFORC */
 #define MCF_GPT_GPTCFORC_FOC0                (0x1)
@@ -123,7 +133,14 @@
 #define MCF_GPT_GPTCTL1_OUTPUT3_CLEAR        (0x80)
 #define MCF_GPT_GPTCTL1_OUTPUT3_SET          (0xC0)
 
+#define MCF_GPT_GPTCTL1_OUTPUT_NOTHING(ch)   (0x0 << 2*ch)
+#define MCF_GPT_GPTCTL1_OUTPUT_TOGGLE(ch)    (0x1 << 2*ch)
+#define MCF_GPT_GPTCTL1_OUTPUT_CLEAR(ch)     (0x2 << 2*ch)
+#define MCF_GPT_GPTCTL1_OUTPUT_SET(ch)       (0x3 << 2*ch)
+#define MCF_GPT_GPTCTL1_OUTPUT_MASK(ch)      (0x3 << 2*ch)
+
 /* MCF_GPT_GPTCTL2 */
+/*
 #define MCF_GPT_GPTCTL2_EDG0A                (0x1)
 #define MCF_GPT_GPTCTL2_EDG0B                (0x2)
 #define MCF_GPT_GPTCTL2_EDG1A                (0x4)
@@ -148,12 +165,21 @@
 #define MCF_GPT_GPTCTL2_INPUT3_RISING        (0x40)
 #define MCF_GPT_GPTCTL2_INPUT3_FALLING       (0x80)
 #define MCF_GPT_GPTCTL2_INPUT3_ANY           (0xC0)
+*/
+#define MCF_GPT_GPTCTL2_INPUT_DISABLED(ch)   (0x0 << 2*ch)
+#define MCF_GPT_GPTCTL2_INPUT_RISING(ch)     (0x1 << 2*ch)
+#define MCF_GPT_GPTCTL2_INPUT_FALLING(ch)    (0x2 << 2*ch)
+#define MCF_GPT_GPTCTL2_INPUT_ANY(ch)        (0x3 << 2*ch)
+#define MCF_GPT_GPTCTL2_INPUT_MASK(ch)       (0x3 << 2*ch)
 
 /* MCF_GPT_GPTIE */
+/*
 #define MCF_GPT_GPTIE_CI0                    (0x1)
 #define MCF_GPT_GPTIE_CI1                    (0x2)
 #define MCF_GPT_GPTIE_CI2                    (0x4)
 #define MCF_GPT_GPTIE_CI3                    (0x8)
+*/
+#define MCF_GPT_GPTIE_CI(ch)                 (1 << ch)
 
 /* MCF_GPT_GPTSCR2 */
 #define MCF_GPT_GPTSCR2_PR(x)                (((x)&0x7)<<0)
@@ -171,10 +197,13 @@
 #define MCF_GPT_GPTSCR2_TOI                  (0x80)
 
 /* MCF_GPT_GPTFLG1 */
+/*
 #define MCF_GPT_GPTFLG1_CF0                  (0x1)
 #define MCF_GPT_GPTFLG1_CF1                  (0x2)
 #define MCF_GPT_GPTFLG1_CF2                  (0x4)
 #define MCF_GPT_GPTFLG1_CF3                  (0x8)
+*/
+#define MCF_GPT_GPTFLG1_CF(ch)               (1 << ch)
 
 /* MCF_GPT_GPTFLG2 */
 #define MCF_GPT_GPTFLG2_TOF                  (0x80)

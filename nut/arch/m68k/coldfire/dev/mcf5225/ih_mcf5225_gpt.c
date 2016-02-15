@@ -35,6 +35,10 @@
 
 static int IrqCtlPai(int cmd, void *param);
 static int IrqCtlPaov(int cmd, void *param);
+static int IrqCtlC0F(int cmd, void *param);
+static int IrqCtlC1F(int cmd, void *param);
+static int IrqCtlC2F(int cmd, void *param);
+static int IrqCtlC3F(int cmd, void *param);
 
 IRQ_HANDLER sig_GPT_PAI = {
 #ifdef NUT_PERFMON
@@ -54,6 +58,43 @@ IRQ_HANDLER sig_GPT_PAOV = {
         IrqCtlPaov
     };
 
+IRQ_HANDLER sig_GPT_C0F = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtlC0F
+    };
+
+IRQ_HANDLER sig_GPT_C1F = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtlC1F
+    };
+
+IRQ_HANDLER sig_GPT_C2F = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtlC2F
+    };
+
+IRQ_HANDLER sig_GPT_C3F = {
+#ifdef NUT_PERFMON
+        0,
+#endif
+        NULL,
+        NULL,
+        IrqCtlC3F
+    };
+
+
 static int IrqCtlPai(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_GPT_PAI, cmd, param,
@@ -70,9 +111,42 @@ static int IrqCtlPaov(int cmd, void *param)
             &MCF_INTC_ICR43(0), IPL_GPT_PAOV);
 }
 
+static int IrqCtlC0F(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_GPT_C0F, cmd, param,
+            &MCF_GPT_GPTIE, MCF_GPT_GPTIE_CI(MCF_GPT_CHANNEL0), 1,
+            &MCF_INTC_IMRH(0), MCF_INTC_IMRH_INT_MASK44,
+            &MCF_INTC_ICR44(0), IPL_GPT_C0F);
+}
+
+static int IrqCtlC1F(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_GPT_C1F, cmd, param,
+            &MCF_GPT_GPTIE, MCF_GPT_GPTIE_CI(MCF_GPT_CHANNEL1), 1,
+            &MCF_INTC_IMRH(0), MCF_INTC_IMRH_INT_MASK45,
+            &MCF_INTC_ICR45(0), IPL_GPT_C1F);
+}
+
+static int IrqCtlC2F(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_GPT_C2F, cmd, param,
+            &MCF_GPT_GPTIE, MCF_GPT_GPTIE_CI(MCF_GPT_CHANNEL2), 1,
+            &MCF_INTC_IMRH(0), MCF_INTC_IMRH_INT_MASK46,
+            &MCF_INTC_ICR46(0), IPL_GPT_C2F);
+}
+
+static int IrqCtlC3F(int cmd, void *param)
+{
+    return IrqCtlCommon(&sig_GPT_C3F, cmd, param,
+            &MCF_GPT_GPTIE, MCF_GPT_GPTIE_CI(MCF_GPT_CHANNEL3), 1,
+            &MCF_INTC_IMRH(0), MCF_INTC_IMRH_INT_MASK47,
+            &MCF_INTC_ICR47(0), IPL_GPT_C3F);
+}
+
+
 SIGNAL(IH_GPT_PAI)
 {
-    MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAIF;
+	MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAIF;
     CallHandler(&sig_GPT_PAI);
 }
 
@@ -80,4 +154,28 @@ SIGNAL(IH_GPT_PAOV)
 {
     MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAOVF;
     CallHandler(&sig_GPT_PAOV);
+}
+
+SIGNAL(IH_GPT_C0F)
+{
+    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL0);
+    CallHandler(&sig_GPT_C0F);
+}
+
+SIGNAL(IH_GPT_C1F)
+{
+    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL1);
+    CallHandler(&sig_GPT_C1F);
+}
+
+SIGNAL(IH_GPT_C2F)
+{
+    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL2);
+    CallHandler(&sig_GPT_C2F);
+}
+
+SIGNAL(IH_GPT_C3F)
+{
+    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL3);
+    CallHandler(&sig_GPT_C3F);
 }
