@@ -81,6 +81,7 @@
 #define MCF_SCM_PPMRH_CDPWM                  0x200
 #define MCF_SCM_PPMRH_CDCAN                  0x400
 #define MCF_SCM_PPMRH_CDCFM                  0x800
+#define MCF_SCM_PPMRH_CDRTC                  0x4000
 
 /* MCF_SCM_CRSR */
 #define MCF_SCM_CRSR_EXT                     0x80
@@ -120,7 +121,7 @@
 #define MCF_SCM_PPMRL_CDI2C0                 0x200
 #define MCF_SCM_PPMRL_CDQSPI                 0x400
 #define MCF_SCM_PPMRL_CDI2C1                 0x800
-#define MCF_SCM_PPMRL_CDRTC                  0x1000
+#define MCF_SCM_PPMRL_CDRTC                  0x1000		//not present at MCF52259
 #define MCF_SCM_PPMRL_CDDTIM0                0x2000
 #define MCF_SCM_PPMRL_CDDTIM1                0x4000
 #define MCF_SCM_PPMRL_CDDTIM2                0x8000
