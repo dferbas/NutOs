@@ -57,7 +57,9 @@
 #define MCF_GPT_GPTPACNT                     (*(volatile uint16_t*)(0x401A001A))
 #define MCF_GPT_GPTPORT                      (*(volatile uint8_t *)(0x401A001D))
 #define MCF_GPT_GPTDDR                       (*(volatile uint8_t *)(0x401A001E))
-#define MCF_GPT_GPTC(x)                      (*(volatile uint16_t*)(0x401A0010 + ((x)*0x2)))
+#define MCF_GPT_GPTC(ch)                      (*(volatile uint16_t*)(0x401A0010 + 2*(ch)))
+
+#define STABLE_PERIOD     5    //Tohle je na pokus omyl, teda pokud nespocitate, jak rychle tomu citaci bezi hodiny
 
 /* GPT Channels */
 #define MCF_GPT_CHANNEL0                     0

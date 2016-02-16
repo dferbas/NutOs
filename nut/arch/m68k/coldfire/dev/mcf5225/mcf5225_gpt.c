@@ -5,8 +5,10 @@
 #include <sys/event.h>
 #include <sys/types.h>
 #include <dev/gpio.h>
+#include <stdlib.h>
 
 static HANDLE *GptPAEHandler = NULL;
+
 
 /*
  * GPT Pulse Accumulator Event Interrupt
@@ -95,20 +97,28 @@ typedef struct
 {
 	int		counter;
 	HANDLE	*handler;
+	uint16_t   captured_count;
 }	GptCounterS;
 
 static	GptCounterS	GptCounter[MCF_GPT_CHANNEL_COUNT];
 static	int	counter_mask = 0;	//TODO: initialized only after power up
 
-static void IntHandlerCnFvent(void *arg)
+static void IntHandlerCnEvent(void *arg)
 {
 	int			channel = (int)arg;
 	GptCounterS	*p_gptCounter = &GptCounter[channel];
+	uint16_t       captured_count;
 
-	p_gptCounter->counter++;
+	//ignore flickers
+	captured_count = MCF_GPT_GPTC(channel);
+	if (abs(captured_count - p_gptCounter->captured_count) > STABLE_PERIOD)
+	{
+	    p_gptCounter->captured_count = captured_count;    //save for next capture event
+	    p_gptCounter->counter++;                          //pulse detected, accumulate
 
-	if (p_gptCounter->handler != NULL)
-		NutEventPostFromIrq(p_gptCounter->handler);
+	    if (p_gptCounter->handler != NULL)
+	        NutEventPostFromIrq(p_gptCounter->handler);   //signal application
+	}
 }
 
 void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
@@ -138,7 +148,7 @@ void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
 	/* Save counter_handler into global variable used from interrupt */
 //	GptCounter[channel].handler = counter_handler;
 
-	NutRegisterIrqHandler(sig_GPT[channel], IntHandlerCnFvent, (void *)channel);
+	NutRegisterIrqHandler(sig_GPT[channel], IntHandlerCnEvent, (void *)channel);
 	NutIrqEnable(sig_GPT[channel]);
 
 	Mcf5225GptCounterClear(channel);
@@ -149,7 +159,7 @@ void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
  */
 void Mcf5225GptCountersEnable(void)
 {
-	MCF_GPT_GPTCTL2 |=  counter_mask;
+	//MCF_GPT_GPTCTL2 |=  counter_mask;
 	MCF_GPT_GPTSCR1 |=  MCF_GPT_GPTSCR1_GPTEN; // Enable GPT
 }
 
@@ -176,5 +186,21 @@ void Mcf5225GptCounterClear(int channel)
 int Mcf5225GptCounterGet(int channel)
 {
 	return GptCounter[channel].counter;
+}
+
+/*
+ * Start GPT Counting on channel (n)
+ */
+void Mcf5225GptCountingStart(int channel)
+{
+	MCF_GPT_GPTCTL2 |=  MCF_GPT_GPTCTL2_INPUT_RISING(channel);
+}
+
+/*
+ * Stop GPT Counting on channel (n)
+ */
+void Mcf5225GptCountingStop(int channel)
+{
+	MCF_GPT_GPTCTL2 &= MCF_GPT_GPTCTL2_INPUT_RISING(channel);
 }
 

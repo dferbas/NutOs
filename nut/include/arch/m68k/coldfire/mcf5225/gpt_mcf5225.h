@@ -47,5 +47,7 @@ void Mcf5225GptCountersEnable(void);
 void Mcf5225GptCountersDisable(void);
 void Mcf5225GptCounterClear(int channel);
 int Mcf5225GptCounterGet(int channel);
+void Mcf5225GptCountingStart(int channel);
+void Mcf5225GptCountingStop(int channel);
 
 #endif  /* GPT_MCF5225_H_ */
