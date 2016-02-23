@@ -35,11 +35,11 @@ void Mcf5225GptInitPA(HANDLE *pae_handler)
 
 	MCF_GPT_GPTPACTL = 0x00;
 	///MCF_GPT_GPTPACNT = 65000; // Clear PA Counter
-	
+
 // JS TODO - predelat na gpio
 //	MCF_GPIO_PTAPAR &= ~(MCF_GPIO_PTAPAR_PTAPAR3(3));
 //	MCF_GPIO_PTAPAR |= (MCF_GPIO_PTAPAR_PTAPAR3(1));
-	
+
 	/* Enables the pulse accumulator. */
 	///MCF_GPT_GPTPACTL |= MCF_GPT_GPTPACTL_PAE; // Enable PA if not MCF_GPT_GPTSCR1_GPTEN
 
@@ -48,7 +48,7 @@ void Mcf5225GptInitPA(HANDLE *pae_handler)
 
 	NutRegisterIrqHandler(&sig_GPT_PAI, IntHandlerPAEvent, NULL);
 	NutIrqEnable(&sig_GPT_PAI);
-	
+
 	Mcf5225GptClearPACounter();
 	Mcf5225GptStartPA();
 }
@@ -76,7 +76,7 @@ void Mcf5225GptStopPA(void)
  */
 void Mcf5225GptClearPACounter(void)
 {
-    MCF_GPT_GPTPACNT = 0; // Clear PA Counter
+	MCF_GPT_GPTPACNT = 0; // Clear PA Counter
 }
 
 /*
@@ -84,7 +84,7 @@ void Mcf5225GptClearPACounter(void)
  */
 uint16_t Mcf5225GptGetPACounter(void)
 {
-    return MCF_GPT_GPTPACNT;
+	return MCF_GPT_GPTPACNT;
 }
 
 /* ******************************************************
@@ -93,37 +93,66 @@ uint16_t Mcf5225GptGetPACounter(void)
  * Firstly you need to use init function, then you can use control functions (Enable,Disable,Clear,Get)
  */
 
-#define STABLE_PERIOD     20    //Tohle je na pokus omyl, teda pokud nespocitame, jak rychle tomu citaci bezi hodiny
+#define	STABLE_PERIOD		5		//Tohle je na pokus omyl, teda pokud nespocitame, jak rychle tomu citaci bezi hodiny
+									//200 bylo moc, 20 slo
+//#define	DEBUG_INT_EVENTS
+#define	INT_EVENTS_MAX		200		//
 
 typedef struct
 {
 	int			counter;
 	HANDLE		*handler;
 	uint16_t	captured_count;
+#ifdef	DEBUG_INT_EVENTS
 	uint16_t	captured_count_prev;
+#endif
 } GptCounterS;
 
-static	GptCounterS	GptCounter[MCF_GPT_CHANNEL_COUNT];
-static	int	Gptcounter_GPCTL2_mask = 0;	//TODO: initialized only after power up
+static	volatile GptCounterS	GptCounter[MCF_GPT_CHANNEL_COUNT];
+static	int						Gptcounter_GPCTL2_mask = 0;	//TODO: initialized only after power up
+
+#ifdef	DEBUG_INT_EVENTS
+typedef struct
+{
+	uint8_t	channel;				//use uint8_t instead of int with faster access to save space
+	int		timer_count;
+	int     timer_count_handled;
+} InterruptEventS;
+
+static	InterruptEventS	int_events[INT_EVENTS_MAX];
+static	int int_event_count = 0;
+#endif
 
 static void IntHandlerCaptureEvent(void *arg)
 {
-	int			channel = (int)arg;
-	GptCounterS	*p_gptCounter = &GptCounter[channel];
-	uint16_t	captured_count;
+	int						channel = (int)arg;
+	volatile GptCounterS	*p_gptCounter = &GptCounter[channel];
+	uint16_t				captured_count;
 	int tmp;
 
 	//ignore flickers
 	captured_count = MCF_GPT_GPTC(channel);
+#ifdef	DEBUG_INT_EVENTS
+	if (int_event_count < INT_EVENTS_MAX)
+	{
+		int_events[int_event_count].channel = channel;
+		int_events[int_event_count].timer_count = captured_count;
+		int_events[int_event_count].timer_count_handled = MCF_GPT_GPTCNT;
+		int_event_count++;
+	}
+#endif
 	if ((tmp = abs(captured_count - p_gptCounter->captured_count)) > STABLE_PERIOD)
 	{
-	    p_gptCounter->captured_count_prev = p_gptCounter->captured_count;    //save previous value
-	    p_gptCounter->captured_count = captured_count;    //save for next capture event
-	    p_gptCounter->counter++;                          //pulse detected, accumulate
+#ifdef	DEBUG_INT_EVENTS
+		p_gptCounter->captured_count_prev = p_gptCounter->captured_count;	//save previous value
+#endif
+		p_gptCounter->captured_count = captured_count;		//save for next capture event
+		p_gptCounter->counter++;							//pulse detected, accumulate
 
-	    if (p_gptCounter->handler != NULL)
-	        NutEventPostFromIrq(p_gptCounter->handler);   //signal application
+		if (p_gptCounter->handler != NULL)
+			NutEventPostFromIrq(p_gptCounter->handler);		//signal application
 	}
+#ifdef	DEBUG_INT_EVENTS
 	else
 		tmp = captured_count;		//just for debug
 
@@ -132,6 +161,7 @@ static void IntHandlerCaptureEvent(void *arg)
 		//another event occured during this interrupt processing
 		tmp = captured_count;		//just for debug
 	}
+#endif
 }
 
 void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
@@ -153,11 +183,11 @@ void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
 
 	MCF_GPT_GPTCTL2 &= ~MCF_GPT_GPTCTL2_INPUT_MASK(channel);
 #endif
-	//Gptcounter_GPCTL2_mask |=  MCF_GPT_GPTCTL2_INPUT_RISING(channel);
-//	Gptcounter_GPCTL2_mask |=  MCF_GPT_GPTCTL2_INPUT_FALLING(channel);
 
 	/* Save counter_handler into global variable used from interrupt */
 	GptCounter[channel].handler = counter_handler;
+
+	//MCF_GPT_GPTSCR2 = MCF_GPT_GPTSCR2_PR(6);
 
 	NutRegisterIrqHandler(sig_GPT[channel], IntHandlerCaptureEvent, (void *)channel);
 	NutIrqEnable(sig_GPT[channel]);
@@ -170,9 +200,7 @@ void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
  */
 void Mcf5225GptCounterStart(int channel)
 {
-//	MCF_GPT_GPTCTL2 |=  MCF_GPT_GPTCTL2_INPUT_RISING(channel);
 	Gptcounter_GPCTL2_mask |=  MCF_GPT_GPTCTL2_INPUT_FALLING(channel);
-
 	GpioPinConfigSet(PORTTA, channel, GPIO_CFG_PERIPHERAL0 | GPIO_CFG_INPUT);	//set PIN functionality to GPT
 }
 
@@ -182,8 +210,6 @@ void Mcf5225GptCounterStart(int channel)
 void Mcf5225GptCounterStop(int channel)
 {
 	GpioPinConfigSet(PORTTA, channel, GPIO_CFG_INPUT);							//return pin functionality to GPIO
-
-//	MCF_GPT_GPTCTL2 &= ~MCF_GPT_GPTCTL2_INPUT_MASK(channel);
 	Gptcounter_GPCTL2_mask &= ~MCF_GPT_GPTCTL2_INPUT_MASK(channel);
 }
 
@@ -220,4 +246,3 @@ int Mcf5225GptCounterGet(int channel)
 {
 	return GptCounter[channel].counter;
 }
-

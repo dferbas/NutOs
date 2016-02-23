@@ -143,43 +143,47 @@ static int IrqCtlC3F(int cmd, void *param)
             &MCF_INTC_ICR47(0), IPL_GPT_C3F);
 }
 
+/*
+ * Following registers handle multiple interrupt events in 1 8-bit register.
+ * Direct writing of only 1 bit clears the exact bit, other bits are untouched.
+ *
+ * This is a difference from other peripheral drivers, where is only 1 interrupt flag,
+ * other bits are R/W, in that case or to the register is correct.
+ * The only exception is the QSPI's QIR register, where are 3 interrupt bits and other R/W bits.
+ */
 
 SIGNAL(IH_GPT_PAI)
 {
-	MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAIF;
+	MCF_GPT_GPTPAFLG = MCF_GPT_GPTPAFLG_PAIF;
     CallHandler(&sig_GPT_PAI);
 }
 
 SIGNAL(IH_GPT_PAOV)
 {
-    MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAOVF;
+    MCF_GPT_GPTPAFLG = MCF_GPT_GPTPAFLG_PAOVF;
     CallHandler(&sig_GPT_PAOV);
 }
 
 SIGNAL(IH_GPT_C0F)
 {
-    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL0);
+    MCF_GPT_GPTFLG1 = MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL0);
     CallHandler(&sig_GPT_C0F);
-    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL0); //TODO: smazat - pouze pro test
 }
 
 SIGNAL(IH_GPT_C1F)
 {
-    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL1);
+    MCF_GPT_GPTFLG1 = MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL1);
     CallHandler(&sig_GPT_C1F);
-    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL1); //TODO: smazat - pouze pro test
 }
 
 SIGNAL(IH_GPT_C2F)
 {
-    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL2);
+    MCF_GPT_GPTFLG1 = MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL2);
     CallHandler(&sig_GPT_C2F);
-    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL2); //TODO: smazat - pouze pro test
 }
 
 SIGNAL(IH_GPT_C3F)
 {
-    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL3);
+    MCF_GPT_GPTFLG1 = MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL3);
     CallHandler(&sig_GPT_C3F);
-    MCF_GPT_GPTFLG1 |= MCF_GPT_GPTFLG1_CF(MCF_GPT_CHANNEL3); //TODO: smazat - pouze pro test
 }

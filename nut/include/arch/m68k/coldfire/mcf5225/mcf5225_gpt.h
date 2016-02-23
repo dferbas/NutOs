@@ -57,7 +57,7 @@
 #define MCF_GPT_GPTPACNT                     (*(volatile uint16_t*)(0x401A001A))
 #define MCF_GPT_GPTPORT                      (*(volatile uint8_t *)(0x401A001D))
 #define MCF_GPT_GPTDDR                       (*(volatile uint8_t *)(0x401A001E))
-#define MCF_GPT_GPTC(ch)                      (*(volatile uint16_t*)(0x401A0010 + 2*(ch)))
+#define MCF_GPT_GPTC(ch)                     (*(volatile uint16_t*)(0x401A0010 + 2*(ch)))
 
 /* GPT Channels */
 #define MCF_GPT_CHANNEL0                     0

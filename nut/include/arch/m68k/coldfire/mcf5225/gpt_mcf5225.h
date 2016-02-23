@@ -43,11 +43,13 @@ void Mcf5225GptClearPACounter(void);
 uint16_t Mcf5225GptGetPACounter(void);
 
 void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler);
-void Mcf5225GptCounterStart(int channel);
-void Mcf5225GptCounterStop(int channel);
 void Mcf5225GptCountersEnable(void);
 void Mcf5225GptCountersDisable(void);
+void Mcf5225GptCountersStart(int channel);
+void Mcf5225GptCountersStop(int channel);
 void Mcf5225GptCounterClear(int channel);
 int Mcf5225GptCounterGet(int channel);
+void Mcf5225GptCounterStart(int channel);
+void Mcf5225GptCounterStop(int channel);
 
 #endif  /* GPT_MCF5225_H_ */

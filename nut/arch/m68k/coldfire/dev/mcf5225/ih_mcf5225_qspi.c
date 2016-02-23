@@ -52,6 +52,12 @@ static int QspiIrqCtl(int cmd, void *param)
             &MCF_INTC_ICR18(0), IPL_QSPI_TF);
 }
 
+/*
+ * The QIR register has 3 interrupt flags - SPIF, ABRT and WCEF.
+ * If 1 bit is or-ed, all 3 flags are cleared - see also note in the GPT driver.
+ * Writing only 1 bit is impossible for the QIR, where there are other R/W bits.
+ */
+
 SIGNAL(IH_QSPI_TF)
 {
 	if (MCF_QSPI_QIR & (MCF_QSPI_QIR_SPIF))
