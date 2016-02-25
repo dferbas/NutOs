@@ -93,10 +93,10 @@ uint16_t Mcf5225GptGetPACounter(void)
  * Firstly you need to use init function, then you can use control functions (Enable,Disable,Clear,Get)
  */
 
-#define	STABLE_PERIOD		5		//Tohle je na pokus omyl, teda pokud nespocitame, jak rychle tomu citaci bezi hodiny
-									//200 bylo moc, 20 slo
+#define	STABLE_COUNT		5000	//ochrana proti zakmitum na meridlu => 26.667ms pri prescaleru 7 (128)  = (1 / 24000000) * 128 * 1000 * 5000
+
 //#define	DEBUG_INT_EVENTS
-#define	INT_EVENTS_MAX		200		//
+#define	INT_EVENTS_MAX		200
 
 typedef struct
 {
@@ -141,7 +141,7 @@ static void IntHandlerCaptureEvent(void *arg)
 		int_event_count++;
 	}
 #endif
-	if ((tmp = abs(captured_count - p_gptCounter->captured_count)) > STABLE_PERIOD)
+	if ((tmp = abs(captured_count - p_gptCounter->captured_count)) > STABLE_COUNT)
 	{
 #ifdef	DEBUG_INT_EVENTS
 		p_gptCounter->captured_count_prev = p_gptCounter->captured_count;	//save previous value
@@ -187,7 +187,7 @@ void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
 	/* Save counter_handler into global variable used from interrupt */
 	GptCounter[channel].handler = counter_handler;
 
-	//MCF_GPT_GPTSCR2 = MCF_GPT_GPTSCR2_PR(6);
+	MCF_GPT_GPTSCR2 = MCF_GPT_GPTSCR2_PR(7);
 
 	NutRegisterIrqHandler(sig_GPT[channel], IntHandlerCaptureEvent, (void *)channel);
 	NutIrqEnable(sig_GPT[channel]);
