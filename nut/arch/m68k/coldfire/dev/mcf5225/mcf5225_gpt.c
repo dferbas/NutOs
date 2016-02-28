@@ -200,7 +200,7 @@ void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
  */
 void Mcf5225GptCounterStart(int channel)
 {
-	Gptcounter_GPCTL2_mask |=  MCF_GPT_GPTCTL2_INPUT_FALLING(channel);
+	Gptcounter_GPCTL2_mask |=  MCF_GPT_GPTCTL2_INPUT_RISING(channel);
 	GpioPinConfigSet(PORTTA, channel, GPIO_CFG_PERIPHERAL0 | GPIO_CFG_INPUT);	//set PIN functionality to GPT
 }
 
