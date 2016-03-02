@@ -34,6 +34,11 @@
 #include <dev/irqreg.h>
 #include <arch/m68k/coldfire/mcf51cn/mcg_mcf51cn.h>
 
+/*!
+ * \addtogroup xgMcf51cn
+ */
+/*@{*/
+
 #define MODULO_COUNTER_SIZE 0x100
 
 void Mcf51cnMtimInitClock(void (*handler)(void *))

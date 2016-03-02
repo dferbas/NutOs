@@ -36,6 +36,11 @@
 #include <dev/watchdog.h>
 #include <stdio.h>
 
+/*!
+ * \addtogroup xgColdfireInit
+ */
+/*@{*/
+
 void InitSystem(void)
 {
 	uint8_t reg;

@@ -45,6 +45,11 @@
 #include <arch/m68k.h>
 #include <arch/m68k/coldfire/mcf51_iic.h>
 
+/*!
+ * \addtogroup xgMcf51
+ */
+/*@{*/
+
 #define NUT_THREAD_TWI_TRANSACT_STACK   	1000			// TODO .. tune it
 
 typedef struct
@@ -197,21 +202,25 @@ static void reenableDevice(int dcbBase)
 	MCF_IIC_CR (dcbBase) = MCF_IIC_CR_IICEN;
 }
 
-//TODO dodelat \param
-/*!
- * \brief Transmit and/or receive data as a master.
+//TODO zkontrolovat \param
+/*! \brief Transmit and/or receive data as a master.
  *
  * The two-wire serial interface must have been initialized by calling
  * TwInit() before this function can be used.
  *
  * \note This function is only available on ATmega128 systems.
  *
- * \param sla    Slave address of the destination. This slave address
- *               must be specified as a 7-bit address. For example, the
- *               PCF8574A may be configured to slave addresses from 0x38
- *               to 0x3F.
- * \param tmo    Timeout in milliseconds. To disable timeout, set this
- *               parameter to NUT_WAIT_INFINITE.
+ * \param sla    	Slave address of the destination. This slave address
+ *               	must be specified as a 7-bit address. For example, the
+ *               	PCF8574A may be configured to slave addresses from 0x38
+ *               	to 0x3F.
+ * \param *addr		Pointer to address for transmit.
+ * \param addrsiz	Length of data.
+ * \param *data		Pointer to data for transmit or receive.
+ * \param siz       Length of data to transmit.
+ * \param tmo    	Timeout in milliseconds. To disable timeout, set this
+ *               	parameter to NUT_WAIT_INFINITE.
+ * \param write		1 = data to transmit, otherwise = data to receive
  *
  * \return The number of bytes received, -1 in case of an error or timeout.
  */
@@ -341,8 +350,7 @@ int TwMasterWrite(uint8_t sla, const void *addr, uint8_t addrlen, void *txdata, 
 	return TwMasterCommon(sla, addr, addrlen, txdata, txsiz, tmo, 1);
 }
 
-/*!
- * \brief Get last master mode error only from IIC1!!!.
+/*! \brief Get last master mode error only from IIC1!!!.
  *
  * You may call this function to determine the specific cause
  * of an error after TwMasterTransact() failed.
@@ -360,8 +368,7 @@ int TwMasterError(void)
 	return rc;
 }
 
-/*!
- * \brief Perform TWI control functions.
+/*! \brief Perform TWI control functions.
  *
  * This function is only available on mcf5xxxx systems.
  *
@@ -421,8 +428,7 @@ int TwIOCtl(int req, void *p_conf)
 	return rc;
 }
 
-/*!
- * \brief Initialize TWI interface.
+/*! \brief Initialize TWI interface.
  *
  * The specified slave address is used only, if the local system
  * is running as a slave. Anyway, care must be taken that it doesn't

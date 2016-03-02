@@ -33,7 +33,11 @@
 #include <dev/gpio.h>
 
 /*!
- * \brief Get pin configuration.
+ * \addtogroup xgMcf51cn
+ */
+/*@{*/
+
+/*! \brief Get pin configuration.
  *
  * \param bank GPIO bank/port number.
  * \param bit  Bit number of the specified bank/port.
@@ -84,8 +88,7 @@ uint32_t GpioPinConfigGet(int bank, int bit)
 	return rc;
 }
 
-/*!
- * \brief Set pin configuration.
+/*! \brief Set pin configuration.
  *
  * Applications may also use this function to make sure, that a specific
  * attribute is available for a specific pin.
@@ -113,8 +116,7 @@ int GpioPinConfigSet(int bank, int bit, uint32_t flags)
 	return 0;
 }
 
-/*!
- * \brief Set port wide pin configuration.
+/*! \brief Set port wide pin configuration.
  *
  * \note This function does not check for undefined ports and pins or
  *       invalid attributes. If this is required, use GpioPinConfigSet().

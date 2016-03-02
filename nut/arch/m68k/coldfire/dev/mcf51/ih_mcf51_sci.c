@@ -33,6 +33,11 @@
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 
+/*!
+ * \addtogroup xgMcf51
+ */
+/*@{*/
+
 static int IrqCtl1_Rx(int cmd, void *param);
 static int IrqCtl1_Tx(int cmd, void *param);
 
@@ -96,31 +101,79 @@ IRQ_HANDLER sig_SCI3_TX = {
         IrqCtl3_Tx
     };
 
+/*! \brief SCI1_RX interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl1_Rx(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_SCI1_RX, cmd, param, &MCF_SCI_C2(1), MCF_SCI_C2_RIE, 1);
 }
 
+/*! \brief SCI1_TX interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl1_Tx(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_SCI1_TX, cmd, param, &MCF_SCI_C2(1), MCF_SCI_C2_TIE, 1);
 }
 
+/*! \brief SCI2_RX interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl2_Rx(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_SCI2_RX, cmd, param, &MCF_SCI_C2(2), MCF_SCI_C2_RIE, 1);
 }
 
+/*! \brief SCI2_TX interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl2_Tx(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_SCI2_TX, cmd, param, &MCF_SCI_C2(2), MCF_SCI_C2_TIE, 1);
 }
 
+/*! \brief SCI3_RX interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl3_Rx(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_SCI3_RX, cmd, param, &MCF_SCI_C2(3), MCF_SCI_C2_RIE, 1);
 }
 
+/*! \brief SCI3_TX interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl3_Tx(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_SCI2_TX, cmd, param, &MCF_SCI_C2(3), MCF_SCI_C2_TIE, 1);

@@ -35,7 +35,11 @@
 #include <sys/nutdebug.h>
 
 /*!
- * \brief Common interrupt control.
+ * \addtogroup xgMcf51
+ */
+/*@{*/
+
+/*! \brief Common interrupt control.
  *
  * \param cmd   Control command.
  *              - NUT_IRQCTL_INIT Initialize and disable interrupt.

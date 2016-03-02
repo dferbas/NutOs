@@ -33,7 +33,13 @@
 #include <arch/m68k.h>
 #include <sys/atom.h>
 
+/*!
+ * \addtogroup xgMcf51
+ */
+/*@{*/
+
 #define BM_FLASH_ERR_MASK 0x30
+
 
 __attribute__ ((section (".data.flash_ram"))) volatile int Mcf51IntFlashRamCMD(uint8_t cmd)
 {
@@ -52,6 +58,10 @@ __attribute__ ((section (".data.flash_ram"))) volatile int Mcf51IntFlashRamCMD(u
 	return 0;
 }
 
+/*! \brief Return flash protect register
+ *
+ * \return MCF_FPROT
+ */
 uint8_t Mcf51IntFlashProtectRegister(void)
 {
 	return MCF_FPROT;
@@ -65,6 +75,14 @@ int Mcf51IntFlashInit(void)
 	return 0;
 }
 
+/*! \brief Read data from flash memory
+ *
+ * \param dst		Destination in flash memory
+ * \param *data		Pointer to data that you want read
+ * \param size		Size of data
+ *
+ * \return 0 = SUCCESS
+ */
 int Mcf51IntFlashRead(uint32_t dst, uint32_t *data, uint32_t size)
 {
 	uint32_t *p_dst = (uint32_t *) dst;
@@ -78,6 +96,14 @@ int Mcf51IntFlashRead(uint32_t dst, uint32_t *data, uint32_t size)
 	return 0;
 }
 
+/*! \brief Write data to flash memory
+ *
+ * \param dst		Destination in flash memory
+ * \param *data		Pointer to data that you want write
+ * \param size		Size of data
+ *
+ * \return 0 = SUCCESS, -1 = ERROR
+ */
 int Mcf51IntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size)
 {
 	int i;
@@ -129,8 +155,12 @@ int Mcf51IntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size)
 	}
 	return 0;
 }
-/*
- * Erase Sector (128 sectors of 1024 bytes each)
+
+/*! \brief Erase Sector (128 sectors of 1024 bytes each)
+ *
+ * \param addr	Flash memory adress
+ *
+ * \return 0 = SUCCESS, -1 = ERROR
  */
 int Mcf51IntFlashSectorErase(uint32_t addr)
 {
@@ -166,8 +196,9 @@ int Mcf51IntFlashSectorErase(uint32_t addr)
 	return 0;
 }
 
-/*
- * Erase entire flash
+/*! \brief Erase entire flash
+ *
+ * \return 0 = SUCCESS, -1 = ERROR
  */
 int Mcf51IntFlashMassErase(void)
 {

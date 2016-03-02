@@ -36,7 +36,11 @@
 #include <dev/gpio.h>
 
 /*!
- * \brief Processor specific Hardware Initiliaization
+ * \addtogroup xgMcfCommon
+ */
+/*@{*/
+
+/*! \brief Processor specific Hardware Initiliaization
  *
  */
 int Mcf5I2cBus1Init(void)

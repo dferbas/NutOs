@@ -37,7 +37,11 @@
 #include <sys/timer.h>
 
 /*!
- * \brief Handle I/O controls for the debug device.
+ * \addtogroup xgMcfCommon
+ */
+/*@{*/
+
+/*! \brief Handle I/O controls for the debug device.
  *
  * \param dev  Identifies the device that receives the device-control
  *             request.
@@ -53,8 +57,7 @@ static int IOCtl(NUTDEVICE * dev, int req, void *conf)
 	return -1;
 }
 
-/*!
- * \brief Send a single character to debug device.
+/*! \brief Send a single character to debug device.
  *
  * The function will automatically prepend any newline character
  * (ASCII 10) with a carriage return character (ASCII 13).
@@ -77,8 +80,7 @@ static void Put(uintptr_t devnum, char ch)
 	MCF_UART_UTB (devnum) = (uint8_t) ch;
 }
 
-/*!
- * \brief Send a buffer contents to the debug device.
+/*! \brief Send a buffer contents to the debug device.
  *
  * This function is called by the low level input routines of the
  * \ref xrCrtLowio "C runtime library", using the _NUTDEVICE::dev_read
@@ -116,8 +118,7 @@ static int Write(NUTFILE * fp, const void *buffer, int len)
 	return len;
 }
 
-/*!
- * \brief Read bytes from file
+/*! \brief Read bytes from file
  *
  * \return Number of characters read.
  */
@@ -126,8 +127,7 @@ static int Read(NUTFILE * nf, void *buffer, int len)
 	return 0;
 }
 
-/*!
- * \brief Open debug device.
+/*! \brief Open debug device.
  *
  * \return Pointer to a static NUTFILE structure.
  */
@@ -142,8 +142,7 @@ static NUTFILE *Open(NUTDEVICE * dev, const char *name, int mode, int acc)
 	return fp;
 }
 
-/*!
- * \brief Close debug device.
+/*! \brief Close debug device.
  *
  * \param fp Pointer to a \ref _NUTFILE structure, obtained by a
  *           previous call to ZeroDebugOpen().
@@ -156,8 +155,7 @@ static int Close(NUTFILE * fp)
 	return 0;
 }
 
-/*!
- * \brief Initialize debug device.
+/*! \brief Initialize debug device.
  *
  * This function is called by NutRegisterDevice(), using the 
  * _NUTDEVICE::dev_init entry.
@@ -239,8 +237,7 @@ static int Init(NUTDEVICE * dev)
  */
 static NUTFILE dbgfile;
 
-/*!
- * \brief Debug device information structure.
+/*! \brief Debug device information structure.
  *
  * Usually, the device structure is the only public symbol that may be
  * referenced by the application code using

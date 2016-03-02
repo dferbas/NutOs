@@ -38,11 +38,17 @@
 #include <sys/timer.h>
 #include <sys/heap.h>
 
+/*!
+ * \addtogroup xgMcfCommon
+ */
+/*@{*/
+
 #define MODE_READ       1       /* Work as Receiver */
 #define MODE_WRITE      0       /* Work as Transmitter */
 
-/*
- * TWI interrupt handler.
+/*! \brief TWI interrupt handler.
+ *
+ * \param *arg	Pointer to NUTTWIBUS structure
  */
 static void TwInterrupt(void *arg)
 {
@@ -183,8 +189,14 @@ static void TwInterrupt(void *arg)
 	return;
 }
 
-/*
- * TWI Transfer starter
+/*! \brief TWI Transfer starter
+ *
+ * \param *bus	Pointer to the \ref NUTTWIBUS structure, which is provided
+ *              by the bus controller driver.
+ * \param tmo	Timeout in milliseconds. To disable timeout,
+ *              set this parameter to NUT_WAIT_INFINITE.
+ *
+ * \return 0, -1 in case of an error or timeout.
  */
 static int TwiInitTransfer(NUTTWIBUS *bus, uint32_t tmo)
 {
@@ -236,8 +248,9 @@ static int TwiInitTransfer(NUTTWIBUS *bus, uint32_t tmo)
 	return 0;
 }
 
-/*
- * TWI Transfer
+/*! \brief TWI Transfer
+ *
+ * \note params desc in NutTwiMasterTranceive
  */
 static int TwiMasterLow(NUTTWIBUS *bus, uint8_t sla, uint32_t iadr, uint8_t iadrlen,
 		CONST void *txdata, uint16_t txlen, void *rxdata, uint16_t rxsiz, uint32_t tmo)
@@ -308,8 +321,7 @@ static int TwiMasterLow(NUTTWIBUS *bus, uint8_t sla, uint32_t iadr, uint8_t iadr
 	return rc;
 }
 
-/*!
- * \brief Transmit and/or receive data as a master.
+/*! \brief Transmit and/or receive data as a master.
  *
  * The two-wire serial interface must have been initialized by calling
  * TwInit() before this function can be used.
@@ -341,8 +353,7 @@ int NutTwiMasterTranceive(NUTTWIBUS *bus, uint8_t sla, CONST void *txdata, uint1
 	return TwiMasterLow(bus, sla, 0, 0, txdata, txlen, rxdata, rxsiz, tmo);
 }
 
-/*!
- * \brief Receive data as a master from a device having internal addressable registers
+/*! \brief Receive data as a master from a device having internal addressable registers
  *
  * The two-wire serial interface must have been initialized by calling
  * TwInit() before this function can be used.
@@ -371,8 +382,7 @@ int NutTwiMasterRegRead(NUTTWIBUS *bus, uint8_t sla, uint32_t iadr, uint8_t iadr
 	return TwiMasterLow(bus, sla, iadr, iadrlen, NULL, 0, rxdata, rxsiz, tmo);
 }
 
-/*!
- * \brief Transmit data as a master to a device having internal addressable registers
+/*! \brief Transmit data as a master to a device having internal addressable registers
  *
  * The two-wire serial interface must have been initialized by calling
  * TwInit() before this function can be used.
@@ -404,8 +414,7 @@ int NutTwiMasterRegWrite(NUTTWIBUS *bus, uint8_t sla, uint32_t iadr, uint8_t iad
 	return TwiMasterLow(bus, sla, iadr, iadrlen, txdata, txsiz, NULL, 0, tmo);
 }
 
-/*!
- * \brief Get last master mode error.
+/*! \brief Get last master mode error.
  *
  * You may call this function to determine the specific cause
  * of an error after twi transaction failed.
@@ -421,8 +430,7 @@ int NutTwiMasterError(NUTTWIBUS *bus)
 	return rc;
 }
 
-/*!
- * \brief Listen for incoming data from a master.
+/*! \brief Listen for incoming data from a master.
  *
  * If this function returns without error, the bus is blocked. The caller
  * must immediately process the request and return a response by calling
@@ -451,8 +459,7 @@ int NutTwiSlaveListen(NUTTWIBUS *bus, uint8_t *sla, void *rxdata, uint16_t rxsiz
 	return -1;
 }
 
-/*!
- * \brief Send response to a master.
+/*! \brief Send response to a master.
  *
  * This function must be called as soon as possible after TwSlaveListen()
  * returned successfully, even if no data needs to be returned. Not doing
@@ -476,8 +483,7 @@ extern int NutTwiSlaveRespond(NUTTWIBUS *bus, void *txdata, uint16_t txlen, uint
 	return -1;
 }
 
-/*!
- * \brief Get last slave mode error.
+/*! \brief Get last slave mode error.
  *
  * You may call this function to determine the specific cause
  * of an error after TwSlaveListen() or TwSlaveRespond() failed.
@@ -495,8 +501,7 @@ extern int NutTwiSlaveError(NUTTWIBUS *bus)
 	return TWERR_BUS;
 }
 
-/*!
- * \brief Get last transfer results.
+/*! \brief Get last transfer results.
  *
  * \param bus    Pointer to the \ref NUTTWIBUS structure, which is provided
  *               by the bus controller driver.
@@ -566,8 +571,7 @@ static int TwiGetSpeed(NUTTWIBUS *bus)
 	return NutGetCpuClock() / Dividers[MCF_I2C_I2FDR(bus->bus_base)];
 }
 
-/*!
- * \brief Perform TWI control functions.
+/*! \brief Perform TWI control functions.
  *
  * \param bus    Pointer to the \ref NUTTWIBUS structure, which is provided
  *               by the bus controller driver.
@@ -620,8 +624,7 @@ int NutTwiIOCtl(NUTTWIBUS *bus, int req, void *conf)
 	return rc;
 }
 
-/*!
- * \brief Initialize TWI interface.
+/*! \brief Initialize TWI interface.
  *
  * The specified slave address is not used here as we don't support twi-slave
  * on this architecture for now.

@@ -41,6 +41,11 @@
 #include <sys/mutex.h>
 #include <sys/nutdebug.h>
 
+/*!
+ * \addtogroup xgMcf51cn
+ */
+/*@{*/
+
 static MUTEX spi_bus_mutex;		// waiting for spi bus
 static HANDLE spi_transfer_handler;	// waiting for spi transfer finished
 
@@ -49,8 +54,8 @@ static HANDLE spi_transfer_handler;	// waiting for spi transfer finished
 
 #define SPI_CHANNEL		2
 
-/*!
- * \brief Set the specified chip select to a given level.
+/*! \brief Set the specified chip select to a given level.
+ *
  */
 static int Mcf51cnSpiChipSelect(uint_fast8_t cs, uint_fast8_t level)
 {
@@ -171,8 +176,7 @@ static void Mcf51cnSpiInterrupt(void *arg)
 	}
 }
 
-/*!
- * \brief Transfer data on the SPI bus using single buffered interrupt mode.
+/*! \brief Transfer data on the SPI bus using single buffered interrupt mode.
  *
  * A device must have been selected by calling Mcf51SpiSelect().
  *
@@ -222,8 +226,8 @@ int Mcf51cnSpiTransfer(const void *txbuf, void *rxbuf, int xlen)
 	return rc;
 }
 
-/*!
- * \brief Initialize an SPI bus node.
+/*! \brief Initialize an SPI bus node.
+ *
  */
 void Mcf51cnSpiInit(void)
 {

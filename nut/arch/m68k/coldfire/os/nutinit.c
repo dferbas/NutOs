@@ -35,6 +35,11 @@
 #include <dev/board.h>
 #include <cfg/os.h>
 
+/*!
+ * \addtogroup xgColdfireOs
+ */
+/*@{*/
+
 #ifdef EARLY_STDIO_DEV
 #include <sys/device.h>
 #include <stdio.h>
@@ -57,8 +62,8 @@ struct __iobuf
 #define NUT_THREAD_IDLESTACK    512
 #endif
 
-/*!
- * \brief Memory address and sizes.
+/*! \brief Memory address and sizes.
+ *
  */
 extern void *__heap_start;
 extern void *__heap_size;
@@ -93,13 +98,12 @@ void IdleMWDTSetResetFN(TMWDTResetFN ResetFN)
 	IdleMWDTResetFN = ResetFN;
 }
 
-/*!
+/*! \fn NutStart(void *arg)
  * \brief M68K Start thread.
  *
  * Configures OS and starts the main application thread.
  *
  */
-
 THREAD( NutStart, arg)
 {
 	/*
@@ -130,12 +134,11 @@ THREAD( NutStart, arg)
 		NutThreadYield();
 }
 
-/*!
+/*! \fn NutIdle(void *arg)
  * \brief Idle thread.
  *
  * Running at priority 254 in an endless loop.
  */
-
 THREAD( NutIdle, arg)
 {
 	/*
@@ -182,8 +185,7 @@ THREAD( NutIdle, arg)
 	}
 }
 
-/*!
- * \brief Nut/OS Initialization.
+/*! \brief Nut/OS Initialization.
  *
  * Initializes the memory management and the thread system and starts
  * an idle thread, which in turn initializes the timer management.

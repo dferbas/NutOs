@@ -36,6 +36,11 @@
 #include <cfg/uart.h>
 #include <dev/usart.h>
 
+/*!
+ * \addtogroup xgMcfCommon
+ */
+/*@{*/
+
 #define BASE    0
 
 /*
@@ -58,13 +63,13 @@ static void Mcf5UsartRxStart(void);
 static int Mcf5UsartInit(void);
 static int Mcf5UsartDeinit(void);
 
-/*
- * \brief UART0 control structure used for write only registers.
+/*! \brief UART0 control structure used for write only registers.
+ *
  */
 static UARTWREGS reg_uart0;
 
-/*!
- * \brief UART0 device control block structure.
+/*! \brief UART0 device control block structure.
+ *
  */
 static USARTDCB dcb_uart0 = {
     0,                          /* dcb_modeflags */
@@ -98,8 +103,7 @@ static USARTDCB dcb_uart0 = {
  * \name Coldfire UART0 Device
  */
 /*@{*/
-/*!
- * \brief Coldfire device information structure.
+/*! \brief Coldfire device information structure.
  *
  * An application must pass a pointer to this structure to
  * NutRegisterDevice() before using the serial communication

@@ -34,6 +34,11 @@
 #include <arch/m68k.h>
 #include <sys/nutdebug.h>
 
+/*!
+ * \addtogroup xgMcf51cn
+ */
+/*@{*/
+
 #define MCG_INTERNAL_REF_CLOCK 			32768
 
 #define MCG_MAX_CPU_FREQ 				50000000

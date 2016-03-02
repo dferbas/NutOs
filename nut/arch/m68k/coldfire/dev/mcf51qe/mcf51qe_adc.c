@@ -34,6 +34,11 @@
 #include <dev/irqreg.h>
 #include <dev/gpio.h>
 
+/*!
+ * \addtogroup xgMcf51qe
+ */
+/*@{*/
+
 uint16_t Mcf51qeAdcValue(void)
 {
 	MCF_ADC_SC1 = 0x5F; // One conversion only (continuous conversions disabled)

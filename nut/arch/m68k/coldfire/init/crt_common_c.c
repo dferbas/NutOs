@@ -33,6 +33,11 @@
 #include <stdio.h>
 #include <stdint.h>
 
+/*!
+ * \addtogroup xgColdfireInit
+ */
+/*@{*/
+
 //------------------------------------------------------------------------------
 void InitRegions(void)
 {

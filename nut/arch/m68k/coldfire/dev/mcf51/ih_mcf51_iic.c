@@ -33,6 +33,11 @@
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 
+/*!
+ * \addtogroup xgMcf51
+ */
+/*@{*/
+
 static int IrqCtl1(int cmd, void *param);
 static int IrqCtl2(int cmd, void *param);
 
@@ -42,7 +47,8 @@ IRQ_HANDLER sig_IIC1 =
 		0,
 #endif
 		NULL,
-		NULL, IrqCtl1 };
+		NULL, IrqCtl1
+};
 
 IRQ_HANDLER sig_IIC2 =
 {
@@ -50,13 +56,29 @@ IRQ_HANDLER sig_IIC2 =
 		0,
 #endif
 		NULL,
-		NULL, IrqCtl2 };
+		NULL, IrqCtl2
+};
 
+
+/*! \brief IIC1 interrupt control.
+ *
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtl1(int cmd, void *param)
 {
 	return IrqCtlCommon(&sig_IIC1, cmd, param, &MCF_IIC_CR(0), MCF_IIC_CR_IICIE, 1);
 }
 
+/*! \brief IIC2 interrupt control.
+ *
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtl2(int cmd, void *param)
 {
 	return IrqCtlCommon(&sig_IIC2, cmd, param, &MCF_IIC_CR(1), MCF_IIC_CR_IICIE, 1);

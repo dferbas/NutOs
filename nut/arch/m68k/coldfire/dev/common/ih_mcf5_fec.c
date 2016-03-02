@@ -34,6 +34,11 @@
 #include <dev/irqreg.h>
 //#include <arch/m68k/coldfire/mcf5225/mcf5225_intc.h>
 
+/*!
+ * \addtogroup xgMcfCommon
+ */
+/*@{*/
+
 static int IrqCtlRb(int cmd, void *param);
 static int IrqCtlRf(int cmd, void *param);
 static int IrqCtlTb(int cmd, void *param);
@@ -75,6 +80,13 @@ IRQ_HANDLER sig_FEC_TF = {
         IrqCtlTf
     };
 
+/*! \brief Rb interrupt control.
+ *
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtlRb(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_FEC_RB, cmd, param, &MCF_FEC_EIMR, MCF_FEC_EIMR_RXB, 4
@@ -84,6 +96,14 @@ static int IrqCtlRb(int cmd, void *param)
     		);
 }
 
+
+/*! \brief Rf interrupt control.
+ *
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtlRf(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_FEC_RF, cmd, param, &MCF_FEC_EIMR, MCF_FEC_EIMR_RXF, 4
@@ -92,6 +112,14 @@ static int IrqCtlRf(int cmd, void *param)
 #endif
     		);
 }
+
+/*! \brief Tb interrupt control.
+ *
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtlTb(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_FEC_TB, cmd, param, &MCF_FEC_EIMR, MCF_FEC_EIMR_TXB, 4
@@ -101,6 +129,13 @@ static int IrqCtlTb(int cmd, void *param)
     		);
 }
 
+/*! \brief Tf interrupt control.
+ *
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtlTf(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_FEC_TF, cmd, param, &MCF_FEC_EIMR, MCF_FEC_EIMR_TXF, 4

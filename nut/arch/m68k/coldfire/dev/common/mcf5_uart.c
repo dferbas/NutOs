@@ -38,8 +38,10 @@
 
 /*!
  * \addtogroup xgNutArchM68kColdfireUart
+ * \addtogroup xgMcfCommon
  */
 /*@{*/
+
 
 #define PREVENT_SPURIOUS_INTERRUPT(code) {NutEnterCritical();{code;} NutExitCritical();}
 
@@ -185,8 +187,7 @@ static uint_fast8_t rts_control;
  */
 static uint_fast8_t cts_sense;
 #endif
-/*
- * \brief USARTn transmit complete interrupt handler.
+/*! \brief USARTn transmit complete interrupt handler.
  *
  * Used with half duplex communication to switch from tranmit to receive
  * mode after the last character has been transmitted.
@@ -212,8 +213,7 @@ static void Mcf5UsartTxEmpty(void *arg)
 	;
 }
 
-/*
- * \brief USARTn transmit data register empty interrupt handler.
+/*! \brief USARTn transmit data register empty interrupt handler.
  *
  * \param arg Pointer to the device specific control block.
  */
@@ -310,8 +310,7 @@ static void Mcf5UsartTxReady(void *arg)
 	}
 }
 
-/*
- * \brief USARTn receive complete interrupt handler.
+/*! \brief USARTn receive complete interrupt handler.
  *
  * \param arg Pointer to the device specific control block.
  */
@@ -451,8 +450,7 @@ static void Mcf5UsartRxComplete(void *arg)
 		NutEventPostFromIrq(&rbf->rbf_que);
 }
 
-/*!
- * \brief USART interrupt handler.
+/*! \brief USART interrupt handler.
  *
  * \param arg Pointer to the device specific control block.
  */
@@ -475,8 +473,7 @@ static void Mcf5UsartInterrupts(void *arg)
 	}
 }
 
-/*!
- * \brief Carefully enable USART hardware functions.
+/*! \brief Carefully enable USART hardware functions.
  *
  * Always enable transmitter and receiver, even on read-only or
  * write-only mode. So we can support software flow control.
@@ -496,8 +493,8 @@ static void Mcf5UsartEnable(void)
 	NutExitCritical();
 }
 
-/*!
- * \brief Carefully disable USART hardware functions.
+/*! \brief Carefully disable USART hardware functions.
+ *
  */
 static void Mcf5UsartDisable(void)
 {
@@ -516,8 +513,7 @@ static void Mcf5UsartDisable(void)
 	MCF_UART_UCR (BASE) = MCF_UART_UCR_RX_DISABLED;
 }
 
-/*!
- * \brief Query the USART hardware for the selected speed.
+/*! \brief Query the USART hardware for the selected speed.
  *
  * This function is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -532,8 +528,7 @@ static uint32_t Mcf5UsartGetSpeed(void)
 	return NutGetCpuClock() / (32 * sv);
 }
 
-/*!
- * \brief Set the USART hardware bit rate.
+/*! \brief Set the USART hardware bit rate.
  *
  * This function is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -564,8 +559,7 @@ static int Mcf5UsartSetSpeed(uint32_t rate)
 	return 0;
 }
 
-/*!
- * \brief Query the USART hardware for the number of data bits.
+/*! \brief Query the USART hardware for the number of data bits.
  *
  * This function is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -577,8 +571,7 @@ static uint8_t Mcf5UsartGetDataBits(void)
 	return (reg_uart.umr1 & 0x3) + 5;
 }
 
-/*!
- * \brief Set the USART hardware to the number of data bits.
+/*! \brief Set the USART hardware to the number of data bits.
  *
  * This function is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -620,8 +613,7 @@ static int Mcf5UsartSetDataBits(uint8_t bits)
 	return 0;
 }
 
-/*!
- * \brief Query the USART hardware for the parity mode.
+/*! \brief Query the USART hardware for the parity mode.
  *
  * This routine is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -643,8 +635,7 @@ static uint8_t Mcf5UsartGetParity(void)
 	return -1;
 }
 
-/*!
- * \brief Set the USART hardware to the specified parity mode.
+/*! \brief Set the USART hardware to the specified parity mode.
  *
  * This routine is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -684,8 +675,7 @@ static int Mcf5UsartSetParity(uint8_t mode)
 	return 0;
 }
 
-/*!
- * \brief Query the USART hardware for the number of stop bits.
+/*! \brief Query the USART hardware for the number of stop bits.
  *
  * This routine is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -706,8 +696,7 @@ static uint8_t Mcf5UsartGetStopBits(void)
 	return -1;
 }
 
-/*!
- * \brief Set the USART hardware to the number of stop bits.
+/*! \brief Set the USART hardware to the number of stop bits.
  *
  * This routine is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -747,8 +736,7 @@ static int Mcf5UsartSetStopBits(uint8_t bits)
 	return 0;
 }
 
-/*!
- * \brief Query the USART hardware status.
+/*! \brief Query the USART hardware status.
  *
  * \return Status flags.
  */
@@ -842,8 +830,7 @@ static uint32_t Mcf5UsartGetStatus(void)
 	return rc;
 }
 
-/*!
- * \brief Set the USART hardware status.
+/*! \brief Set the USART hardware status.
  *
  * \param flags Status flags.
  *
@@ -923,8 +910,7 @@ static int Mcf5UsartSetStatus(uint32_t flags)
 	return 0;
 }
 
-/*!
- * \brief Query flow control mode.
+/*! \brief Query flow control mode.
  *
  * This routine is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -980,8 +966,7 @@ static uint32_t Mcf5UsartGetFlowControl(void)
 	return rc;
 }
 
-/*!
- * \brief Set flow control mode.
+/*! \brief Set flow control mode.
  *
  * This function is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -1082,8 +1067,7 @@ static int Mcf5UsartSetFlowControl(uint32_t flags)
 	return 0;
 }
 
-/*!
- * \brief Start the USART transmitter hardware.
+/*! \brief Start the USART transmitter hardware.
  *
  * The upper level USART driver will call this function through the
  * USARTDCB jump table each time it added one or more bytes to the
@@ -1109,8 +1093,7 @@ static void Mcf5UsartTxStart(void)
 	;
 }
 
-/*!
- * \brief Start the USART receiver hardware.
+/*! \brief Start the USART receiver hardware.
  *
  * The upper level USART driver will call this function through the
  * USARTDCB jump table each time it removed enough bytes from the
@@ -1147,8 +1130,7 @@ static void Mcf5UsartRxStart(void)
 	;
 }
 
-/*
- * \brief Initialize the USART hardware driver.
+/*! \brief Initialize the USART hardware driver.
  *
  * This function is called during device registration by the upper level
  * USART driver through the USARTDCB jump table.
@@ -1244,8 +1226,7 @@ static int Mcf5UsartInit(void)
 	return 0;
 }
 
-/*
- * \brief Deinitialize the USART hardware driver.
+/*! \brief Deinitialize the USART hardware driver.
  *
  * This function is called during device deregistration by the upper
  * level USART driver through the USARTDCB jump table.

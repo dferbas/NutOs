@@ -36,6 +36,11 @@
 #include <cfg/uart.h>
 #include <dev/usart.h>
 
+/*!
+ * \addtogroup xgMcfCommon
+ */
+/*@{*/
+
 #define BASE    2
 
 /*

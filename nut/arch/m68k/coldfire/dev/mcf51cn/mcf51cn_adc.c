@@ -41,6 +41,11 @@
 #include <sys/thread.h>
 #include <sys/timer.h>
 
+/*!
+ * \addtogroup xgMcf51cn
+ */
+/*@{*/
+
 #ifndef MCF51_ADC_INITIAL_MODE
 #define MCF51_ADC_INITIAL_MODE SINGLE_CONVERSION
 #endif
@@ -59,8 +64,7 @@ uint32_t adcEnableChannels;
 
 static HANDLE readHandle;
 
-/*!
- * \brief Reads data from the adc buffer
+/*! \brief Reads data from the adc buffer
  *
  * \param channel  Specifies the channel to read data from
  * \param read     Variable to store the data in
@@ -98,8 +102,7 @@ static inline int Mcf51cnAdcBufWrite(uint16_t channel, uint16_t write)
 	return 1;
 }
 
-/*!
- * \brief Sets the data aquisition mode for the adc
+/*! \brief Sets the data aquisition mode for the adc
  *
  * \param mode  Mode to set
  */
@@ -120,8 +123,7 @@ void Mcf51cnAdcSetMode(TADCMode mode)
 	}
 }
 
-/*!
- * \brief Enable a channel used to sample when conversion started
+/*! \brief Enable a channel used to sample when conversion started
  *
  * \param channel  Specifies the channel to enable
  */
@@ -184,8 +186,7 @@ void Mcf51cnAdcEnableChannel(TADCChannel channel)
 	adcEnableChannels |= 1 << channel;
 }
 
-/*!
- * \brief Disable a channel.
+/*! \brief Disable a channel.
  *
  * \param channel  Specifies the channel to disable
  */
@@ -194,8 +195,7 @@ void Mcf51cnAdcDisableChannel(TADCChannel channel)
 	adcEnableChannels &= ~(1 << channel);
 }
 
-/*!
- * \brief Set the prescaler for the adc
+/*! \brief Set the prescaler for the adc
  *
  * \param prescale  Prescaler value 0-8
  */
@@ -220,8 +220,8 @@ void Mcf51cnAdcSetPrescale(uint32_t prescale)
 	MCF_ADC_CFG = cfg_reg;
 }
 
-/*!
- * \brief do conversion
+/*! \brief do conversion
+ *
  */
 void Mcf51cnAdcStartConversion(void)
 {
@@ -258,8 +258,8 @@ static void Mcf51cnAdcInterrupt(void *arg)
 	NutEventPostFromIrq(&readHandle);
 }
 
-/*!
- * \brief Initialize the adc to the configured default values and enable interrupt
+/*! \brief Initialize the adc to the configured default values and enable interrupt
+ *
  */
 void Mcf51cnAdcInit(void)
 {

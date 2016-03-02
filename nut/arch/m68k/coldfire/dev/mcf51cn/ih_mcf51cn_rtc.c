@@ -33,6 +33,11 @@
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 
+/*!
+ * \addtogroup xgMcf51cn
+ */
+/*@{*/
+
 static int IrqCtl(int cmd, void *param);
 
 IRQ_HANDLER sig_RTC = {
@@ -45,6 +50,13 @@ IRQ_HANDLER sig_RTC = {
     };
 
 
+/*! \brief RTC interrupt control.
+ *
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtl(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_RTC, cmd, param, &MCF_RTC_SC, MCF_RTC_SC_RTIE, 1);

@@ -34,6 +34,11 @@
 #include <arch/m68k.h>
 #include <sys/nutdebug.h>
 
+/*!
+ * \addtogroup xgMcf51qe
+ */
+/*@{*/
+
 void Mcf51qeIcsInitClock(void)
 {
 	/*  System clock initialization */

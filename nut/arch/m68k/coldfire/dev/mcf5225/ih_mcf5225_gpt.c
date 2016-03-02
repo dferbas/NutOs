@@ -101,8 +101,8 @@ IRQ_HANDLER sig_GPT_C3F = {
 
 /*! \brief Pai interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */
@@ -116,8 +116,8 @@ static int IrqCtlPai(int cmd, void *param)
 
 /*! \brief Paov interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */
@@ -131,8 +131,8 @@ static int IrqCtlPaov(int cmd, void *param)
 
 /*! \brief C0F interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */
@@ -146,8 +146,8 @@ static int IrqCtlC0F(int cmd, void *param)
 
 /*! \brief C1F interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */
@@ -161,8 +161,8 @@ static int IrqCtlC1F(int cmd, void *param)
 
 /*! \brief C2F interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */
@@ -176,8 +176,8 @@ static int IrqCtlC2F(int cmd, void *param)
 
 /*! \brief C3F interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */

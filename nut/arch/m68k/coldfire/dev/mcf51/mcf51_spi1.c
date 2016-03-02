@@ -46,10 +46,15 @@
 #include <stdlib.h>
 #include <memdebug.h>
 
+/*!
+ * \addtogroup xgMcf51
+ */
+/*@{*/
+
 #define SPI_CHANNEL		1
 
-/*!
- * \brief Set the specified chip select to a given level.
+/*! \brief Set the specified chip select to a given level.
+ *
  */
 static int Mcf51Spi1ChipSelect(uint_fast8_t cs, uint_fast8_t hi)
 {
@@ -78,8 +83,8 @@ static uint8_t * volatile spi1_rxp;
 static HANDLE spi1_que;
 static volatile size_t spi1_xc;
 
-/*!
- * \brief MCF51 SPI interrupt handler.
+/*! \brief MCF51 SPI interrupt handler.
+ *
  */
 static void Mcf51Spi1Interrupt(void *arg)
 {
@@ -116,8 +121,7 @@ static void Mcf51Spi1Interrupt(void *arg)
     }
 }
 
-/*!
- * \brief Transfer data on the SPI bus.
+/*! \brief Transfer data on the SPI bus.
  *
  * A device must have been selected by calling Mcf51Spi1Select().
  *
@@ -169,8 +173,7 @@ int Mcf51SpiBus1Transfer(NUTSPINODE * node, const void *txbuf, void *rxbuf, int 
     return 0;
 }
 
-/*!
- * \brief Initialize an SPI bus node.
+/*! \brief Initialize an SPI bus node.
  *
  * This routine is called for each SPI node, which is registered via
  * NutRegisterSpiDevice().
@@ -283,8 +286,8 @@ int Mcf51SpiBus1Deselect(NUTSPINODE * node)
     return 0;
 }
 
-/*!
- * \brief AVR SPI bus driver implementation structure.
+/*! \brief AVR SPI bus driver implementation structure.
+ *
  */
 NUTSPIBUS spiBus1Mcf51 = {
     NULL,                       /*!< Bus mutex semaphore (bus_mutex). */

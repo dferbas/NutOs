@@ -71,8 +71,8 @@ IRQ_HANDLER sig_UART2 = {
 
 /*! \brief UART0 interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */
@@ -88,8 +88,8 @@ static int IrqCtl0(int cmd, void *param)
 
 /*! \brief UART1 interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */
@@ -105,8 +105,8 @@ static int IrqCtl1(int cmd, void *param)
 
 /*! \brief UART2 interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */

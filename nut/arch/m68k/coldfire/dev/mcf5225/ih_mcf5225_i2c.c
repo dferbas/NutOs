@@ -61,8 +61,8 @@ IRQ_HANDLER sig_I2C1 = {
 
 /*! \brief I2C0 interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */
@@ -76,8 +76,8 @@ static int IrqCtl0(int cmd, void *param)
 
 /*! \brief I2C1 interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */

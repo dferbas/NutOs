@@ -35,6 +35,11 @@
 #include <dev/gpio.h>
 #include <sys/timer.h>
 
+/*!
+ * \addtogroup xgMcf51qe
+ */
+/*@{*/
+
 #define MODULO_COUNTER_SIZE 0x100
 
 /* System timer ticks, one tick per 1ms */

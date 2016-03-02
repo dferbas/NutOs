@@ -32,6 +32,11 @@
 
 #include <dev/reset.h>
 
+/*!
+ * \addtogroup xgMcf51
+ */
+/*@{*/
+
 void Mcf51_Reset(void)
 {
     // JS TODO - not implemented

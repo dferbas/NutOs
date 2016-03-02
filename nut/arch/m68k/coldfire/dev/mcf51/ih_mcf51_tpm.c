@@ -33,6 +33,11 @@
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 
+/*!
+ * \addtogroup xgMcf51
+ */
+/*@{*/
+
 static int IrqCtl1_ovfl(int cmd, void *param);
 static int IrqCtl1_Ch0(int cmd, void *param);
 static int IrqCtl1_Ch1(int cmd, void *param);
@@ -114,42 +119,110 @@ IRQ_HANDLER sig_TPM2_CH2 = {
         IrqCtl2_Ch2
     };
 
-
+/*! \brief TPM1_OVFL interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl1_ovfl(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM1_OVFL, cmd, param, &MCF_TPM_SC(1), MCF_TPM_SC_TOIE, 1);
 }
 
+
+/*! \brief TPM1_CH0 interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl1_Ch0(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM1_CH0, cmd, param, &MCF_TPM_CSC(1, 0), MCF_TPM_CSC_CHnIE, 1);
 }
 
+
+/*! \brief TPM1_CH1 interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl1_Ch1(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM1_CH1, cmd, param, &MCF_TPM_CSC(1, 1), MCF_TPM_CSC_CHnIE, 1);
 }
 
+
+/*! \brief TPM1_CH2 interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl1_Ch2(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM1_CH2, cmd, param, &MCF_TPM_CSC(1, 2), MCF_TPM_CSC_CHnIE, 1);
 }
 
+
+/*! \brief TPM2_OVFL interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl2_ovfl(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM2_OVFL, cmd, param, &MCF_TPM_SC(2), MCF_TPM_SC_TOIE, 1);
 }
 
+
+/*! \brief TPM2_CH0 interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl2_Ch0(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM2_CH0, cmd, param, &MCF_TPM_CSC(2, 0), MCF_TPM_CSC_CHnIE, 1);
 }
 
+/*! \brief TPM2_CH1 interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl2_Ch1(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM2_CH1, cmd, param, &MCF_TPM_CSC(2, 1), MCF_TPM_CSC_CHnIE, 1);
 }
 
+/*! \brief TPM2_CH2 interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl2_Ch2(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_TPM2_CH2, cmd, param, &MCF_TPM_CSC(2, 2), MCF_TPM_CSC_CHnIE, 1);

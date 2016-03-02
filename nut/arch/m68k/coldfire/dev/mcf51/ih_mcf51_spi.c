@@ -33,6 +33,11 @@
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 
+/*!
+ * \addtogroup xgMcf51
+ */
+/*@{*/
+
 static int IrqCtl1(int cmd, void *param);
 static int IrqCtl2(int cmd, void *param);
 
@@ -54,11 +59,27 @@ IRQ_HANDLER sig_SPI2 = {
         IrqCtl2
     };
 
+/*! \brief SPI1 interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl1(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_SPI1, cmd, param, &MCF_SPI_C1(1), MCF_SPI_C1_SPIE, 1);
 }
 
+/*! \brief SPI2 interrupt control.
+ *
+ * \param cmd   	Control command.
+ *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
+ * \param param 	Pointer to optional parameter.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
 static int IrqCtl2(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_SPI2, cmd, param, &MCF_SPI_C1(2), MCF_SPI_C1_SPIE, 1);

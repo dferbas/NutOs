@@ -51,8 +51,8 @@ IRQ_HANDLER sig_CWD = {
 
 /*! \brief Interrupt control.
  *
- * \param cmd Control command.
- * \param *param Pointer to optional parameter.
+ * \param cmd 		Control command.
+ * \param *param 	Pointer to optional parameter.
  *
  * \return IrqCtlCommon 0 on success, -1 otherwise.
  */

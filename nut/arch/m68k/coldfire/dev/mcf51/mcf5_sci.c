@@ -36,6 +36,11 @@
 #include <sys/event.h>
 #include <sys/timer.h>
 
+/*!
+ * \addtogroup xgMcf51
+ */
+/*@{*/
+
 /* \brief ASCII code for software flow control, starts transmitter. */
 #define ASCII_XON   0x11
 /* \brief ASCII code for software flow control, stops transmitter. */
@@ -50,13 +55,13 @@
 /* \brief XOFF received flag. */
 #define XOFF_RCVD       0x80
 
-/*!
- * \brief Enables software flow control if not equal zero.
+/*! \brief Enables software flow control if not equal zero.
+ *
  */
 static ureg_t flow_control;
 
-/*!
- * \brief Receiver error flags.
+/*! \brief Receiver error flags.
+ *
  */
 static uint8_t rx_errors;
 static uint8_t tx_errors;
@@ -71,8 +76,7 @@ static uint_fast8_t hdx_control;
 #define SciSetToTransmitMode()
 #endif
 
-/*
- * \brief Scin transmit data register empty interrupt handler.
+/*! \brief Scin transmit data register empty interrupt handler.
  *
  * \param arg Pointer to the device specific control block.
  */
@@ -185,8 +189,7 @@ static void Mcf5SciTxReady(void *arg)
 	}
 }
 
-/*
- * \brief Scin receive complete interrupt handler.
+/*! \brief Scin receive complete interrupt handler.
  *
  * \param arg Pointer to the device specific control block.
  */
@@ -307,8 +310,7 @@ static void Mcf5SciRxComplete(void *arg)
 		NutEventPostFromIrq(&rbf->rbf_que);
 }
 
-/*!
- * \brief Carefully enable Sci hardware functions.
+/*! \brief Carefully enable Sci hardware functions.
  *
  * Always enable transmitter and receiver, even on read-only or
  * write-only mode. So we can support software flow control.
@@ -321,8 +323,8 @@ static void Mcf5SciEnable(void)
 	MCF_SCI_C2 (BASE) = MCF_SCI_C2_RE | MCF_SCI_C2_TE;
 }
 
-/*!
- * \brief Carefully disable Sci hardware functions.
+/*! \brief Carefully disable Sci hardware functions.
+ *
  */
 /*static void Mcf5SciDisable(void)
  {
@@ -340,8 +342,7 @@ static void Mcf5SciEnable(void)
  MCF_SCI_C2(BASE) &= ~MCF_SCI_C2_RE;
  }*/
 
-/*!
- * \brief Query the Sci hardware for the selected speed.
+/*! \brief Query the Sci hardware for the selected speed.
  *
  * This function is called by ioctl function of the upper level Sci
  * driver through the USARTDCB jump table.
@@ -353,8 +354,7 @@ static uint32_t Mcf5SciGetSpeed(void)
 	return -1;
 }
 
-/*!
- * \brief Set the Sci hardware bit rate.
+/*! \brief Set the Sci hardware bit rate.
  *
  * This function is called by ioctl function of the upper level Sci
  * driver through the USARTDCB jump table.
@@ -380,8 +380,7 @@ static int Mcf5SciSetSpeed(uint32_t rate)
 	return 0;
 }
 
-/*!
- * \brief Query the Sci hardware for the number of data bits.
+/*! \brief Query the Sci hardware for the number of data bits.
  *
  * This function is called by ioctl function of the upper level Sci
  * driver through the USARTDCB jump table.
@@ -393,8 +392,7 @@ static uint8_t Mcf5SciGetDataBits(void)
 	return -1;
 }
 
-/*!
- * \brief Set the Sci hardware to the number of data bits.
+/*! \brief Set the Sci hardware to the number of data bits.
  *
  * This function is called by ioctl function of the upper level Sci
  * driver through the USARTDCB jump table.
@@ -406,8 +404,7 @@ static int Mcf5SciSetDataBits(uint8_t bits)
 	return -1;
 }
 
-/*!
- * \brief Query the Sci hardware for the parity mode.
+/*! \brief Query the Sci hardware for the parity mode.
  *
  * This routine is called by ioctl function of the upper level Sci
  * driver through the USARTDCB jump table.
@@ -419,8 +416,7 @@ static uint8_t Mcf5SciGetParity(void)
 	return -1;
 }
 
-/*!
- * \brief Set the Sci hardware to the specified parity mode.
+/*! \brief Set the Sci hardware to the specified parity mode.
  *
  * This routine is called by ioctl function of the upper level Sci
  * driver through the USARTDCB jump table.
@@ -434,8 +430,7 @@ static int Mcf5SciSetParity(uint8_t mode)
 	return -1;
 }
 
-/*!
- * \brief Query the Sci hardware for the number of stop bits.
+/*! \brief Query the Sci hardware for the number of stop bits.
  *
  * This routine is called by ioctl function of the upper level Sci
  * driver through the USARTDCB jump table.
@@ -447,8 +442,7 @@ static uint8_t Mcf5SciGetStopBits(void)
 	return -1;
 }
 
-/*!
- * \brief Set the Sci hardware to the number of stop bits.
+/*! \brief Set the Sci hardware to the number of stop bits.
  *
  * This routine is called by ioctl function of the upper level Sci
  * driver through the USARTDCB jump table.
@@ -462,8 +456,7 @@ static int Mcf5SciSetStopBits(uint8_t bits)
 	return -1;
 }
 
-/*!
- * \brief Query the Sci hardware status.
+/*! \brief Query the Sci hardware status.
  *
  * \return Status flags.
  */
@@ -490,8 +483,7 @@ static uint32_t Mcf5SciGetStatus(void)
 	return rc;
 }
 
-/*!
- * \brief Set the Sci hardware status.
+/*! \brief Set the Sci hardware status.
  *
  * \param flags Status flags.
  *
@@ -546,8 +538,7 @@ static int Mcf5SciSetStatus(uint32_t flags)
 	return 0;
 }
 
-/*!
- * \brief Query flow control mode.
+/*! \brief Query flow control mode.
  *
  * This routine is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -579,8 +570,7 @@ static uint32_t Mcf5SciGetFlowControl(void)
 	return rc;
 }
 
-/*!
- * \brief Set flow control mode.
+/*! \brief Set flow control mode.
  *
  * This function is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
@@ -642,8 +632,7 @@ static int Mcf5SciSetFlowControl(uint32_t flags)
 	return 0;
 }
 
-/*!
- * \brief Start the Sci transmitter hardware.
+/*! \brief Start the Sci transmitter hardware.
  *
  * The upper level Sci driver will call this function through the
  * USARTDCB jump table each time it added one or more bytes to the
@@ -665,8 +654,7 @@ static void Mcf5SciTxStart(void)
 
 }
 
-/*!
- * \brief Start the Sci receiver hardware.
+/*! \brief Start the Sci receiver hardware.
  *
  * The upper level Sci driver will call this function through the
  * USARTDCB jump table each time it removed enough bytes from the
@@ -700,8 +688,7 @@ static void Mcf5SciRxStart(void)
 	}
 }
 
-/*
- * \brief Initialize the Sci hardware driver.
+/*! \brief Initialize the Sci hardware driver.
  *
  * This function is called during device registration by the upper level
  * Sci driver through the USARTDCB jump table.
@@ -764,8 +751,7 @@ static int Mcf5SciInit(void)
 	return 0;
 }
 
-/*
- * \brief Deinitialize the Sci hardware driver.
+/*! \brief Deinitialize the Sci hardware driver.
  *
  * This function is called during device deregistration by the upper
  * level Sci driver through the USARTDCB jump table.

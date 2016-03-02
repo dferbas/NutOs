@@ -34,6 +34,11 @@
 #include <stdint.h>
 #include <arch/m68k.h>
 
+/*!
+ * \addtogroup xgColdfireInit
+ */
+/*@{*/
+
 void InitClock(void)
 {
 	// JS TODO - configurable from Nut/OS Configurator or Board specific function

@@ -39,12 +39,12 @@
 
 /*!
  * \addtogroup xgNutArchM68kMCF51CNOsTimer
+ * \addtogroup xgMcf51cn
  */
 /*@{*/
 
 #ifndef NUT_TICK_FREQ
-/*!
- * \brief System timer interrupt frequency.
+/*! \brief System timer interrupt frequency.
  *
  * Specifies the number of interrupts per second, typically 1000.
  * In order to reduce overhead, you may choose lower values. Note,
@@ -55,8 +55,7 @@
 #define NUT_TICK_FREQ       1000UL
 #endif
 
-/*!
- * \brief Initialize system timer.
+/*! \brief Initialize system timer.
  *
  * Applications must not call this function.
  *
@@ -78,8 +77,7 @@ void NutRegisterTimer(void (*handler) (void *))
 }
 
 #ifndef NUT_CPU_FREQ
-/*!
- * \brief Return the specified clock frequency.
+/*! \brief Return the specified clock frequency.
  *
  * Applications must not call this function, but use NutClockGet()
  * instead.
@@ -103,8 +101,7 @@ uint32_t NutArchClockGet(int idx)
 }
 #endif
 
-/*!
- * \brief Return the number of system ticks per second.
+/*! \brief Return the number of system ticks per second.
  *
  * This routine is used by Nut/OS to convert tick counts into
  * milliseconds.
@@ -121,8 +118,7 @@ uint32_t NutGetTickClock(void)
     return NUT_TICK_FREQ;
 }
 
-/*!
- * \brief Calculate system ticks for a given number of milliseconds.
+/*! \brief Calculate system ticks for a given number of milliseconds.
  *
  * This routine is used by Nut/OS to retrieve the number of system
  * ticks for a given timeout.
