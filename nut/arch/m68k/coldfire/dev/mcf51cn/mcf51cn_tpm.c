@@ -34,6 +34,11 @@
 #include <dev/irqreg.h>
 #include <dev/gpio.h>
 
+/*!
+ * \addtogroup xgMcf51cn
+ */
+/*@{*/
+
 int Mcf51cnPtmInitInputCapture(void (*handler)(void *), void *handler_arg, uint32_t devnum,
 		uint32_t channel)
 {

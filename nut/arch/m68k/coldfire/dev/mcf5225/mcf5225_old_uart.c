@@ -910,9 +910,9 @@ static uint32_t McfUsartGetFlowControl(void)
  *
  * This function is called by ioctl function of the upper level USART
  * driver through the USARTDCB jump table.
- * Nove pridan parametr USART_MF_HALFDUPLEX_YZ, ktery se vklada spolecne
- * s parametrem USART_MF_HALFDUPLEX. Pokud USART_MF_HALFDUPLEX_YZ je 
- * zadan komonikuje se pres porty XY, pokud neni tak pres AB.
+ *
+ * Added parameter USART_MF_HALFDUPLEX_YZ, which is inserting together with USART_MF_HALFDUPLEX parameter.
+ * If USART_MF_HALFDUPLEX_YZ is set then it is communicating via ports XY if is not set then via ports AB
  *
  * \param flags See UsartIOCtl().
  *

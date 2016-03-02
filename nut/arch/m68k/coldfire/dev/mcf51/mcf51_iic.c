@@ -202,7 +202,7 @@ static void reenableDevice(int dcbBase)
 	MCF_IIC_CR (dcbBase) = MCF_IIC_CR_IICEN;
 }
 
-//TODO zkontrolovat \param
+//TODO check \param
 /*! \brief Transmit and/or receive data as a master.
  *
  * The two-wire serial interface must have been initialized by calling

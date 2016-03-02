@@ -424,7 +424,7 @@ t_spi_ret qspi_delete(uint8_t uid)
 
 /*! \brief QSPI ISR
  *
- * \note TODO: param?, \brief
+ * TODO: where is used param?, remake \brief
  */
 void QspiInterrupt(void *arg)
 {

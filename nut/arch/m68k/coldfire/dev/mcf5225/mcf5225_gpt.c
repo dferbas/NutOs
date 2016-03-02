@@ -56,7 +56,7 @@ static void IntHandlerPAEvent(void *arg)
 	if (GptPAEHandler != NULL)
 		NutEventPostFromIrq(GptPAEHandler);
 
-	//TODO zakomentovat, je v IH
+	//TODO Should be commented, It is already in IH
 	MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAIF;
 }
 
@@ -75,7 +75,7 @@ void Mcf5225GptInitPA(HANDLE *pae_handler)
 	MCF_GPT_GPTPACTL = 0x00;
 	///MCF_GPT_GPTPACNT = 65000; // Clear PA Counter
 
-// JS TODO - predelat na gpio
+// JS TODO - remake to gpio
 //	MCF_GPIO_PTAPAR &= ~(MCF_GPIO_PTAPAR_PTAPAR3(3));
 //	MCF_GPIO_PTAPAR |= (MCF_GPIO_PTAPAR_PTAPAR3(1));
 
