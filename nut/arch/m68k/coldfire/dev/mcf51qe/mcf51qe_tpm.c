@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,6 +29,7 @@
  *
  * For additional information see http://www.ethernut.de/
  */
+
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 #include <dev/gpio.h>
@@ -37,7 +38,7 @@
 #define MODULO_COUNTER_SIZE 0x100
 
 /* System timer ticks, one tick per 1ms */
-void Mcf51qeTpmInitClock(void (*handler) (void *))
+void Mcf51qeTpmInitClock(void (*handler)(void *))
 {
 	uint16_t mod;
 

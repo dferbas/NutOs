@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,70 +34,77 @@
 #include <dev/gpio.h>
 #include <sys/nutdebug.h>
 
-enum pin_type {
-    DUAL, QUAD
+/*!
+ * \addtogroup xgMcf5225
+ */
+/*@{*/
+
+enum pin_type
+{
+	DUAL, QUAD
 };
 
-struct bank_layout {
-    enum pin_type pins_type;
-    uint8_t pins_configurable;
+struct bank_layout
+{
+	enum pin_type pins_type;
+	uint8_t pins_configurable;
 };
 
 struct bank_layout * BankLayout(int bank)
 {
-    static struct bank_layout layout;
+	static struct bank_layout layout;
 
-    switch (bank) {
-    case PORTDD:
-    case PORTAN:
-    case PORTTE:
-    case PORTTF:
-    case PORTTG:
-    case PORTTI:
-    case PORTTJ:
-        layout.pins_type = DUAL;
-        layout.pins_configurable = 0xFF;
-        break;
+	switch (bank)
+	{
+		case PORTDD:
+		case PORTAN:
+		case PORTTE:
+		case PORTTF:
+		case PORTTG:
+		case PORTTI:
+		case PORTTJ:
+			layout.pins_type = DUAL;
+			layout.pins_configurable = 0xFF;
+			break;
 
-    case PORTAS:
-        layout.pins_type = QUAD;
-        layout.pins_configurable = 0x07;
-        break;
+		case PORTAS:
+			layout.pins_type = QUAD;
+			layout.pins_configurable = 0x07;
+			break;
 
-    case PORTQS:
-        layout.pins_type = QUAD;
-        layout.pins_configurable = 0x6F;
-        break;
+		case PORTQS:
+			layout.pins_type = QUAD;
+			layout.pins_configurable = 0x6F;
+			break;
 
-    case PORTTA:
-    case PORTTC:
-    case PORTUA:
-    case PORTUB:
-    case PORTUC:
-        layout.pins_type = QUAD;
-        layout.pins_configurable = 0x0F;
-        break;
+		case PORTTA:
+		case PORTTC:
+		case PORTUA:
+		case PORTUB:
+		case PORTUC:
+			layout.pins_type = QUAD;
+			layout.pins_configurable = 0x0F;
+			break;
 
-    case PORTTH:
-        layout.pins_type = QUAD;
-        layout.pins_configurable = 0xFF;
-        break;
+		case PORTTH:
+			layout.pins_type = QUAD;
+			layout.pins_configurable = 0xFF;
+			break;
 
-    case PORTNQ:
-        layout.pins_type = QUAD;
-        layout.pins_configurable = 0xAA;
-        break;
+		case PORTNQ:
+			layout.pins_type = QUAD;
+			layout.pins_configurable = 0xAA;
+			break;
 
-    default:
-        return NULL;
-        break;
-    }
+		default:
+			return NULL;
+			break;
+	}
 
-    return &layout;
+	return &layout;
 }
 
-/*!
- * \brief Get pin configuration.
+/*! \brief Get pin configuration.
  *
  * \param bank GPIO bank/port number.
  * \param bit  Bit number of the specified bank/port.
@@ -106,41 +113,46 @@ struct bank_layout * BankLayout(int bank)
  */
 uint32_t GpioPinConfigGet(int bank, int bit)
 {
-    uint32_t rc = 0;
-    struct bank_layout *bank_cfg;
+	uint32_t rc = 0;
+	struct bank_layout *bank_cfg;
 
-    /* Get & check bank layout */
-    bank_cfg = BankLayout(bank);
-    if ((!bank_cfg) || !(bank_cfg->pins_configurable & _BV(bit)))
-        return 0;
+	/* Get & check bank layout */
+	bank_cfg = BankLayout(bank);
+	if ((!bank_cfg) || !(bank_cfg->pins_configurable & _BV(bit)))
+		return 0;
 
-    /* Read pin role (pin assignment register) */
-    switch (bank_cfg->pins_type) {
-    case DUAL:
-        rc = (MCF_GPIO_PAR8(bank) >> bit) & 0x1;
-        break;
+	/* Read pin role (pin assignment register) */
+	switch (bank_cfg->pins_type)
+	{
+		case DUAL:
+			rc = (MCF_GPIO_PAR8(bank) >> bit) & 0x1;
+			break;
 
-    case QUAD:
-        if (bank_cfg->pins_configurable & 0xF0) {
-            rc = (MCF_GPIO_PAR16(bank) >> (2 * bit)) & 0x3;
-        } else {
-            rc = (MCF_GPIO_PAR8(bank) >> (2 * bit)) & 0x3;
-        }
-        break;
-    }
+		case QUAD:
+			if (bank_cfg->pins_configurable & 0xF0)
+			{
+				rc = (MCF_GPIO_PAR16(bank) >> (2 * bit)) & 0x3;
+			}
+			else
+			{
+				rc = (MCF_GPIO_PAR8(bank) >> (2 * bit)) & 0x3;
+			}
+			break;
+	}
 
-    /* Read GPIO direction */
-    if (rc == GPIO_CFG_INPUT) {
-        if (MCF_GPIO_DDR(bank) & _BV(bit)) {
-            rc = GPIO_CFG_OUTPUT;
-        }
-    }
+	/* Read GPIO direction */
+	if (rc == GPIO_CFG_INPUT)
+	{
+		if (MCF_GPIO_DDR(bank) & _BV(bit))
+		{
+			rc = GPIO_CFG_OUTPUT;
+		}
+	}
 
-    return rc;
+	return rc;
 }
 
-/*!
- * \brief Set pin configuration.
+/*! \brief Set pin configuration.
  *
  * Applications may also use this function to make sure, that a specific
  * attribute is available for a specific pin.
@@ -158,17 +170,17 @@ uint32_t GpioPinConfigGet(int bank, int bit)
  */
 int GpioPinConfigSet(int bank, int bit, uint32_t flags)
 {
-    GpioPortConfigSet(bank, _BV(bit), flags);
+	GpioPortConfigSet(bank, _BV(bit), flags);
 
-    /* Check the result. */
-    if (GpioPinConfigGet(bank, bit) != flags) {
-        return -1;
-    }
-    return 0;
+	/* Check the result. */
+	if (GpioPinConfigGet(bank, bit) != flags)
+	{
+		return -1;
+	}
+	return 0;
 }
 
-/*!
- * \brief Set port wide pin configuration.
+/*! \brief Set port wide pin configuration.
  *
  * \note This function does not check for undefined ports and pins or
  *       invalid attributes. If this is required, use GpioPinConfigSet().
@@ -182,69 +194,87 @@ int GpioPinConfigSet(int bank, int bit, uint32_t flags)
  */
 int GpioPortConfigSet(int bank, uint32_t mask, uint32_t flags)
 {
-    struct bank_layout *bank_cfg;
-    uint32_t role = flags & (GPIO_CFG_PERIPHERAL_MASK | GPIO_CFG_OUTPUT);
-    uint32_t role_mask;
-    int i;
+	struct bank_layout *bank_cfg;
+	uint32_t role = flags & (GPIO_CFG_PERIPHERAL_MASK | GPIO_CFG_OUTPUT);
+	uint32_t role_mask;
+	int i;
 
-    /* Get bank layout */
-    bank_cfg = BankLayout(bank);
+	/* Get bank layout */
+	bank_cfg = BankLayout(bank);
 
-    /* Return if the bank is unknown */
-    if (!bank_cfg) {
-        return 0;
-    }
+	/* Return if the bank is unknown */
+	if (!bank_cfg)
+	{
+		return 0;
+	}
 
-    /* Return if roles are not applicable. */
-    if (bank_cfg->pins_type != QUAD && ((role == GPIO_CFG_PERIPHERAL1) || (role == GPIO_CFG_PERIPHERAL2))) {
-        return 0;
-    }
+	/* Return if roles are not applicable. */
+	if (bank_cfg->pins_type != QUAD
+			&& ((role == GPIO_CFG_PERIPHERAL1) || (role == GPIO_CFG_PERIPHERAL2)))
+	{
+		return 0;
+	}
 
-    /* Configure the configurable pins only */
-    mask &= bank_cfg->pins_configurable;
+	/* Configure the configurable pins only */
+	mask &= bank_cfg->pins_configurable;
 
-    /* Configure GPIO direction first */
-    if (role == GPIO_CFG_OUTPUT) {
-        MCF_GPIO_DDR(bank) |= mask;
-    } else if (role == GPIO_CFG_INPUT) {
-        MCF_GPIO_DDR(bank) &= ~mask;
-    }
+	/* Configure GPIO direction first */
+	if (role == GPIO_CFG_OUTPUT)
+	{
+		MCF_GPIO_DDR(bank) |= mask;
+	}
+	else if (role == GPIO_CFG_INPUT)
+	{
+		MCF_GPIO_DDR(bank) &= ~mask;
+	}
 
-    /* Then configure pin role */
-    if (bank_cfg->pins_type == DUAL) {
-        /* Read old roles */
-        role_mask = MCF_GPIO_PAR8(bank);
+	/* Then configure pin role */
+	if (bank_cfg->pins_type == DUAL)
+	{
+		/* Read old roles */
+		role_mask = MCF_GPIO_PAR8(bank);
 
-        /* Update roles */
-        if (role == GPIO_CFG_PERIPHERAL0) {
-            role_mask |= mask;
-        } else {
-            role_mask &= ~mask;
-        }
+		/* Update roles */
+		if (role == GPIO_CFG_PERIPHERAL0)
+		{
+			role_mask |= mask;
+		}
+		else
+		{
+			role_mask &= ~mask;
+		}
 
-        /* Apply new roles */
-        MCF_GPIO_PAR8(bank) = (uint8_t) role_mask;
-    } else /* if (bank_cfg->pins_type == QUAD) */{
-        /* Read old roles */
-        role_mask = (bank_cfg->pins_configurable & 0xF0) ? MCF_GPIO_PAR16(bank) : MCF_GPIO_PAR8(bank);
+		/* Apply new roles */
+		MCF_GPIO_PAR8 (bank) = (uint8_t) role_mask;
+	}
+	else /* if (bank_cfg->pins_type == QUAD) */
+	{
+		/* Read old roles */
+		role_mask =
+				(bank_cfg->pins_configurable & 0xF0) ? MCF_GPIO_PAR16(bank) : MCF_GPIO_PAR8(bank);
 
-        /* Shift in new roles */
-        for (i = 0; i < 8; i++) {
-            if (mask & (1 << i)) {
-                /* Erase old role */
-                role_mask &= ~(GPIO_CFG_PERIPHERAL_MASK << (2 * i));
+		/* Shift in new roles */
+		for (i = 0; i < 8; i++)
+		{
+			if (mask & (1 << i))
+			{
+				/* Erase old role */
+				role_mask &= ~(GPIO_CFG_PERIPHERAL_MASK << (2 * i));
 
-                /* Set new role */
-                role_mask |= (role & GPIO_CFG_PERIPHERAL_MASK) << (2 * i);
-            }
-        }
+				/* Set new role */
+				role_mask |= (role & GPIO_CFG_PERIPHERAL_MASK) << (2 * i);
+			}
+		}
 
-        /* Write back new roles */
-        if (bank_cfg->pins_configurable & 0xF0) {
-            MCF_GPIO_PAR16(bank) = (uint16_t) role_mask;
-        } else {
-            MCF_GPIO_PAR8(bank) = (uint8_t) role_mask;
-        }
-    }
-    return 0;
+		/* Write back new roles */
+		if (bank_cfg->pins_configurable & 0xF0)
+		{
+			MCF_GPIO_PAR16 (bank) = (uint16_t) role_mask;
+		}
+		else
+		{
+			MCF_GPIO_PAR8 (bank) = (uint8_t) role_mask;
+		}
+	}
+	return 0;
 }

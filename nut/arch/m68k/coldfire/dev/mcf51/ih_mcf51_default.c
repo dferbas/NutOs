@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,23 +36,20 @@
 static int IrqCtl(int cmd, void *param);
 static void IrqHandler(void *arg);
 
-IRQ_HANDLER sig_DEFAULT = {
+IRQ_HANDLER sig_DEFAULT =
+{
 #ifdef NUT_PERFMON
-        0,
+		0,
 #endif
-        NULL,
-        IrqHandler,
-        IrqCtl
-};
+		NULL, IrqHandler, IrqCtl };
 
 /*!
  * \brief Default interrupt entry.
  */
 //NUTSIGNAL(IH_DEFAULT, sig_DEFAULT)
-
 SIGNAL(IH_DEFAULT)
 {
-	CallHandler (&sig_DEFAULT);
+	CallHandler(&sig_DEFAULT);
 }
 
 /*!
@@ -60,35 +57,34 @@ SIGNAL(IH_DEFAULT)
  */
 static void IrqHandler(void *arg)
 {
-    //  void Put(char ch)
-    //  {
-    //      #define DEVNUM 1
-    //
-    //      /* Wait until the Tx register is empty */
-    //      while ((MCF_SCI_S1(DEVNUM) & MCF_SCI_S1_TDRE) == 0)
-    //          ;
-    //
-    //      /* Send the character */
-    //      MCF_SCI_D(DEVNUM) = (uint8_t) ch;
-    //  }
-    //
-    //  int Write(const void *buffer, int len)
-    //  {
-    //      int c = len;
-    //      const char *cp = (const char *) buffer;
-    //
-    //      while (c--) {
-    //          Put(*cp++);
-    //      }
-    //
-    //      return len;
-    //  }
-    //
-    //  Write("gogo", 4);
+	//  void Put(char ch)
+	//  {
+	//      #define DEVNUM 1
+	//
+	//      /* Wait until the Tx register is empty */
+	//      while ((MCF_SCI_S1(DEVNUM) & MCF_SCI_S1_TDRE) == 0)
+	//          ;
+	//
+	//      /* Send the character */
+	//      MCF_SCI_D(DEVNUM) = (uint8_t) ch;
+	//  }
+	//
+	//  int Write(const void *buffer, int len)
+	//  {
+	//      int c = len;
+	//      const char *cp = (const char *) buffer;
+	//
+	//      while (c--) {
+	//          Put(*cp++);
+	//      }
+	//
+	//      return len;
+	//  }
+	//
+	//  Write("gogo", 4);
 
-
-    while (1)
-        ;
+	while (1)
+		;
 }
 
 /*!
@@ -102,5 +98,5 @@ static void IrqHandler(void *arg)
  */
 static int IrqCtl(int cmd, void *param)
 {
-    return (cmd == NUT_IRQCTL_INIT) ? 0 : -1;
+	return (cmd == NUT_IRQCTL_INIT) ? 0 : -1;
 }

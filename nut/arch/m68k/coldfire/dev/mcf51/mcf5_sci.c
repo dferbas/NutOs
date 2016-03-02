@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,7 +29,6 @@
  *
  * For additional information see http://www.ethernut.de/
  */
-
 #include <string.h>
 #include <arch/m68k.h>
 #include <dev/gpio.h>
@@ -79,56 +78,63 @@ static uint_fast8_t hdx_control;
  */
 static void Mcf5SciTxReady(void *arg)
 {
-    register RINGBUF *rbf = &((USARTDCB *)arg)->dcb_tx_rbf;;
-    register uint8_t *cp;
-    uint_fast8_t usr;
+	register RINGBUF *rbf = &((USARTDCB *) arg)->dcb_tx_rbf;
+	;
+	register uint8_t *cp;
+	uint_fast8_t usr;
 
 #ifndef UART_NO_SW_FLOWCONTROL
 
-    /*
-     * Process pending software flow controls first.
-     */
-    if (flow_control & (XON_PENDING | XOFF_PENDING)) {
-        if (flow_control & XOFF_PENDING) {
-        	MCF_SCI_D(BASE) = ASCII_XOFF;
-            flow_control |= XOFF_SENT;
-        } else {
-        	MCF_SCI_D(BASE) = ASCII_XON;
-            flow_control &= ~XOFF_SENT;
-        }
-        flow_control &= ~(XON_PENDING | XOFF_PENDING);
-        return;
-    }
+	/*
+	 * Process pending software flow controls first.
+	 */
+	if (flow_control & (XON_PENDING | XOFF_PENDING))
+	{
+		if (flow_control & XOFF_PENDING)
+		{
+			MCF_SCI_D (BASE) = ASCII_XOFF;
+			flow_control |= XOFF_SENT;
+		}
+		else
+		{
+			MCF_SCI_D (BASE) = ASCII_XON;
+			flow_control &= ~XOFF_SENT;
+		}
+		flow_control &= ~(XON_PENDING | XOFF_PENDING);
+		return;
+	}
 
-    if (flow_control & XOFF_RCVD) {
-        /*
-         * If XOFF has been received, we disable the transmit interrupts
-         * and return without sending anything.
-         */
-    	MCF_SCI_C2(BASE) &= ~(MCF_SCI_C2_TIE);
+	if (flow_control & XOFF_RCVD)
+	{
+		/*
+		 * If XOFF has been received, we disable the transmit interrupts
+		 * and return without sending anything.
+		 */
+		MCF_SCI_C2(BASE) &= ~(MCF_SCI_C2_TIE);
 		if (hdx_control)
 			SciSetToReceiveMode();
-        return;
-    }
+		return;
+	}
 #endif /* UART_NO_SW_FLOWCONTROL */
 
-    /*
-     * Prepare next character for transmitting
-     */
-    if (rbf->rbf_cnt) {
+	/*
+	 * Prepare next character for transmitting
+	 */
+	if (rbf->rbf_cnt)
+	{
 
-        /*
-         * Previous character transmitted successfully
-         */
-        rbf->rbf_cnt--;
+		/*
+		 * Previous character transmitted successfully
+		 */
+		rbf->rbf_cnt--;
 
-        /*
-         * Start transmission of the next character and clear TXRDY bit
-         * in USR register.
-         */
-        cp = rbf->rbf_tail;
+		/*
+		 * Start transmission of the next character and clear TXRDY bit
+		 * in USR register.
+		 */
+		cp = rbf->rbf_tail;
 
-        /*
+		/*
 		 * To clear TDRE, read SCIxS1 with TDRE set and then read the SCI data register (SCIxD).
 		 */
 		usr = MCF_SCI_S1(BASE);
@@ -136,27 +142,30 @@ static void Mcf5SciTxReady(void *arg)
 		/* Record SCI Errors  */
 		tx_errors |= usr;
 
-        MCF_SCI_D(BASE) = *cp;
+		MCF_SCI_D (BASE) = *cp;
 
-        /*
-         * Wrap around the buffer pointer if we reached its end.
-         */
-        if (++cp == rbf->rbf_last) {
-            cp = rbf->rbf_start;
-        }
-        rbf->rbf_tail = cp;
+		/*
+		 * Wrap around the buffer pointer if we reached its end.
+		 */
+		if (++cp == rbf->rbf_last)
+		{
+			cp = rbf->rbf_start;
+		}
+		rbf->rbf_tail = cp;
 
-        /*
-         * Wakeup waiting thread when tx buffer low watermark is reached
-         */
-        if (rbf->rbf_cnt == rbf->rbf_lwm) {
-            NutEventPostFromIrq(&rbf->rbf_que);
-        }
-    }
+		/*
+		 * Wakeup waiting thread when tx buffer low watermark is reached
+		 */
+		if (rbf->rbf_cnt == rbf->rbf_lwm)
+		{
+			NutEventPostFromIrq(&rbf->rbf_que);
+		}
+	}
 
-    if (rbf->rbf_cnt == 0){
+	if (rbf->rbf_cnt == 0)
+	{
 
-    	if (MCF_SCI_C2(BASE) & MCF_SCI_C2_TIE)
+		if (MCF_SCI_C2(BASE) & MCF_SCI_C2_TIE)
 		{
 			// If transmit complete, disable transmitter and interrupts
 			MCF_SCI_C2(BASE) &= ~(MCF_SCI_C2_TIE);
@@ -165,15 +174,15 @@ static void Mcf5SciTxReady(void *arg)
 			 * Nothing left to transmit, wakeup waiting thread
 			 */
 			NutEventPostFromIrq(&rbf->rbf_que);
-    	}
-    	else // MCF_SCI_C2(BASE) & MCF_SCI_C2_TCIE
-    	{
-    		MCF_SCI_C2(BASE) &= ~MCF_SCI_C2_TCIE;
+		}
+		else // MCF_SCI_C2(BASE) & MCF_SCI_C2_TCIE
+		{
+			MCF_SCI_C2(BASE) &= ~MCF_SCI_C2_TCIE;
 			if (hdx_control)
 				SciSetToReceiveMode();
-    	}
+		}
 
-    }
+	}
 }
 
 /*
@@ -181,107 +190,121 @@ static void Mcf5SciTxReady(void *arg)
  *
  * \param arg Pointer to the device specific control block.
  */
-static void Mcf5SciRxComplete(void *arg) {
-    register RINGBUF *rbf = &((USARTDCB *)arg)->dcb_rx_rbf;
-    register size_t cnt;
-    register uint8_t ch;
-    uint_fast8_t usr;
-    uint_fast8_t postEvent = 0;
+static void Mcf5SciRxComplete(void *arg)
+{
+	register RINGBUF *rbf = &((USARTDCB *) arg)->dcb_rx_rbf;
+	register size_t cnt;
+	register uint8_t ch;
+	uint_fast8_t usr;
+	uint_fast8_t postEvent = 0;
 
-    /*
-     * Receive all bytes from RxFIFO
-     */
-    do {
-        /*
-         * To clear RDRF, read SCIxS1 with RDRF set and then read the SCI data register (SCIxD)
-         */
-        usr = MCF_SCI_S1(BASE);
+	/*
+	 * Receive all bytes from RxFIFO
+	 */
+	do
+	{
+		/*
+		 * To clear RDRF, read SCIxS1 with RDRF set and then read the SCI data register (SCIxD)
+		 */
+		usr = MCF_SCI_S1(BASE);
 
-       /* Record SCI Errors  */
-        rx_errors |= usr;
+		/* Record SCI Errors  */
+		rx_errors |= usr;
 
-       /* Receive char from Rx FIFO */
-        ch = MCF_SCI_D(BASE);
-
-#ifndef UART_NO_SW_FLOWCONTROL
-        /*
-         * Handle software handshake. We have to do this before checking the
-         * buffer, because flow control must work in write-only mode, where
-         * there is no receive buffer.
-         */
-        if (flow_control) {
-            /* XOFF character disables transmit interrupts. */
-            if (ch == ASCII_XOFF) {
-            	NutIrqDisable(&sig_sci_tx);
-                flow_control |= XOFF_RCVD;
-                return;
-            }
-            /* XON enables transmit interrupts. */
-            else if (ch == ASCII_XON) {
-            	NutIrqEnable(&sig_sci_tx);
-                flow_control &= ~XOFF_RCVD;
-                return;
-            }
-        }
-#endif
-
-        /*
-         * Check buffer overflow.
-         */
-        cnt = rbf->rbf_cnt;
-        if (cnt >= rbf->rbf_siz) {
-            rx_errors |= MCF_SCI_S1_OR;
-            return;
-        }
-
-        /*
-         * Wake up waiting threads if this is the first byte in the buffer.
-         */
-        if (cnt++ == 0){
-            postEvent = 1;
-        }
+		/* Receive char from Rx FIFO */
+		ch = MCF_SCI_D(BASE);
 
 #ifndef UART_NO_SW_FLOWCONTROL
-
-        /*
-         * Check the high watermark for software handshake. If the number of
-         * buffered bytes is above this mark, then send XOFF.
-         */
-        else if (flow_control) {
-            if(cnt >= rbf->rbf_hwm) {
-                if((flow_control & XOFF_SENT) == 0) {
-                    if (MCF_SCI_C2(BASE) & MCF_SCI_C2_TIE) {
-                    	MCF_SCI_D(BASE) = ASCII_XOFF;
-                        flow_control |= XOFF_SENT;
-                        flow_control &= ~XOFF_PENDING;
-                    } else {
-                        flow_control |= XOFF_PENDING;
-                    }
-                }
-            }
-        }
+		/*
+		 * Handle software handshake. We have to do this before checking the
+		 * buffer, because flow control must work in write-only mode, where
+		 * there is no receive buffer.
+		 */
+		if (flow_control)
+		{
+			/* XOFF character disables transmit interrupts. */
+			if (ch == ASCII_XOFF)
+			{
+				NutIrqDisable(&sig_sci_tx);
+				flow_control |= XOFF_RCVD;
+				return;
+			}
+			/* XON enables transmit interrupts. */
+			else if (ch == ASCII_XON)
+			{
+				NutIrqEnable(&sig_sci_tx);
+				flow_control &= ~XOFF_RCVD;
+				return;
+			}
+		}
 #endif
 
-        /*
-         * Store the character and increment and the ring buffer pointer.
-         */
-        *rbf->rbf_head++ = ch;
-        if (rbf->rbf_head == rbf->rbf_last) {
-            rbf->rbf_head = rbf->rbf_start;
-        }
+		/*
+		 * Check buffer overflow.
+		 */
+		cnt = rbf->rbf_cnt;
+		if (cnt >= rbf->rbf_siz)
+		{
+			rx_errors |= MCF_SCI_S1_OR;
+			return;
+		}
 
-        /*
-         * Update the ring buffer counter.
-         */
-        rbf->rbf_cnt = cnt;
+		/*
+		 * Wake up waiting threads if this is the first byte in the buffer.
+		 */
+		if (cnt++ == 0)
+		{
+			postEvent = 1;
+		}
 
-    } while ( MCF_SCI_S1(BASE) & MCF_SCI_S1_RDRF );
+#ifndef UART_NO_SW_FLOWCONTROL
 
-    /*
-     *  Wakeup waiting threads
-     */
-    if (postEvent)
-        NutEventPostFromIrq(&rbf->rbf_que);
+		/*
+		 * Check the high watermark for software handshake. If the number of
+		 * buffered bytes is above this mark, then send XOFF.
+		 */
+		else if (flow_control)
+		{
+			if (cnt >= rbf->rbf_hwm)
+			{
+				if ((flow_control & XOFF_SENT) == 0)
+				{
+					if (MCF_SCI_C2(BASE) & MCF_SCI_C2_TIE)
+					{
+						MCF_SCI_D (BASE) = ASCII_XOFF;
+						flow_control |= XOFF_SENT;
+						flow_control &= ~XOFF_PENDING;
+					}
+					else
+					{
+						flow_control |= XOFF_PENDING;
+					}
+				}
+			}
+		}
+#endif
+
+		/*
+		 * Store the character and increment and the ring buffer pointer.
+		 */
+		*rbf->rbf_head++ = ch;
+		if (rbf->rbf_head == rbf->rbf_last)
+		{
+			rbf->rbf_head = rbf->rbf_start;
+		}
+
+		/*
+		 * Update the ring buffer counter.
+		 */
+		rbf->rbf_cnt = cnt;
+
+	} while (MCF_SCI_S1(BASE) & MCF_SCI_S1_RDRF);
+
+	/*
+	 *  Wakeup waiting threads
+	 */
+	if (postEvent)
+		NutEventPostFromIrq(&rbf->rbf_que);
 }
 
 /*!
@@ -295,27 +318,27 @@ static void Mcf5SciEnable(void)
 	/*
 	 * Enable Sci receive.
 	 */
-    MCF_SCI_C2(BASE) = MCF_SCI_C2_RE | MCF_SCI_C2_TE;
+	MCF_SCI_C2 (BASE) = MCF_SCI_C2_RE | MCF_SCI_C2_TE;
 }
 
 /*!
  * \brief Carefully disable Sci hardware functions.
  */
 /*static void Mcf5SciDisable(void)
-{
-	NutIrqDisable(&sig_sci_rx);
-	NutIrqDisable(&sig_sci_tx);
+ {
+ NutIrqDisable(&sig_sci_rx);
+ NutIrqDisable(&sig_sci_tx);
 
 
-     * Allow incoming or outgoing character to finish.
+ * Allow incoming or outgoing character to finish.
 
-    NutDelay(10);
+ NutDelay(10);
 
 
-     * Disable Sci transmit and receive.
+ * Disable Sci transmit and receive.
 
-    MCF_SCI_C2(BASE) &= ~MCF_SCI_C2_RE;
-}*/
+ MCF_SCI_C2(BASE) &= ~MCF_SCI_C2_RE;
+ }*/
 
 /*!
  * \brief Query the Sci hardware for the selected speed.
@@ -327,7 +350,7 @@ static void Mcf5SciEnable(void)
  */
 static uint32_t Mcf5SciGetSpeed(void)
 {
-    return -1;
+	return -1;
 }
 
 /*!
@@ -349,12 +372,12 @@ static int Mcf5SciSetSpeed(uint32_t rate)
 #if defined(MCU_MCF51CN)
 	ubgs = (uint16_t)(sysclk / (rate * 16));
 #elif defined(MCU_MCF51QE)
-    ubgs = (uint16_t)(sysclk / (rate * 16 * 2));
+	ubgs = (uint16_t)(sysclk / (rate * 16 * 2));
 #endif
 
-	MCF_SCI_BD(BASE) = ubgs;
+	MCF_SCI_BD (BASE) = ubgs;
 
-    return 0;
+	return 0;
 }
 
 /*!
@@ -367,7 +390,7 @@ static int Mcf5SciSetSpeed(uint32_t rate)
  */
 static uint8_t Mcf5SciGetDataBits(void)
 {
-    return -1;
+	return -1;
 }
 
 /*!
@@ -380,7 +403,7 @@ static uint8_t Mcf5SciGetDataBits(void)
  */
 static int Mcf5SciSetDataBits(uint8_t bits)
 {
-    return -1;
+	return -1;
 }
 
 /*!
@@ -393,7 +416,7 @@ static int Mcf5SciSetDataBits(uint8_t bits)
  */
 static uint8_t Mcf5SciGetParity(void)
 {
-    return -1;
+	return -1;
 }
 
 /*!
@@ -408,7 +431,7 @@ static uint8_t Mcf5SciGetParity(void)
  */
 static int Mcf5SciSetParity(uint8_t mode)
 {
-    return -1;
+	return -1;
 }
 
 /*!
@@ -421,7 +444,7 @@ static int Mcf5SciSetParity(uint8_t mode)
  */
 static uint8_t Mcf5SciGetStopBits(void)
 {
-    return -1;
+	return -1;
 }
 
 /*!
@@ -436,7 +459,7 @@ static uint8_t Mcf5SciGetStopBits(void)
  */
 static int Mcf5SciSetStopBits(uint8_t bits)
 {
-    return -1;
+	return -1;
 }
 
 /*!
@@ -452,11 +475,14 @@ static uint32_t Mcf5SciGetStatus(void)
 	 * Determine software handshake status. The flow control status may
 	 * change during interrupt, but this doesn't really hurt us.
 	 */
-	if (flow_control) {
-		if (flow_control & XOFF_SENT) {
+	if (flow_control)
+	{
+		if (flow_control & XOFF_SENT)
+		{
 			rc |= UART_RXDISABLED;
 		}
-		if (flow_control & XOFF_RCVD) {
+		if (flow_control & XOFF_RCVD)
+		{
 			rc |= UART_TXDISABLED;
 		}
 	}
@@ -473,43 +499,51 @@ static uint32_t Mcf5SciGetStatus(void)
  */
 static int Mcf5SciSetStatus(uint32_t flags)
 {
-    /*
-     * Process software handshake control.
-     */
-    if (flow_control) {
+	/*
+	 * Process software handshake control.
+	 */
+	if (flow_control)
+	{
 
-        /* Access to the flow control status must be atomic. */
-        NutEnterCritical();
+		/* Access to the flow control status must be atomic. */
+		NutEnterCritical();
 
-        /*
-         * Enabling or disabling the receiver means to behave like
-         * having sent a XON or XOFF character resp.
-         */
-        if (flags & UART_RXENABLED) {
-            flow_control &= ~XOFF_SENT;
-        } else if (flags & UART_RXDISABLED) {
-            flow_control |= XOFF_SENT;
-        }
+		/*
+		 * Enabling or disabling the receiver means to behave like
+		 * having sent a XON or XOFF character resp.
+		 */
+		if (flags & UART_RXENABLED)
+		{
+			flow_control &= ~XOFF_SENT;
+		}
+		else if (flags & UART_RXDISABLED)
+		{
+			flow_control |= XOFF_SENT;
+		}
 
-        /*
-         * Enabling or disabling the transmitter means to behave like
-         * having received a XON or XOFF character resp.
-         */
-        if (flags & UART_TXENABLED) {
-            flow_control &= ~XOFF_RCVD;
-        } else if (flags & UART_TXDISABLED) {
-            flow_control |= XOFF_RCVD;
-        }
-        NutExitCritical();
-    }
+		/*
+		 * Enabling or disabling the transmitter means to behave like
+		 * having received a XON or XOFF character resp.
+		 */
+		if (flags & UART_TXENABLED)
+		{
+			flow_control &= ~XOFF_RCVD;
+		}
+		else if (flags & UART_TXDISABLED)
+		{
+			flow_control |= XOFF_RCVD;
+		}
+		NutExitCritical();
+	}
 
-    /*
-     * Verify the result.
-     */
-    if (Mcf5SciGetStatus() != flags) {
-        return -1;
-    }
-    return 0;
+	/*
+	 * Verify the result.
+	 */
+	if (Mcf5SciGetStatus() != flags)
+	{
+		return -1;
+	}
+	return 0;
 }
 
 /*!
@@ -522,21 +556,27 @@ static int Mcf5SciSetStatus(uint32_t flags)
  */
 static uint32_t Mcf5SciGetFlowControl(void)
 {
-    uint32_t rc = 0;
+	uint32_t rc = 0;
 
-    if (flow_control) {
-        rc |= USART_MF_XONXOFF;
-    } else {
-        rc &= ~USART_MF_XONXOFF;
-    }
+	if (flow_control)
+	{
+		rc |= USART_MF_XONXOFF;
+	}
+	else
+	{
+		rc &= ~USART_MF_XONXOFF;
+	}
 
-    if (hdx_control) {
+	if (hdx_control)
+	{
 		rc |= USART_MF_HALFDUPLEX;
-	} else {
+	}
+	else
+	{
 		rc &= ~USART_MF_HALFDUPLEX;
 	}
 
-    return rc;
+	return rc;
 }
 
 /*!
@@ -554,26 +594,31 @@ static uint32_t Mcf5SciGetFlowControl(void)
  */
 static int Mcf5SciSetFlowControl(uint32_t flags)
 {
-    /*
-     * Set software handshake mode.
-     */
-    if (flags & USART_MF_XONXOFF) {
-        if(flow_control == 0) {
-            NutEnterCritical();
-            flow_control = 1 | XOFF_SENT;  /* force XON to be sent on next read */
-            NutExitCritical();
-        }
-    } else {
+	/*
+	 * Set software handshake mode.
+	 */
+	if (flags & USART_MF_XONXOFF)
+	{
+		if (flow_control == 0)
+		{
+			NutEnterCritical();
+			flow_control = 1 | XOFF_SENT; /* force XON to be sent on next read */
+			NutExitCritical();
+		}
+	}
+	else
+	{
 
-        NutEnterCritical();
-        flow_control = 0;
-        NutExitCritical();
-    }
+		NutEnterCritical();
+		flow_control = 0;
+		NutExitCritical();
+	}
 
-    /*
+	/*
 	 * Set duplex mode.
 	 */
-	if (flags & USART_MF_HALFDUPLEX) {
+	if (flags & USART_MF_HALFDUPLEX)
+	{
 		hdx_control = 1;
 #if defined(MCU_MCF51QE) && (BASE == 2)
 		/* Set Hbus halfduplex Pins as outputs. */
@@ -582,16 +627,19 @@ static int Mcf5SciSetFlowControl(uint32_t flags)
 
 		SciSetToReceiveMode();
 #endif
-	} else {
+	}
+	else
+	{
 		hdx_control = 0;
 	}
-    /*
-     * Verify the result.
-     */
-    if (Mcf5SciGetFlowControl() != flags) {
-        return -1;
-    }
-    return 0;
+	/*
+	 * Verify the result.
+	 */
+	if (Mcf5SciGetFlowControl() != flags)
+	{
+		return -1;
+	}
+	return 0;
 }
 
 /*!
@@ -603,12 +651,14 @@ static int Mcf5SciSetFlowControl(uint32_t flags)
  */
 static void Mcf5SciTxStart(void)
 {
-	if (hdx_control){
+	if (hdx_control)
+	{
 		SciSetToTransmitMode();
 		/* Transmission Complete Interrupt Enable */
 		MCF_SCI_C2(BASE) |= MCF_SCI_C2_TCIE | MCF_SCI_C2_TIE;
 	}
-	else {
+	else
+	{
 		/* Transmit Interrupt Enable */
 		NutIrqEnable(&sig_sci_tx);
 	}
@@ -625,20 +675,24 @@ static void Mcf5SciTxStart(void)
  */
 static void Mcf5SciRxStart(void)
 {
-    /*
-     * Enable receive interrupt. It could be disabled by flow control.
-     */
-    NutIrqEnable(&sig_sci_rx);
+	/*
+	 * Enable receive interrupt. It could be disabled by flow control.
+	 */
+	NutIrqEnable(&sig_sci_rx);
 
 	/*
 	 * Do any required software flow control.
 	 */
-	if (flow_control && (flow_control & XOFF_SENT) != 0) {
+	if (flow_control && (flow_control & XOFF_SENT) != 0)
+	{
 		NutEnterCritical();
-		if (MCF_SCI_C2(BASE) & MCF_SCI_C2_TIE) {
-			MCF_SCI_D(BASE) = ASCII_XON;
+		if (MCF_SCI_C2(BASE) & MCF_SCI_C2_TIE)
+		{
+			MCF_SCI_D (BASE) = ASCII_XON;
 			flow_control &= ~XON_PENDING;
-		} else {
+		}
+		else
+		{
 			flow_control |= XON_PENDING;
 		}
 		flow_control &= ~(XOFF_SENT | XOFF_PENDING);
@@ -657,59 +711,57 @@ static void Mcf5SciRxStart(void)
 static int Mcf5SciInit(void)
 {
 
-    int result = 0;
+	int result = 0;
 
-	MCF_SCI_C1(BASE) = 0x0;              /* Configure the SCI */
-	MCF_SCI_C3(BASE) = 0x0;              /* Disable error interrupts */
-	MCF_SCI_C2(BASE) = 0x0;             /* Disable all interrupts */
-	MCF_SCI_S2(BASE) = 0x0;
+	MCF_SCI_C1 (BASE) = 0x0; /* Configure the SCI */
+	MCF_SCI_C3 (BASE) = 0x0; /* Disable error interrupts */
+	MCF_SCI_C2 (BASE) = 0x0; /* Disable all interrupts */
+	MCF_SCI_S2 (BASE) = 0x0;
 
-    /*
-     *  GPIO Configuration
-     */
+	/*
+	 *  GPIO Configuration
+	 */
 #if defined(MCU_MCF51CN)
-    result |= GpioPinConfigSet(TXD_PORT, TXD_PIN, TXD_PERIPHERAL | GPIO_CFG_PULLUP);
-    result |= GpioPinConfigSet(RXD_PORT, RXD_PIN, RXD_PERIPHERAL | GPIO_CFG_PULLUP);
+	result |= GpioPinConfigSet(TXD_PORT, TXD_PIN, TXD_PERIPHERAL | GPIO_CFG_PULLUP);
+	result |= GpioPinConfigSet(RXD_PORT, RXD_PIN, RXD_PERIPHERAL | GPIO_CFG_PULLUP);
 #elif defined(MCU_MCF51QE)
-	#if (BASE == 1)
-		/* Eneble SCI System clock gating */
-		MCF_SCGC1 |= MCF_SCGC1_SCI1;
-	#elif (BASE == 2)
-		/* Eneble SCI System clock gating */
-		MCF_SCGC1 |= MCF_SCGC1_SCI2;
-	#endif
+#if (BASE == 1)
+	/* Eneble SCI System clock gating */
+	MCF_SCGC1 |= MCF_SCGC1_SCI1;
+#elif (BASE == 2)
+	/* Eneble SCI System clock gating */
+	MCF_SCGC1 |= MCF_SCGC1_SCI2;
 #endif
-    /*
-     * SCI Configuration
-     */
+#endif
+	/*
+	 * SCI Configuration
+	 */
 
 	result |= Mcf5SciSetFlowControl(0
 #ifdef HDX_ENABLED
-				 | USART_MF_HALFDUPLEX
+			| USART_MF_HALFDUPLEX
 #endif
-		);
+			);
 
 //	result |= Mcf5SciSetDataBits(8);
 //	result |= Mcf5SciSetStopBits(1);
 //	result |= Mcf5SciSetParity(0);
-    result |= Mcf5SciSetSpeed(USART_INITSPEED);
+	result |= Mcf5SciSetSpeed(USART_INITSPEED);
 
+	/*
+	 * Register and enable Interrupt handler
+	 */
+	if (result || NutRegisterIrqHandler(&sig_sci_rx, Mcf5SciRxComplete, &dcb_sci)
+			|| NutRegisterIrqHandler(&sig_sci_tx, Mcf5SciTxReady, &dcb_sci))
+		return -1;
 
-    /*
-     * Register and enable Interrupt handler
-     */
-    if (result
-     || NutRegisterIrqHandler(&sig_sci_rx, Mcf5SciRxComplete, &dcb_sci)
-     || NutRegisterIrqHandler(&sig_sci_tx, Mcf5SciTxReady, &dcb_sci))
-        return -1;
+	/*
+	 * Start receiving immediately
+	 * NOTE: Transmitting is started too, but it is stopped after while in Mcf5SciTxReady()
+	 */
+	Mcf5SciEnable();
 
-    /*
-     * Start receiving immediately
-     * NOTE: Transmitting is started too, but it is stopped after while in Mcf5SciTxReady()
-     */
-    Mcf5SciEnable();
-
-    return 0;
+	return 0;
 }
 
 /*
@@ -722,15 +774,15 @@ static int Mcf5SciInit(void)
  */
 static int Mcf5SciDeinit(void)
 {
-    /* Deregister receive and transmit interrupts. */
-    NutIrqDisable(&sig_sci_rx);
-    NutIrqDisable(&sig_sci_tx);
+	/* Deregister receive and transmit interrupts. */
+	NutIrqDisable(&sig_sci_rx);
+	NutIrqDisable(&sig_sci_tx);
 
-    /* Deregister receive and transmit interrupts. */
-    NutRegisterIrqHandler(&sig_sci_rx, 0, 0);
-    NutRegisterIrqHandler(&sig_sci_tx, 0, 0);
+	/* Deregister receive and transmit interrupts. */
+	NutRegisterIrqHandler(&sig_sci_rx, 0, 0);
+	NutRegisterIrqHandler(&sig_sci_tx, 0, 0);
 
-    return 0;
+	return 0;
 }
 
 /*@}*/

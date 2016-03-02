@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,42 +40,42 @@ void InitRegions(void)
 	{
 		unsigned *p_region_start;	// start address of region
 		unsigned region_size;
-		unsigned *p_region_data;	// initial contents of this region (p_region_data == p_region_start means "clear the region only")
+		unsigned *p_region_data;// initial contents of this region (p_region_data == p_region_start means "clear the region only")
 	};
 
 	extern const struct __region __regions_start[];
 	extern const struct __region __regions_end[];
 
-    const struct __region   *p_reg;
-    const struct __region   *p_reg_end;
+	const struct __region *p_reg;
+	const struct __region *p_reg_end;
 
-    /* get regions pointer and count (they was defined in linker file) */
-    p_reg = __regions_start;
-    p_reg_end = __regions_end;
-    
-    /* initialize all regions */
-    for (; p_reg < p_reg_end; p_reg++)
-    {
-        unsigned *p_src = p_reg->p_region_data;
-        unsigned *p_dst = p_reg->p_region_start;
-        unsigned count = p_reg->region_size;
-        
-        if (p_src != p_dst)
-        {
-            // init data present --> copy them
-            for (; count; count -= sizeof(unsigned))
-                *p_dst++ = *p_src++;
-        }
-        else
-        {
-        	// no init data --> bss section --> clear only
+	/* get regions pointer and count (they was defined in linker file) */
+	p_reg = __regions_start;
+	p_reg_end = __regions_end;
+
+	/* initialize all regions */
+	for (; p_reg < p_reg_end; p_reg++)
+	{
+		unsigned *p_src = p_reg->p_region_data;
+		unsigned *p_dst = p_reg->p_region_start;
+		unsigned count = p_reg->region_size;
+
+		if (p_src != p_dst)
+		{
+			// init data present --> copy them
+			for (; count; count -= sizeof(unsigned))
+				*p_dst++ = *p_src++;
+		}
+		else
+		{
+			// no init data --> bss section --> clear only
 			for (; count >= 4; count -= sizeof(unsigned))
 				*p_dst++ = 0;
 
-			char *pdst_char = (char *)p_dst;
+			char *pdst_char = (char *) p_dst;
 
 			for (; count; count--)
 				*pdst_char++ = 0;
-        }
-    }
+		}
+	}
 }

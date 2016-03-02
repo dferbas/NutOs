@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,8 +41,8 @@
 #include <sys/mutex.h>
 #include <sys/nutdebug.h>
 
-static MUTEX 	spi_bus_mutex;		// waiting for spi bus
-static HANDLE 	spi_transfer_handler;	// waiting for spi transfer finished
+static MUTEX spi_bus_mutex;		// waiting for spi bus
+static HANDLE spi_transfer_handler;	// waiting for spi transfer finished
 
 #define CHIP_SELECT_LO	0	// slave activated
 #define CHIP_SELECT_HI	1	// slave deactivated
@@ -54,21 +54,22 @@ static HANDLE 	spi_transfer_handler;	// waiting for spi transfer finished
  */
 static int Mcf51cnSpiChipSelect(uint_fast8_t cs, uint_fast8_t level)
 {
-    int rc = 0;
+	int rc = 0;
 
-    switch (cs) {
-    case NODE_CS_PTE2:
-    	GpioPinSet(PORTE, 2, level);
-    	break;
-    case NODE_CS_PTB2:
-        GpioPinSet(PORTB, 2, level);
-        break;
-    default:
-        errno = EIO;
-        rc = -1;
-        break;
-    }
-    return rc;
+	switch (cs)
+	{
+		case NODE_CS_PTE2:
+			GpioPinSet(PORTE, 2, level);
+			break;
+		case NODE_CS_PTB2:
+			GpioPinSet(PORTB, 2, level);
+			break;
+		default:
+			errno = EIO;
+			rc = -1;
+			break;
+	}
+	return rc;
 }
 
 /*! \brief Select a device on the first SPI bus.
@@ -84,26 +85,27 @@ static int Mcf51cnSpiChipSelect(uint_fast8_t cs, uint_fast8_t level)
  */
 int Mcf51cnSpiSelect(uint_fast8_t node_cs) //, uint32_t tmo)
 {
-    int rc;
+	int rc;
 
-    /* Allocate the bus. */
-    NutMutexLock(&spi_bus_mutex); // if timeout need to set, use NutEventWait with spi_bus_handle
+	/* Allocate the bus. */
+	NutMutexLock(&spi_bus_mutex); // if timeout need to set, use NutEventWait with spi_bus_handle
 //    rc = NutEventWait(&spi_bus_mutex, tmo);
 //    if (rc) {
 //        errno = EIO;
 //    } else {
-        /* Enable SPI peripherals and clock. */
+	/* Enable SPI peripherals and clock. */
 
-        /* Finally activate the node's chip select. */
-        rc = Mcf51cnSpiChipSelect(node_cs, CHIP_SELECT_LO);
-        if (rc) {
-        	errno = ENXIO;
-            /* Release the bus in case of an error. */
-        	NutMutexUnlock(&spi_bus_mutex);
+	/* Finally activate the node's chip select. */
+	rc = Mcf51cnSpiChipSelect(node_cs, CHIP_SELECT_LO);
+	if (rc)
+	{
+		errno = ENXIO;
+		/* Release the bus in case of an error. */
+		NutMutexUnlock(&spi_bus_mutex);
 //            NutEventPost(&spi_bus_mutex);
-        }
+	}
 //    }
-    return rc;
+	return rc;
 
 }
 
@@ -117,14 +119,14 @@ int Mcf51cnSpiSelect(uint_fast8_t node_cs) //, uint32_t tmo)
  */
 int Mcf51cnSpiDeselect(uint_fast8_t node_cs)
 {
-    /* Deactivate the node's chip select. */
+	/* Deactivate the node's chip select. */
 	Mcf51cnSpiChipSelect(node_cs, CHIP_SELECT_HI);
 
-    /* Release the bus. */
+	/* Release the bus. */
 	NutMutexUnlock(&spi_bus_mutex);
 //    NutEventPost(&spi_bus_mutex);
 
-    return 0;
+	return 0;
 }
 
 static uint8_t * volatile spi0_txp;
@@ -133,17 +135,18 @@ static volatile size_t spi0_xc;
 
 static void Mcf51cnSpiInterrupt(void *arg)
 {
-    uint8_t data;
-    uint8_t status;
+	uint8_t data;
+	uint8_t status;
 
-    status = MCF_SPI_S(SPI_CHANNEL);
-    data = MCF_SPI_D(SPI_CHANNEL);
+	status = MCF_SPI_S(SPI_CHANNEL);
+	data = MCF_SPI_D(SPI_CHANNEL);
 
-    if (status & MCF_SPI_S_SPRF)
-    {
+	if (status & MCF_SPI_S_SPRF)
+	{
 		if (spi0_xc)
 		{
-			if (spi0_rxp) {
+			if (spi0_rxp)
+			{
 				*spi0_rxp++ = data;
 			}
 			spi0_xc--;
@@ -153,17 +156,19 @@ static void Mcf51cnSpiInterrupt(void *arg)
 				if (spi0_txp)
 				{
 					data = *spi0_txp++;
-				} else
+				}
+				else
 				{
 					data = 0xFF; // write dummy char to generate clock for reading
 				}
 				MCF_SPI_D(SPI_CHANNEL) = data;
-			} else
+			}
+			else
 			{
 				NutEventPostFromIrq(&spi_transfer_handler);
 			}
 		}
-    }
+	}
 }
 
 /*!
@@ -181,39 +186,41 @@ static void Mcf51cnSpiInterrupt(void *arg)
  */
 int Mcf51cnSpiTransfer(const void *txbuf, void *rxbuf, int xlen)
 {
-    uint8_t data;
-    int rc;
-    // Mutex .. spolecny s SpiSelect
-    rc = NutMutexTrylock(&spi_bus_mutex);
-    NUTASSERT(!rc);
+	uint8_t data;
+	int rc;
+	// Mutex .. spolecny s SpiSelect
+	rc = NutMutexTrylock(&spi_bus_mutex);
+	NUTASSERT(!rc);
 
-    if (rc == 0 && xlen) {
-        spi0_txp = (uint8_t *) txbuf;
-        spi0_rxp = (uint8_t *) rxbuf;
-        spi0_xc = (size_t) xlen;
-        if (spi0_txp) {
-            data = *spi0_txp++;
-        }
-        else {
-        	data = 0xff;
-        }
-        /* Enable and kick interrupts. */
-        NutEnterCritical();
+	if (rc == 0 && xlen)
+	{
+		spi0_txp = (uint8_t *) txbuf;
+		spi0_rxp = (uint8_t *) rxbuf;
+		spi0_xc = (size_t) xlen;
+		if (spi0_txp)
+		{
+			data = *spi0_txp++;
+		}
+		else
+		{
+			data = 0xff;
+		}
+		/* Enable and kick interrupts. */
+		NutEnterCritical();
 
-        (void) MCF_SPI_S(SPI_CHANNEL); // read status register to clear flags
-        MCF_SPI_D(SPI_CHANNEL) =  data; // start transmission
+		(void) MCF_SPI_S(SPI_CHANNEL); // read status register to clear flags
+		MCF_SPI_D(SPI_CHANNEL) = data; // start transmission
 
-        NutExitCritical();
+		NutExitCritical();
 
-        /* Wait until transfer has finished. */
-        rc = NutEventWait(&spi_transfer_handler, 5000); /* if -1 on timeout, data are broken */
+		/* Wait until transfer has finished. */
+		rc = NutEventWait(&spi_transfer_handler, 5000); /* if -1 on timeout, data are broken */
 
-    }
+	}
 
-    NutMutexUnlock(&spi_bus_mutex);
-    return rc;
+	NutMutexUnlock(&spi_bus_mutex);
+	return rc;
 }
-
 
 /*!
  * \brief Initialize an SPI bus node.
@@ -223,26 +230,26 @@ void Mcf51cnSpiInit(void)
 
 #if	SPI_CHANNEL == 2
 	MCF_SCGC2 |= MCF_SCGC2_SPI2;
-    GpioPinConfigSet(PORTD, 7, GPIO_CFG_ALT2); // set pin assignment for SCK2
-    GpioPinConfigSet(PORTE, 0, GPIO_CFG_ALT2); // set pin assignment for MISO2
-    GpioPinConfigSet(PORTE, 1, GPIO_CFG_ALT2); // set pin assignment for MOSI2
+	GpioPinConfigSet(PORTD, 7, GPIO_CFG_ALT2); // set pin assignment for SCK2
+	GpioPinConfigSet(PORTE, 0, GPIO_CFG_ALT2); // set pin assignment for MISO2
+	GpioPinConfigSet(PORTE, 1, GPIO_CFG_ALT2); // set pin assignment for MOSI2
 #else
 	MCF_SCGC2 |= MCF_SCGC2_SPI1;
-    GpioPinConfigSet(PORTC, 7, GPIO_CFG_ALT2); // set pin assignment for SCK1
-    GpioPinConfigSet(PORTC, 6, GPIO_CFG_ALT2); // set pin assignment for MISO1
-    GpioPinConfigSet(PORTC, 5, GPIO_CFG_ALT2); // set pin assignment for MOSI1
+	GpioPinConfigSet(PORTC, 7, GPIO_CFG_ALT2); // set pin assignment for SCK1
+	GpioPinConfigSet(PORTC, 6, GPIO_CFG_ALT2);// set pin assignment for MISO1
+	GpioPinConfigSet(PORTC, 5, GPIO_CFG_ALT2);// set pin assignment for MOSI1
 #endif
 
 //    NutEventPost(&spi_bus_mutex);
-    NutMutexInit(&spi_bus_mutex);
+	NutMutexInit(&spi_bus_mutex);
 
 	/* Init registers */
-	(void) MCF_SPI_S(SPI_CHANNEL); 		/* Read the status register */
-	(void) MCF_SPI_D(SPI_CHANNEL); 		/* Read the data register */
+	(void) MCF_SPI_S(SPI_CHANNEL); /* Read the status register */
+	(void) MCF_SPI_D(SPI_CHANNEL); /* Read the data register */
 	/* Set the baud rate register, speed 1,25MHz */
 	/* Set the baud rate register 0x72 for speed 375kHz */
-	MCF_SPI_BR(SPI_CHANNEL) = 0x72; 	// TODO: pokud zadam nejvyzsi rychlost 12,5Mhz tak to zamrzne po dokonceni dlouheho zapisu nebo cteni
-	MCF_SPI_C2(SPI_CHANNEL) = 0x00; 	/* Configure the SPI port - control register 2 */
+	MCF_SPI_BR(SPI_CHANNEL) = 0x72; // TODO: pokud zadam nejvyzsi rychlost 12,5Mhz tak to zamrzne po dokonceni dlouheho zapisu nebo cteni
+	MCF_SPI_C2(SPI_CHANNEL) = 0x00; /* Configure the SPI port - control register 2 */
 	MCF_SPI_C1(SPI_CHANNEL) = MCF_SPI_C1_MSTR; /* Master */
 
 	/*
@@ -251,7 +258,7 @@ void Mcf51cnSpiInit(void)
 	 *  SPI Transmit Interrupt Enable is not used
 	 */
 #if	SPI_CHANNEL == 2
-    NutRegisterIrqHandler(&sig_SPI2, Mcf51cnSpiInterrupt, 0);
+	NutRegisterIrqHandler(&sig_SPI2, Mcf51cnSpiInterrupt, 0);
 	NutIrqEnable(&sig_SPI2);
 #else
 	NutRegisterIrqHandler(&sig_SPI1, Mcf51cnSpiInterrupt, 0);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,8 +38,9 @@
 #include <sys/heap.h>
 
 typedef struct _mcf51cn_rtc_dcb mcf51cn_rtc_dcb;
-struct _mcf51cn_rtc_dcb {
-    int seconds;
+struct _mcf51cn_rtc_dcb
+{
+	int seconds;
 };
 
 /*!
@@ -48,8 +49,8 @@ struct _mcf51cn_rtc_dcb {
  */
 static void Mcf51cnRtcInterrupt(void *arg)
 {
-    NUTRTC *rtc = (NUTRTC *)arg;
-    ((mcf51cn_rtc_dcb *)rtc->dcb)->seconds++;
+	NUTRTC *rtc = (NUTRTC *) arg;
+	((mcf51cn_rtc_dcb *) rtc->dcb)->seconds++;
 }
 
 /*!
@@ -62,8 +63,8 @@ static void Mcf51cnRtcInterrupt(void *arg)
  */
 static int Mcf51cnRtcGetClock(NUTRTC *rtc, struct _tm *tm)
 {
-	time_t time = ((mcf51cn_rtc_dcb *)rtc->dcb)->seconds;
-	localtime_r(&time,tm);
+	time_t time = ((mcf51cn_rtc_dcb *) rtc->dcb)->seconds;
+	localtime_r(&time, tm);
 	return 0;
 }
 
@@ -78,10 +79,11 @@ static int Mcf51cnRtcGetClock(NUTRTC *rtc, struct _tm *tm)
 static int Mcf51cnRtcSetClock(NUTRTC *rtc, const struct _tm *tm)
 {
 	time_t time;
-	time = mktime((struct _tm *)tm);
+	time = mktime((struct _tm *) tm);
 
-	if (time) {
-	    ((mcf51cn_rtc_dcb *)rtc->dcb)->seconds = time;
+	if (time)
+	{
+		((mcf51cn_rtc_dcb *) rtc->dcb)->seconds = time;
 	}
 	return 0;
 }
@@ -95,12 +97,14 @@ static int Mcf51cnRtcSetClock(NUTRTC *rtc, const struct _tm *tm)
 static int Mcf51cnRtcInit(NUTRTC *rtc)
 {
 	rtc->dcb = NutHeapAllocClear(sizeof(mcf51cn_rtc_dcb));
-    if (rtc->dcb == NULL) {
-        return -1;
-    }
+	if (rtc->dcb == NULL)
+	{
+		return -1;
+	}
 
-	if (NutRegisterIrqHandler(&sig_RTC, Mcf51cnRtcInterrupt, rtc)) {
-	    NutHeapFree(rtc->dcb);
+	if (NutRegisterIrqHandler(&sig_RTC, Mcf51cnRtcInterrupt, rtc))
+	{
+		NutHeapFree(rtc->dcb);
 		return -1;
 	}
 
@@ -114,22 +118,23 @@ static int Mcf51cnRtcInit(NUTRTC *rtc)
 	MCF_RTC_SC |= 0xE << MCF_RTC_SC_RTCPS_BITNUM;
 
 	/* Set modulo register to 250 */
-    MCF_RTC_MOD = 0xFA;
+	MCF_RTC_MOD = 0xFA;
 
-    /* Start timer */
+	/* Start timer */
 	NutIrqEnable(&sig_RTC);
 
 	return 0;
 }
 
-NUTRTC rtcMcf51cn = {
-  /*.dcb           = */ NULL,               /*!< Driver control block */
-  /*.rtc_init      = */ Mcf51cnRtcInit,     /*!< Hardware initializatiuon, rtc_init */
-  /*.rtc_gettime   = */ Mcf51cnRtcGetClock, /*!< Read date and time, rtc_gettime */
-  /*.rtc_settime   = */ Mcf51cnRtcSetClock, /*!< Set date and time, rtc_settime */
-  /*.rtc_getalarm  = */ NULL,               /*!< Read alarm date and time, rtc_getalarm */
-  /*.rtc_setalarm  = */ NULL,               /*!< Set alarm date and time, rtc_setalarm */
-  /*.rtc_getstatus = */ NULL,               /*!< Read status flags, rtc_getstatus */
-  /*.rtc_clrstatus = */ NULL,               /*!< Clear status flags, rtc_clrstatus */
-  /*.alarm         = */ NULL,               /*!< Handle for alarm event queue, not supported right now */
+NUTRTC rtcMcf51cn =
+{
+/*.dcb           = */NULL, /*!< Driver control block */
+/*.rtc_init      = */Mcf51cnRtcInit, /*!< Hardware initializatiuon, rtc_init */
+/*.rtc_gettime   = */Mcf51cnRtcGetClock, /*!< Read date and time, rtc_gettime */
+/*.rtc_settime   = */Mcf51cnRtcSetClock, /*!< Set date and time, rtc_settime */
+/*.rtc_getalarm  = */NULL, /*!< Read alarm date and time, rtc_getalarm */
+/*.rtc_setalarm  = */NULL, /*!< Set alarm date and time, rtc_setalarm */
+/*.rtc_getstatus = */NULL, /*!< Read status flags, rtc_getstatus */
+/*.rtc_clrstatus = */NULL, /*!< Clear status flags, rtc_clrstatus */
+/*.alarm         = */NULL, /*!< Handle for alarm event queue, not supported right now */
 };

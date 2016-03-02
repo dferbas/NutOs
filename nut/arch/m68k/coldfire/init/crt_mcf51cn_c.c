@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,21 +38,21 @@
 
 void InitSystem(void)
 {
-    uint8_t reg;
+	uint8_t reg;
 
-    /* Configure system options register 1 */
-    reg = 0x1c; // default
+	/* Configure system options register 1 */
+	reg = 0x1c; // default
 #ifndef NUT_WDT_ENABLE
-    reg &= ~(MCF_SOPT1_COPT);
+	reg &= ~(MCF_SOPT1_COPT);
 #endif
-    MCF_SOPT1 = reg;
+	MCF_SOPT1 = reg;
 
-    /* Configure System Power Management Status and Control 1 Register */
-    reg = 0x1c; // default
+	/* Configure System Power Management Status and Control 1 Register */
+	reg = 0x1c; // default
 #ifndef NUT_LVD_ENABLE
-    MCF_SPMSC1 &= ~(MCF_SPMSC1_LVDE_MASK);
+	MCF_SPMSC1 &= ~(MCF_SPMSC1_LVDE_MASK);
 #endif
-    MCF_SPMSC1 = reg;
+	MCF_SPMSC1 = reg;
 }
 
 void InitClock(void)

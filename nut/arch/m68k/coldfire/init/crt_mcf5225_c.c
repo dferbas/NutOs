@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,53 +36,53 @@
 
 void InitClock(void)
 {
-    // JS TODO - configurable from Nut/OS Configurator or Board specific function
-    // This fixed configuration is used for SM2-MU board
+	// JS TODO - configurable from Nut/OS Configurator or Board specific function
+	// This fixed configuration is used for SM2-MU board
 
-    /* Turn on external oscillator in external crystal mode. */
-    MCF_CLOCK_OCLR = MCF_CLOCK_OCLR_REFS | MCF_CLOCK_OCLR_OSCEN;
+	/* Turn on external oscillator in external crystal mode. */
+	MCF_CLOCK_OCLR = MCF_CLOCK_OCLR_REFS | MCF_CLOCK_OCLR_OSCEN;
 
-    /* Select clock source. */
-    MCF_CLOCK_CCLR = 0x00;
+	/* Select clock source. */
+	MCF_CLOCK_CCLR = 0x00;
 
-    /* Disable on-chip oscilator. */
-    MCF_CLOCK_OCHR = 0x00;
+	/* Disable on-chip oscilator. */
+	MCF_CLOCK_OCHR = 0x00;
 
-    /*
-     * Configure PLL dividers:
-     *  - PLL pre-divider = 48MHz / (CCHR + 1) = 8MHz
-     *  - MFD, RFD = x10 .. 8*10 = 80MHz (system clock)
-     */
-    MCF_CLOCK_CCHR = 0x05;
-    MCF_CLOCK_SYNCR |= MCF_CLOCK_SYNCR_MFD(3) | MCF_CLOCK_SYNCR_RFD(0);
+	/*
+	 * Configure PLL dividers:
+	 *  - PLL pre-divider = 48MHz / (CCHR + 1) = 8MHz
+	 *  - MFD, RFD = x10 .. 8*10 = 80MHz (system clock)
+	 */
+	MCF_CLOCK_CCHR = 0x05;
+	MCF_CLOCK_SYNCR |= MCF_CLOCK_SYNCR_MFD(3) | MCF_CLOCK_SYNCR_RFD(0);
 
-    /*
-     * PLL output clock drives the system clock.
-     * Set operating mode to 1.
-     * Enable PLL.
-     */
-    MCF_CLOCK_SYNCR |= MCF_CLOCK_SYNCR_CLKSRC | MCF_CLOCK_SYNCR_PLLMODE | MCF_CLOCK_SYNCR_PLLEN;
+	/*
+	 * PLL output clock drives the system clock.
+	 * Set operating mode to 1.
+	 * Enable PLL.
+	 */
+	MCF_CLOCK_SYNCR |= MCF_CLOCK_SYNCR_CLKSRC | MCF_CLOCK_SYNCR_PLLMODE | MCF_CLOCK_SYNCR_PLLEN;
 
-    /* Wait until the PLL is locked. */
-    while (!(MCF_CLOCK_SYNSR & MCF_CLOCK_SYNSR_LOCK))
-        ;
+	/* Wait until the PLL is locked. */
+	while (!(MCF_CLOCK_SYNSR & MCF_CLOCK_SYNSR_LOCK))
+		;
 }
 
 void InitIntramAccess(void)
 {
-    extern void *__rambar;
+	extern void *__rambar;
 
-    /* Enable on-chip modules (DMA, FEC, USB) to access internal SRAM. */
-    MCF_SCM_RAMBAR = (0 | MCF_SCM_RAMBAR_BA((uint32_t) &__rambar) | MCF_SCM_RAMBAR_BDE);
+	/* Enable on-chip modules (DMA, FEC, USB) to access internal SRAM. */
+	MCF_SCM_RAMBAR = (0 | MCF_SCM_RAMBAR_BA((uint32_t) &__rambar) | MCF_SCM_RAMBAR_BDE);
 }
 
 void InitExtram(void)
 {
-    /*
-     * External memory may be connected using several ways.
-     * Call board specific Extram initialization.
-     */
-    extern void BoardInitExtram(void);
-    BoardInitExtram();
+	/*
+	 * External memory may be connected using several ways.
+	 * Call board specific Extram initialization.
+	 */
+	extern void BoardInitExtram(void);
+	BoardInitExtram();
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,11 +40,12 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <dev/debug.h>
-struct __iobuf {
-    int         iob_fd;
-    uint16_t    iob_mode;
-    uint8_t     iob_flags;
-    int         iob_unget;
+struct __iobuf
+{
+	int iob_fd;
+	uint16_t iob_mode;
+	uint8_t iob_flags;
+	int iob_unget;
 };
 #endif
 
@@ -101,32 +102,32 @@ void IdleMWDTSetResetFN(TMWDTResetFN ResetFN)
 
 THREAD( NutStart, arg)
 {
-    /*
-     * Read OS configuration from non-volatile memory.
-     * This cannot be called sooner, because NonVolatile memory driver
-     * may use interrupts, timers and thread switching.
-     */
+	/*
+	 * Read OS configuration from non-volatile memory.
+	 * This cannot be called sooner, because NonVolatile memory driver
+	 * may use interrupts, timers and thread switching.
+	 */
 //    NutLoadConfig(); //JS TODO: nemuze byt zde se stavajicim TWI driverem
-
 #ifdef NUT_INIT_MAIN
-    /*
-     * Call custom initialization.
-     * NOTE: All OS parts are ready. Whole Nut/OS API may be used.
-     */
-    NutMainInit();
+	/*
+	 * Call custom initialization.
+	 * NOTE: All OS parts are ready. Whole Nut/OS API may be used.
+	 */
+	NutMainInit();
 #endif
 
-    /*
-     * Create the main application thread.
-     */
-    NutThreadCreate("main", main, 0, (NUT_THREAD_MAINSTACK * NUT_THREAD_STACK_MULT) + NUT_THREAD_STACK_ADD);
+	/*
+	 * Create the main application thread.
+	 */
+	NutThreadCreate("main", main, 0,
+			(NUT_THREAD_MAINSTACK * NUT_THREAD_STACK_MULT) + NUT_THREAD_STACK_ADD);
 
-    /*
-     * Terminate the thread
-     */
-    NutThreadExit();
-    while(1)
-        NutThreadYield();
+	/*
+	 * Terminate the thread
+	 */
+	NutThreadExit();
+	while (1)
+		NutThreadYield();
 }
 
 /*!
@@ -137,46 +138,48 @@ THREAD( NutStart, arg)
 
 THREAD( NutIdle, arg)
 {
-    /*
-     * Enable interrupts.
-     * SR[IPL] = 0; (See NutThreadCreate(): ef->sr = 0x2000;)
-     * IMRL[0] = 0;
-     */
+	/*
+	 * Enable interrupts.
+	 * SR[IPL] = 0; (See NutThreadCreate(): ef->sr = 0x2000;)
+	 * IMRL[0] = 0;
+	 */
 #ifdef MCU_MCF5225
-    MCF_INTC_IMRL(0) &= ~MCF_INTC_IMRL_MASKALL;
+	MCF_INTC_IMRL(0) &= ~MCF_INTC_IMRL_MASKALL;
 #endif
 
 #ifdef NUT_INIT_IDLE
-    /*
-     * Call custom initialization
-     * NOTE: context switching and timers cannot be used yet.
-     */
-    NutIdleInit();
+	/*
+	 * Call custom initialization
+	 * NOTE: context switching and timers cannot be used yet.
+	 */
+	NutIdleInit();
 #endif
 
-    /*
-     * Initialize system timers.
-     */
-    NutTimerInit();
+	/*
+	 * Initialize system timers.
+	 */
+	NutTimerInit();
 
-    /*
-     * Create the Start thread.
-     */
-    NutThreadCreate("config", NutStart, 0, (NUT_THREAD_CONFIGSTACK * NUT_THREAD_STACK_MULT) + NUT_THREAD_STACK_ADD);
+	/*
+	 * Create the Start thread.
+	 */
+	NutThreadCreate("config", NutStart, 0,
+			(NUT_THREAD_CONFIGSTACK * NUT_THREAD_STACK_MULT) + NUT_THREAD_STACK_ADD);
 
-    /*
-     * Run in an idle loop at the lowest priority. We can still
-     * do something useful here, like killing terminated threads
-     * or putting the CPU into sleep mode.
-     */
-    NutThreadSetPriority(254);
-    for (;;) {
-    	if (IdleMWDTResetFN != NULL)
-    	    IdleMWDTResetFN();
+	/*
+	 * Run in an idle loop at the lowest priority. We can still
+	 * do something useful here, like killing terminated threads
+	 * or putting the CPU into sleep mode.
+	 */
+	NutThreadSetPriority(254);
+	for (;;)
+	{
+		if (IdleMWDTResetFN != NULL)
+			IdleMWDTResetFN();
 
-        NutThreadYield();
-        NutThreadDestroy();
-    }
+		NutThreadYield();
+		NutThreadDestroy();
+	}
 }
 
 /*!
@@ -189,51 +192,52 @@ THREAD( NutIdle, arg)
 void NutInit(void)
 {
 	/* volatile is used for optimization, which ignore test these local values. */
-    size_t volatile heap2_size = HEAP2_SIZE;
+	size_t volatile heap2_size = HEAP2_SIZE;
 #ifdef NUTMEM_STACKHEAP
-    size_t volatile stackheap_size = STACK_HEAP_SIZE;
+	size_t volatile stackheap_size = STACK_HEAP_SIZE;
 #endif
 
 #ifdef EARLY_STDIO_DEV
-    /* We may optionally initialize stdout as early as possible.
-     ** Be aware, that no heap is available and no threads are
-     ** running. We need a very basic driver here, which won't
-     ** use interrupts or call malloc, NutEventXxx, NutSleep etc. */
-    {
-        extern NUTDEVICE EARLY_STDIO_DEV;
-        static struct __iobuf early_stdout;
-        /* Initialize the output device. */
-        EARLY_STDIO_DEV.dev_init(&EARLY_STDIO_DEV);
-        /* Assign a static iobuf. */
-        stdout = &early_stdout;
-        /* Open the device. */
-        stdout->iob_fd = (int)EARLY_STDIO_DEV.dev_open(&EARLY_STDIO_DEV, "", 0, 0);
-        /* Set the mode. No idea if this is required. */
-        stdout->iob_mode = _O_WRONLY | _O_CREAT | _O_TRUNC;
-        /* A first trial. */
-        puts("\nStarting Nut/OS");
-    }
+	/* We may optionally initialize stdout as early as possible.
+	 ** Be aware, that no heap is available and no threads are
+	 ** running. We need a very basic driver here, which won't
+	 ** use interrupts or call malloc, NutEventXxx, NutSleep etc. */
+	{
+		extern NUTDEVICE EARLY_STDIO_DEV;
+		static struct __iobuf early_stdout;
+		/* Initialize the output device. */
+		EARLY_STDIO_DEV.dev_init(&EARLY_STDIO_DEV);
+		/* Assign a static iobuf. */
+		stdout = &early_stdout;
+		/* Open the device. */
+		stdout->iob_fd = (int)EARLY_STDIO_DEV.dev_open(&EARLY_STDIO_DEV, "", 0, 0);
+		/* Set the mode. No idea if this is required. */
+		stdout->iob_mode = _O_WRONLY | _O_CREAT | _O_TRUNC;
+		/* A first trial. */
+		puts("\nStarting Nut/OS");
+	}
 #endif
 
 #ifdef NUT_INIT_BOARD
-    NutBoardInit();
+	NutBoardInit();
 #endif
 
-    /* Initialize heap memory. */
-    NutHeapAdd(HEAP_START, HEAP_SIZE);
+	/* Initialize heap memory. */
+	NutHeapAdd(HEAP_START, HEAP_SIZE);
 
-    /* Add next heap region if defined */
-    if (heap2_size)
-        NutHeapAdd(HEAP2_START, heap2_size);
+	/* Add next heap region if defined */
+	if (heap2_size)
+		NutHeapAdd(HEAP2_START, heap2_size);
 
-    /* Initialize stack heap (fast internal memory) if defined */
+	/* Initialize stack heap (fast internal memory) if defined */
 #ifdef NUTMEM_STACKHEAP
-    if (stackheap_size)
-        NutStackAdd(STACK_HEAP_START, stackheap_size);
+	if (stackheap_size)
+	NutStackAdd(STACK_HEAP_START, stackheap_size);
 #endif
 
-    /* Create idle thread */
-    NutThreadCreate("idle", NutIdle, 0, (NUT_THREAD_IDLESTACK * NUT_THREAD_STACK_MULT) + NUT_THREAD_STACK_ADD);
+	/* Create idle thread */
+	NutThreadCreate("idle", NutIdle, 0,
+			(NUT_THREAD_IDLESTACK * NUT_THREAD_STACK_MULT) + NUT_THREAD_STACK_ADD);
 }
 
 /*@}*/

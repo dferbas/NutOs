@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,24 +41,25 @@
  */
 int Mcf5I2cBus0Init(void)
 {
-    /* Enable the I2C signals */
-    GpioPinConfigSet(I2C0_SCL_PORT, I2C0_SCL_PIN, I2C0_SCL_PERIPHERAL);
-    GpioPinConfigSet(I2C0_SDA_PORT, I2C0_SDA_PIN, I2C0_SDA_PERIPHERAL);
+	/* Enable the I2C signals */
+	GpioPinConfigSet(I2C0_SCL_PORT, I2C0_SCL_PIN, I2C0_SCL_PERIPHERAL);
+	GpioPinConfigSet(I2C0_SDA_PORT, I2C0_SDA_PIN, I2C0_SDA_PERIPHERAL);
 
-    return 0;
+	return 0;
 }
 
 /*!
  * \brief TWI/I2C bus structure.
  */
-NUTTWIBUS Mcf5TwiBus0 = {
-  /*.bus_base =    */  0,               /* Bus base address. */
-  /*.bus_sig_ev =  */  &sig_I2C0,       /* Bus data and event interrupt handler. */
-  /*.bus_sig_er =  */  NULL,            /* Bus error interrupt handler. */
-  /*.bus_mutex =   */  NULL,            /* Bus lock queue. */
-  /*.bus_icb   =   */  NULL,            /* Bus Runtime Data Pointer */
-  /*.bus_dma_tx =  */  0,
-  /*.bus_dma_rx =  */  0,
-  /*.bus_initbus = */  Mcf5I2cBus0Init, /* Initialize bus controller. */
-  /*.bus_recover = */  NULL,            /* Recover bus in case a slave hangs with SCL low */
+NUTTWIBUS Mcf5TwiBus0 =
+{
+/*.bus_base =    */0, /* Bus base address. */
+/*.bus_sig_ev =  */&sig_I2C0, /* Bus data and event interrupt handler. */
+/*.bus_sig_er =  */NULL, /* Bus error interrupt handler. */
+/*.bus_mutex =   */NULL, /* Bus lock queue. */
+/*.bus_icb   =   */NULL, /* Bus Runtime Data Pointer */
+/*.bus_dma_tx =  */0,
+/*.bus_dma_rx =  */0,
+/*.bus_initbus = */Mcf5I2cBus0Init, /* Initialize bus controller. */
+/*.bus_recover = */NULL, /* Recover bus in case a slave hangs with SCL low */
 };

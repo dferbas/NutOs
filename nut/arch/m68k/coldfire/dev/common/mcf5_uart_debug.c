@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,6 +29,7 @@
  *
  * For additional information see http://www.ethernut.de/
  */
+
 #include <cfg/peripherals.h>
 #include <arch/m68k.h>
 #include <dev/debug.h>
@@ -49,7 +50,7 @@
  */
 static int IOCtl(NUTDEVICE * dev, int req, void *conf)
 {
-    return -1;
+	return -1;
 }
 
 /*!
@@ -62,17 +63,18 @@ static int IOCtl(NUTDEVICE * dev, int req, void *conf)
  */
 static void Put(uintptr_t devnum, char ch)
 {
-    /* Prepend NL with CR. */
-    if (ch == '\n') {
-        Put(devnum, '\r');
-    }
+	/* Prepend NL with CR. */
+	if (ch == '\n')
+	{
+		Put(devnum, '\r');
+	}
 
-    /* Wait until space is available in the FIFO */
-    while (!(MCF_UART_USR(devnum) & MCF_UART_USR_TXRDY))
-        ;
+	/* Wait until space is available in the FIFO */
+	while (!(MCF_UART_USR(devnum) & MCF_UART_USR_TXRDY))
+		;
 
-    /* Send the character */
-    MCF_UART_UTB(devnum) = (uint8_t) ch;
+	/* Send the character */
+	MCF_UART_UTB (devnum) = (uint8_t) ch;
 }
 
 /*!
@@ -102,15 +104,16 @@ static void Put(uintptr_t devnum, char ch)
  */
 static int Write(NUTFILE * fp, const void *buffer, int len)
 {
-    int c = len;
-    const char *cp = (const char *) buffer;
-    uintptr_t devnum = fp->nf_dev->dev_base;
+	int c = len;
+	const char *cp = (const char *) buffer;
+	uintptr_t devnum = fp->nf_dev->dev_base;
 
-    while (c--) {
-        Put(devnum, *cp++);
-    }
+	while (c--)
+	{
+		Put(devnum, *cp++);
+	}
 
-    return len;
+	return len;
 }
 
 /*!
@@ -120,7 +123,7 @@ static int Write(NUTFILE * fp, const void *buffer, int len)
  */
 static int Read(NUTFILE * nf, void *buffer, int len)
 {
-    return 0;
+	return 0;
 }
 
 /*!
@@ -130,13 +133,13 @@ static int Read(NUTFILE * nf, void *buffer, int len)
  */
 static NUTFILE *Open(NUTDEVICE * dev, const char *name, int mode, int acc)
 {
-    NUTFILE *fp = (NUTFILE *) (dev->dev_dcb);
+	NUTFILE *fp = (NUTFILE *) (dev->dev_dcb);
 
-    fp->nf_next = NULL;
-    fp->nf_dev = dev;
-    fp->nf_fcb = NULL;
+	fp->nf_next = NULL;
+	fp->nf_dev = dev;
+	fp->nf_fcb = NULL;
 
-    return fp;
+	return fp;
 }
 
 /*!
@@ -149,8 +152,8 @@ static NUTFILE *Open(NUTDEVICE * dev, const char *name, int mode, int acc)
  */
 static int Close(NUTFILE * fp)
 {
-    /* Nothing to do for this simple driver. */
-    return 0;
+	/* Nothing to do for this simple driver. */
+	return 0;
 }
 
 /*!
@@ -168,63 +171,64 @@ static int Close(NUTFILE * fp)
  */
 static int Init(NUTDEVICE * dev)
 {
-    uint8_t devnum = dev->dev_base;
-    uint32_t sysclk = NutGetCpuClock();
-    int baud = 115200;
-    register uint16_t ubgs;
+	uint8_t devnum = dev->dev_base;
+	uint32_t sysclk = NutGetCpuClock();
+	int baud = 115200;
+	register uint16_t ubgs;
 
-    /* Enable UART Port on GPIO */
-    switch (devnum) {
+	/* Enable UART Port on GPIO */
+	switch (devnum)
+	{
 #ifdef UART0_TXD_PIN
-    case 0:
-        GpioPinConfigSet(UART0_TXD_PORT, UART0_TXD_PIN, UART0_TXD_PERIPHERAL);
-        GpioPinConfigSet(UART0_RXD_PORT, UART0_RXD_PIN, UART0_RXD_PERIPHERAL);
-        break;
+		case 0:
+		GpioPinConfigSet(UART0_TXD_PORT, UART0_TXD_PIN, UART0_TXD_PERIPHERAL);
+		GpioPinConfigSet(UART0_RXD_PORT, UART0_RXD_PIN, UART0_RXD_PERIPHERAL);
+		break;
 #endif
 #ifdef UART1_TXD_PIN
-    case 1:
-        GpioPinConfigSet(UART1_TXD_PORT, UART1_TXD_PIN, UART1_TXD_PERIPHERAL);
-        GpioPinConfigSet(UART1_RXD_PORT, UART1_RXD_PIN, UART1_RXD_PERIPHERAL);
-        break;
+		case 1:
+		GpioPinConfigSet(UART1_TXD_PORT, UART1_TXD_PIN, UART1_TXD_PERIPHERAL);
+		GpioPinConfigSet(UART1_RXD_PORT, UART1_RXD_PIN, UART1_RXD_PERIPHERAL);
+		break;
 #endif
 #ifdef UART2_TXD_PIN
-    case 2:
-        GpioPinConfigSet(UART2_TXD_PORT, UART2_TXD_PIN, UART2_TXD_PERIPHERAL);
-        GpioPinConfigSet(UART2_RXD_PORT, UART2_RXD_PIN, UART2_RXD_PERIPHERAL);
-        break;
+		case 2:
+		GpioPinConfigSet(UART2_TXD_PORT, UART2_TXD_PIN, UART2_TXD_PERIPHERAL);
+		GpioPinConfigSet(UART2_RXD_PORT, UART2_RXD_PIN, UART2_RXD_PERIPHERAL);
+		break;
 #endif
-    default:
-        return 0;
-    }
+		default:
+			return 0;
+	}
 
-    /* Reset Transmitter */
-    MCF_UART_UCR(devnum) = MCF_UART_UCR_RESET_TX;
+	/* Reset Transmitter */
+	MCF_UART_UCR (devnum) = MCF_UART_UCR_RESET_TX;
 
-    /* Reset Receiver */
-    MCF_UART_UCR(devnum) = MCF_UART_UCR_RESET_RX;
+	/* Reset Receiver */
+	MCF_UART_UCR (devnum) = MCF_UART_UCR_RESET_RX;
 
-    /* Reset Mode Register */
-    MCF_UART_UCR(devnum) = MCF_UART_UCR_RESET_MR;
+	/* Reset Mode Register */
+	MCF_UART_UCR (devnum) = MCF_UART_UCR_RESET_MR;
 
-    /* No parity, 8-bits per character */
-    MCF_UART_UMR(devnum) = MCF_UART_UMR_PM_NONE | MCF_UART_UMR_BC_8;
+	/* No parity, 8-bits per character */
+	MCF_UART_UMR (devnum) = MCF_UART_UMR_PM_NONE | MCF_UART_UMR_BC_8;
 
-    /* Normal mode(No echo or loopback), 1 stop bit */
-    MCF_UART_UMR(devnum) = MCF_UART_UMR_CM_NORMAL | MCF_UART_UMR_SB_STOP_BITS_1;
+	/* Normal mode(No echo or loopback), 1 stop bit */
+	MCF_UART_UMR (devnum) = MCF_UART_UMR_CM_NORMAL | MCF_UART_UMR_SB_STOP_BITS_1;
 
-    /* Select Rx and Tx clocks */
-    MCF_UART_UCSR(devnum) = MCF_UART_UCSR_RCS_SYS_CLK | MCF_UART_UCSR_TCS_SYS_CLK;
+	/* Select Rx and Tx clocks */
+	MCF_UART_UCSR (devnum) = MCF_UART_UCSR_RCS_SYS_CLK | MCF_UART_UCSR_TCS_SYS_CLK;
 
-    /* Calculate baud settings */
-    ubgs = (uint16_t)(sysclk / (baud * 32));
+	/* Calculate baud settings */
+	ubgs = (uint16_t) (sysclk / (baud * 32));
 
-    MCF_UART_UBG1(devnum) = (uint8_t)((ubgs & 0xFF00) >> 8);
-    MCF_UART_UBG2(devnum) = (uint8_t)(ubgs & 0x00FF);
+	MCF_UART_UBG1 (devnum) = (uint8_t) ((ubgs & 0xFF00) >> 8);
+	MCF_UART_UBG2 (devnum) = (uint8_t) (ubgs & 0x00FF);
 
-    /* Enable receiver and transmitter */
-    MCF_UART_UCR(devnum) = MCF_UART_UCR_TX_ENABLED | MCF_UART_UCR_RX_ENABLED;
+	/* Enable receiver and transmitter */
+	MCF_UART_UCR (devnum) = MCF_UART_UCR_TX_ENABLED | MCF_UART_UCR_RX_ENABLED;
 
-    return 0;
+	return 0;
 }
 
 /*
@@ -291,58 +295,61 @@ static NUTFILE dbgfile;
  * be offered to access data in program space.
  */
 #ifdef UART0_TXD_PIN
-NUTDEVICE devDebug0 = {
-        NULL,           /*!< _NUTDEVICE::dev_next, must be NULL */
-        { 'u', 'a', 'r', 't', '0', 0, 0, 0, 0 }, /*!< _NUTDEVICE::dev_name, use for all UART0 drivers. */
-        IFTYP_CHAR,     /*!< _NUTDEVICE::dev_type, probably not used, may be 0. */
-        0,              /*!< _NUTDEVICE::dev_base, device number = 2(COM2). */
-        0,              /*!< _NUTDEVICE::dev_irq, not used by this driver. */
-        NULL,           /*!< _NUTDEVICE::dev_icb, not used by this driver. */
-        &dbgfile,       /*!< _NUTDEVICE::dev_dcb, stores the \ref NUTFILE handle. */
-        Init,           /*!< _NUTDEVICE::dev_init. */
-        IOCtl,          /*!< _NUTDEVICE::dev_ioctl. */
-        Read,           /*!< _NUTDEVICE::dev_read, optional, may be NULL. */
-        Write,          /*!< _NUTDEVICE::dev_write. */
-        Open,           /*!< _NUTDEVICE::dev_open. */
-        Close,          /*!< _NUTDEVICE::dev_close. */
-        NULL            /*!< _NUTDEVICE::dev_size, optional, may be NULL. */
+NUTDEVICE devDebug0 =
+{
+	NULL, /*!< _NUTDEVICE::dev_next, must be NULL */
+	{	'u', 'a', 'r', 't', '0', 0, 0, 0, 0}, /*!< _NUTDEVICE::dev_name, use for all UART0 drivers. */
+	IFTYP_CHAR, /*!< _NUTDEVICE::dev_type, probably not used, may be 0. */
+	0, /*!< _NUTDEVICE::dev_base, device number = 2(COM2). */
+	0, /*!< _NUTDEVICE::dev_irq, not used by this driver. */
+	NULL, /*!< _NUTDEVICE::dev_icb, not used by this driver. */
+	&dbgfile, /*!< _NUTDEVICE::dev_dcb, stores the \ref NUTFILE handle. */
+	Init, /*!< _NUTDEVICE::dev_init. */
+	IOCtl, /*!< _NUTDEVICE::dev_ioctl. */
+	Read, /*!< _NUTDEVICE::dev_read, optional, may be NULL. */
+	Write, /*!< _NUTDEVICE::dev_write. */
+	Open, /*!< _NUTDEVICE::dev_open. */
+	Close, /*!< _NUTDEVICE::dev_close. */
+	NULL /*!< _NUTDEVICE::dev_size, optional, may be NULL. */
 };
 #endif
 
 #ifdef UART1_TXD_PIN
-NUTDEVICE devDebug1 = {
-        NULL,           /*!< _NUTDEVICE::dev_next, must be NULL */
-        { 'u', 'a', 'r', 't', '1', 0, 0, 0, 0 }, /*!< _NUTDEVICE::dev_name, use for all UART0 drivers. */
-        IFTYP_CHAR,     /*!< _NUTDEVICE::dev_type, probably not used, may be 0. */
-        1,              /*!< _NUTDEVICE::dev_base, device number = 2(COM2). */
-        0,              /*!< _NUTDEVICE::dev_irq, not used by this driver. */
-        NULL,           /*!< _NUTDEVICE::dev_icb, not used by this driver. */
-        &dbgfile,       /*!< _NUTDEVICE::dev_dcb, stores the \ref NUTFILE handle. */
-        Init,           /*!< _NUTDEVICE::dev_init. */
-        IOCtl,          /*!< _NUTDEVICE::dev_ioctl. */
-        Read,           /*!< _NUTDEVICE::dev_read, optional, may be NULL. */
-        Write,          /*!< _NUTDEVICE::dev_write. */
-        Open,           /*!< _NUTDEVICE::dev_open. */
-        Close,          /*!< _NUTDEVICE::dev_close. */
-        NULL            /*!< _NUTDEVICE::dev_size, optional, may be NULL. */
+NUTDEVICE devDebug1 =
+{
+	NULL, /*!< _NUTDEVICE::dev_next, must be NULL */
+	{	'u', 'a', 'r', 't', '1', 0, 0, 0, 0}, /*!< _NUTDEVICE::dev_name, use for all UART0 drivers. */
+	IFTYP_CHAR, /*!< _NUTDEVICE::dev_type, probably not used, may be 0. */
+	1, /*!< _NUTDEVICE::dev_base, device number = 2(COM2). */
+	0, /*!< _NUTDEVICE::dev_irq, not used by this driver. */
+	NULL, /*!< _NUTDEVICE::dev_icb, not used by this driver. */
+	&dbgfile, /*!< _NUTDEVICE::dev_dcb, stores the \ref NUTFILE handle. */
+	Init, /*!< _NUTDEVICE::dev_init. */
+	IOCtl, /*!< _NUTDEVICE::dev_ioctl. */
+	Read, /*!< _NUTDEVICE::dev_read, optional, may be NULL. */
+	Write, /*!< _NUTDEVICE::dev_write. */
+	Open, /*!< _NUTDEVICE::dev_open. */
+	Close, /*!< _NUTDEVICE::dev_close. */
+	NULL /*!< _NUTDEVICE::dev_size, optional, may be NULL. */
 };
 #endif
 
 #ifdef UART2_TXD_PIN
-NUTDEVICE devDebug2 = {
-        NULL,           /*!< _NUTDEVICE::dev_next, must be NULL */
-        { 'u', 'a', 'r', 't', '2', 0, 0, 0, 0 }, /*!< _NUTDEVICE::dev_name, use for all UART0 drivers. */
-        IFTYP_CHAR,     /*!< _NUTDEVICE::dev_type, probably not used, may be 0. */
-        2,              /*!< _NUTDEVICE::dev_base, device number = 2(COM2). */
-        0,              /*!< _NUTDEVICE::dev_irq, not used by this driver. */
-        NULL,           /*!< _NUTDEVICE::dev_icb, not used by this driver. */
-        &dbgfile,       /*!< _NUTDEVICE::dev_dcb, stores the \ref NUTFILE handle. */
-        Init,           /*!< _NUTDEVICE::dev_init. */
-        IOCtl,          /*!< _NUTDEVICE::dev_ioctl. */
-        Read,           /*!< _NUTDEVICE::dev_read, optional, may be NULL. */
-        Write,          /*!< _NUTDEVICE::dev_write. */
-        Open,           /*!< _NUTDEVICE::dev_open. */
-        Close,          /*!< _NUTDEVICE::dev_close. */
-        NULL            /*!< _NUTDEVICE::dev_size, optional, may be NULL. */
+NUTDEVICE devDebug2 =
+{
+	NULL, /*!< _NUTDEVICE::dev_next, must be NULL */
+	{	'u', 'a', 'r', 't', '2', 0, 0, 0, 0}, /*!< _NUTDEVICE::dev_name, use for all UART0 drivers. */
+	IFTYP_CHAR, /*!< _NUTDEVICE::dev_type, probably not used, may be 0. */
+	2, /*!< _NUTDEVICE::dev_base, device number = 2(COM2). */
+	0, /*!< _NUTDEVICE::dev_irq, not used by this driver. */
+	NULL, /*!< _NUTDEVICE::dev_icb, not used by this driver. */
+	&dbgfile, /*!< _NUTDEVICE::dev_dcb, stores the \ref NUTFILE handle. */
+	Init, /*!< _NUTDEVICE::dev_init. */
+	IOCtl, /*!< _NUTDEVICE::dev_ioctl. */
+	Read, /*!< _NUTDEVICE::dev_read, optional, may be NULL. */
+	Write, /*!< _NUTDEVICE::dev_write. */
+	Open, /*!< _NUTDEVICE::dev_open. */
+	Close, /*!< _NUTDEVICE::dev_close. */
+	NULL /*!< _NUTDEVICE::dev_size, optional, may be NULL. */
 };
 #endif

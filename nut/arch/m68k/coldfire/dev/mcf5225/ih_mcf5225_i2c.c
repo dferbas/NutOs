@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +33,10 @@
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 
+/*!
+ * \addtogroup xgMcf5225
+ */
+/*@{*/
 
 static int IrqCtl0(int cmd, void *param);
 static int IrqCtl1(int cmd, void *param);
@@ -55,6 +59,13 @@ IRQ_HANDLER sig_I2C1 = {
         IrqCtl1
     };
 
+/*! \brief I2C0 interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtl0(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_I2C0, cmd, param,
@@ -63,6 +74,13 @@ static int IrqCtl0(int cmd, void *param)
             &MCF_INTC_ICR17(0), IPL_I2C0);
 }
 
+/*! \brief I2C1 interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtl1(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_I2C1, cmd, param,

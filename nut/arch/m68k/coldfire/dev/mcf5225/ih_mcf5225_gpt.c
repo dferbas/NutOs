@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,6 +32,11 @@
 
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
+
+/*!
+ * \addtogroup xgMcf5225
+ */
+/*@{*/
 
 static int IrqCtlPai(int cmd, void *param);
 static int IrqCtlPaov(int cmd, void *param);
@@ -94,7 +99,13 @@ IRQ_HANDLER sig_GPT_C3F = {
         IrqCtlC3F
     };
 
-
+/*! \brief Pai interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtlPai(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_GPT_PAI, cmd, param,
@@ -103,6 +114,13 @@ static int IrqCtlPai(int cmd, void *param)
             &MCF_INTC_ICR42(0), IPL_GPT_PAI);
 }
 
+/*! \brief Paov interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtlPaov(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_GPT_PAOV, cmd, param,
@@ -111,6 +129,13 @@ static int IrqCtlPaov(int cmd, void *param)
             &MCF_INTC_ICR43(0), IPL_GPT_PAOV);
 }
 
+/*! \brief C0F interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtlC0F(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_GPT_C0F, cmd, param,
@@ -119,6 +144,13 @@ static int IrqCtlC0F(int cmd, void *param)
             &MCF_INTC_ICR44(0), IPL_GPT_C0F);
 }
 
+/*! \brief C1F interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtlC1F(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_GPT_C1F, cmd, param,
@@ -127,6 +159,13 @@ static int IrqCtlC1F(int cmd, void *param)
             &MCF_INTC_ICR45(0), IPL_GPT_C1F);
 }
 
+/*! \brief C2F interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtlC2F(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_GPT_C2F, cmd, param,
@@ -135,6 +174,13 @@ static int IrqCtlC2F(int cmd, void *param)
             &MCF_INTC_ICR46(0), IPL_GPT_C2F);
 }
 
+/*! \brief C3F interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtlC3F(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_GPT_C3F, cmd, param,

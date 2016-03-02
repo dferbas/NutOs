@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +33,11 @@
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 
+/*!
+ * \addtogroup xgMcf5225
+ */
+/*@{*/
+
 static int QspiIrqCtl(int cmd, void *param);
 
 IRQ_HANDLER sig_QSPI_TF = {
@@ -44,6 +49,13 @@ IRQ_HANDLER sig_QSPI_TF = {
     QspiIrqCtl     /* Interrupt control, ir_ctl. */
 };
 
+/*! \brief Qspi interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int QspiIrqCtl(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_QSPI_TF, cmd, param,

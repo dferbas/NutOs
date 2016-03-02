@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,40 +33,57 @@
 #include <arch/m68k.h>
 #include <dev/reset.h>
 
+/*!
+ * \addtogroup xgMcf5225
+ */
+/*@{*/
+
+
+/*! \brief Reset control registers
+ *
+ * \note SOFTRST - Allows software to request a reset. The reset caused by setting this bit clears this bit.
+ *
+ * 		1 	Software reset request
+ *		0 	No software reset request
+ */
 void Mcf5225_Reset(void)
 {
-    MCF_RCM_RCR |= MCF_RCM_RCR_SOFTRST;
+	MCF_RCM_RCR |= MCF_RCM_RCR_SOFTRST;
 }
 
+/*! \brief Reset status register (RSR)
+ *
+ * \note The RSR contains a status bit for every reset source. RSR can be read at any time. Writing to RSR has no effect.
+ */
 int Mcf5225_ResetCause(void)
 {
-    // TODO: One or more status bits may be set at the same time.
+	// TODO: One or more status bits may be set at the same time.
 
-    uint8_t rsr = MCF_RCM_RSR;
+	uint8_t rsr = MCF_RCM_RSR;
 
-    if (rsr & MCF_RCM_RSR_POR)
-        return NUT_RSTTYP_POWERUP;
+	if (rsr & MCF_RCM_RSR_POR)
+		return NUT_RSTTYP_POWERUP;
 
-    if (rsr & MCF_RCM_RSR_EXT)
-        return NUT_RSTTYP_EXTERNAL;
+	if (rsr & MCF_RCM_RSR_EXT)
+		return NUT_RSTTYP_EXTERNAL;
 
-    if (rsr & MCF_RCM_RSR_BWD)
-        return NUT_RSTTYP_BACKUP_WATCHDOG;
+	if (rsr & MCF_RCM_RSR_BWD)
+		return NUT_RSTTYP_BACKUP_WATCHDOG;
 
-    if (rsr & MCF_RCM_RSR_WDR)
-        return NUT_RSTTYP_WATCHDOG;
+	if (rsr & MCF_RCM_RSR_WDR)
+		return NUT_RSTTYP_WATCHDOG;
 
-    if (rsr & MCF_RCM_RSR_LVD)
-        return NUT_RSTTYP_BROWNOUT;
+	if (rsr & MCF_RCM_RSR_LVD)
+		return NUT_RSTTYP_BROWNOUT;
 
-    if (rsr & MCF_RCM_RSR_LOL)
-        return NUT_RSTTYP_LOSS_OF_LOCK;
+	if (rsr & MCF_RCM_RSR_LOL)
+		return NUT_RSTTYP_LOSS_OF_LOCK;
 
-    if (rsr & MCF_RCM_RSR_LOC)
-        return NUT_RSTTYP_LOSS_OF_CLOCK;
+	if (rsr & MCF_RCM_RSR_LOC)
+		return NUT_RSTTYP_LOSS_OF_CLOCK;
 
-    if (rsr & MCF_RCM_RSR_SOFT)
-        return NUT_RSTTYP_SOFTWARE;
+	if (rsr & MCF_RCM_RSR_SOFT)
+		return NUT_RSTTYP_SOFTWARE;
 
-    return NUT_RSTTYP_UNKNOWN;
+	return NUT_RSTTYP_UNKNOWN;
 }

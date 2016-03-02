@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,34 +37,34 @@
 
 void InitSystem(void)
 {
-    uint8_t reg;
+	uint8_t reg;
 
-    /* Configure system options register 1 */
-    /* SOPT1: COPE=1,COPT=1,STOPE=0,WAITE=1,RSTOPE=0,BKGDPE=1,RSTPE=0 */
-    reg = 0xD2;
+	/* Configure system options register 1 */
+	/* SOPT1: COPE=1,COPT=1,STOPE=0,WAITE=1,RSTOPE=0,BKGDPE=1,RSTPE=0 */
+	reg = 0xD2;
 //#ifndef NUT_WDT_ENABLE
 //    reg &= ~(MCF_SOPT1_COPE); // Disable COP (Watchdog timer)
 //#endif
-    /* All SOPT1 bit fields, except WAITE, are write-once. Therefore for
-     * the write-once bits, only the first write after reset is honored. */
-    MCF_SOPT1 = reg;
+	/* All SOPT1 bit fields, except WAITE, are write-once. Therefore for
+	 * the write-once bits, only the first write after reset is honored. */
+	MCF_SOPT1 = reg;
 
-    /* SOPT2: COPCLKS=0,SPI1PS=1,ACIC2=0,IIC1PS=0,ACIC1=0 */
-    MCF_SOPT2 = MCF_SOPT2_SPI1PS | MCF_SOPT2_COPCLKS;
+	/* SOPT2: COPCLKS=0,SPI1PS=1,ACIC2=0,IIC1PS=0,ACIC1=0 */
+	MCF_SOPT2 = MCF_SOPT2_SPI1PS | MCF_SOPT2_COPCLKS;
 
-    /* Configure System Power Management Status and Control 1 Register */
-    /* SPMSC1: LVDF=0,LVDACK=0,LVDIE=0,LVDRE=1,LVDSE=1,LVDE=1,BGBE=0 */
-    reg = 0x1c; // default
+	/* Configure System Power Management Status and Control 1 Register */
+	/* SPMSC1: LVDF=0,LVDACK=0,LVDIE=0,LVDRE=1,LVDSE=1,LVDE=1,BGBE=0 */
+	reg = 0x1c; // default
 //#ifndef NUT_LVD_ENABLE
 //    MCF_SPMSC1 &= ~(MCF_SPMSC1_LVDE);
 //#endif
-    MCF_SPMSC1 = reg;
+	MCF_SPMSC1 = reg;
 
-    /* SPMSC2: LPR=0,LPRS=0,LPWUI=0,PPDF=0,PPDACK=0,PPDE=1,PPDC=0 */
-    MCF_SPMSC2 = 0x02;
+	/* SPMSC2: LPR=0,LPRS=0,LPWUI=0,PPDF=0,PPDACK=0,PPDE=1,PPDC=0 */
+	MCF_SPMSC2 = 0x02;
 
-    /* SPMSC3: LVDV=0,LVWV=0,LVWIE=0 */
-    MCF_SPMSC3 &= ~0x38;
+	/* SPMSC3: LVDV=0,LVWV=0,LVWIE=0 */
+	MCF_SPMSC3 &= ~0x38;
 }
 
 void InitClock(void)

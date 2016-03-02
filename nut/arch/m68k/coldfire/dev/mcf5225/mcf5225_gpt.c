@@ -1,3 +1,35 @@
+/*
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holders nor the names of
+ *    contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+ * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * For additional information see http://www.ethernut.de/
+ */
+
 #include <arch/m68k.h>
 #include <arch/m68k/coldfire/mcf5225/gpt_mcf5225.h>
 #include <dev/irqreg.h>
@@ -7,11 +39,17 @@
 #include <dev/gpio.h>
 #include <stdlib.h>
 
+/*!
+ * \addtogroup xgMcf5225
+ */
+/*@{*/
+
 static HANDLE *GptPAEHandler = NULL;
 
 
-/*
- * GPT Pulse Accumulator Event Interrupt
+/*! \brief GPT Pulse Accumulator Event Interrupt
+ *
+ * \param *arg
  */
 static void IntHandlerPAEvent(void *arg)
 {
@@ -22,8 +60,9 @@ static void IntHandlerPAEvent(void *arg)
 	MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAIF;
 }
 
-/*
- * Initialize GPT as a pulse accumulator counter
+/*! \brief Initialize GPT as a pulse accumulator counter
+ *
+ * \param *pae_handler Function used from interrupt
  */
 void Mcf5225GptInitPA(HANDLE *pae_handler)
 {
@@ -53,34 +92,35 @@ void Mcf5225GptInitPA(HANDLE *pae_handler)
 	Mcf5225GptStartPA();
 }
 
-/*
- * Enable Pulse accumulator. If enabled MCF_GPT_GPTSCR1_GPTEN,
- * this function have not effect.
+/*! \brief Enable Pulse accumulator.
+ *	If enabled MCF_GPT_GPTSCR1_GPTEN, this function have not effect.
+ *
  */
 void Mcf5225GptStartPA(void)
 {
     MCF_GPT_GPTPACTL |= MCF_GPT_GPTPACTL_PAE; // Enable PA
 }
 
-/*
- * Disable Pulse accumulator. If enabled MCF_GPT_GPTSCR1_GPTEN,
- * this function have not effect.
+/*! \brief Disable Pulse accumulator.
+ *	If enabled MCF_GPT_GPTSCR1_GPTEN, this function have not effect.
+ *
  */
 void Mcf5225GptStopPA(void)
 {
 	MCF_GPT_GPTPACTL &= ~MCF_GPT_GPTPACTL_PAE; // Disable PA
 }
 
-/*
- * Clear Pa
+/*! \brief Clear Pa
+ *
  */
 void Mcf5225GptClearPACounter(void)
 {
 	MCF_GPT_GPTPACNT = 0; // Clear PA Counter
 }
 
-/*
- * Get value of pulse accumulator
+/*! \brief Get value of pulse accumulator
+ *
+ * \return MCF_GPT_GPTPACNT
  */
 uint16_t Mcf5225GptGetPACounter(void)
 {
@@ -90,7 +130,7 @@ uint16_t Mcf5225GptGetPACounter(void)
 /* ******************************************************
  * Counter implementation
  * ******************************************************
- * Firstly you need to use init function, then you can use control functions (Enable,Disable,Clear,Get)
+ * Firstly, you need to use init function, then you can use control functions (Enable,Disable,Clear,Get,Start,Stop)
  */
 
 #define	STABLE_COUNT		5000	//ochrana proti zakmitum na meridlu => 26.667ms pri prescaleru 7 (128)  = (1 / 24000000) * 128 * 1000 * 5000
@@ -123,17 +163,22 @@ static	InterruptEventS	int_events[INT_EVENTS_MAX];
 static	int int_event_count = 0;
 #endif
 
+
+/*! \brief Fce called in interrupt event
+ *
+ * \param *arg 	Channel Index (1-3)
+ */
 static void IntHandlerCaptureEvent(void *arg)
 {
 	int						channel = (int)arg;
 	volatile GptCounterS	*p_gptCounter = &GptCounter[channel];
 	uint16_t				captured_count;
-	int tmp;
+	int 					tmp;
 
 	//ignore flickers
 	captured_count = MCF_GPT_GPTC(channel);
 #ifdef	DEBUG_INT_EVENTS
-	if (int_event_count < INT_EVENTS_MAX)
+	if(int_event_count < INT_EVENTS_MAX)
 	{
 		int_events[int_event_count].channel = channel;
 		int_events[int_event_count].timer_count = captured_count;
@@ -164,6 +209,11 @@ static void IntHandlerCaptureEvent(void *arg)
 #endif
 }
 
+/*! \brief Start GPT Counting on channel (n)
+ *
+ * \param channel 			Channel Index (1-3)
+ * \param *counter_handler 	Function used from interrupt
+ */
 void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
 {
 	static IRQ_HANDLER	*sig_GPT[MCF_GPT_CHANNEL_COUNT] = {
@@ -195,8 +245,9 @@ void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
 	Mcf5225GptCounterClear(channel);
 }
 
-/*
- * Start GPT Counting on channel (n)
+/*! \brief Start GPT Counting on channel (n)
+ *
+ * \param channel 	Channel Index (1-3)
  */
 void Mcf5225GptCounterStart(int channel)
 {
@@ -204,8 +255,9 @@ void Mcf5225GptCounterStart(int channel)
 	GpioPinConfigSet(PORTTA, channel, GPIO_CFG_PERIPHERAL0 | GPIO_CFG_INPUT);	//set PIN functionality to GPT
 }
 
-/*
- * Stop GPT Counting on channel (n)
+/*! \brief Stop GPT Counting on channel (n)
+ *
+ * \param channel 	Channel Index (1-3)
  */
 void Mcf5225GptCounterStop(int channel)
 {
@@ -213,8 +265,8 @@ void Mcf5225GptCounterStop(int channel)
 	Gptcounter_GPCTL2_mask &= ~MCF_GPT_GPTCTL2_INPUT_MASK(channel);
 }
 
-/*
- * Start GPT Counting input capture events
+/*! \brief Start GPT Counting input capture events
+ *
  */
 void Mcf5225GptCountersEnable(void)
 {
@@ -222,8 +274,8 @@ void Mcf5225GptCountersEnable(void)
 	MCF_GPT_GPTSCR1 |=  MCF_GPT_GPTSCR1_GPTEN; // Enable GPT
 }
 
-/*
- * Stop GPT Counting
+/*! \brief Stop GPT Counting
+ *
  */
 void Mcf5225GptCountersDisable(void)
 {
@@ -231,16 +283,22 @@ void Mcf5225GptCountersDisable(void)
 	MCF_GPT_GPTCTL2 &= ~Gptcounter_GPCTL2_mask;
 }
 
-/*
- * Clear GPT Channel Counter
+
+/*! \brief Clear GPT Channel Counter
+ *
+ * \param channel 	Channel Index (1-3)
  */
 void Mcf5225GptCounterClear(int channel)
 {
 	GptCounter[channel].counter = 0;
 }
 
-/*
- * Get GPT Channel Counter
+
+/*! \brief Get GPT Channel Counter
+ *
+ * \param channel 	Channel Index (1-3)
+ *
+ * \return GptCounter[channel].counter
  */
 int Mcf5225GptCounterGet(int channel)
 {

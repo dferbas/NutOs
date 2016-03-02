@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +33,10 @@
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 
+/*!
+ * \addtogroup xgMcf5225
+ */
+/*@{*/
 
 static int IrqCtl0(int cmd, void *param);
 static int IrqCtl1(int cmd, void *param);
@@ -65,6 +69,13 @@ IRQ_HANDLER sig_UART2 = {
         IrqCtl2
     };
 
+/*! \brief UART0 interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtl0(int cmd, void *param)
 {
     uint32_t   no_imr;
@@ -75,6 +86,13 @@ static int IrqCtl0(int cmd, void *param)
             &MCF_INTC_ICR13(0), IPL_UART0);
 }
 
+/*! \brief UART1 interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtl1(int cmd, void *param)
 {
     uint32_t   no_imr;
@@ -85,6 +103,13 @@ static int IrqCtl1(int cmd, void *param)
             &MCF_INTC_ICR14(0), IPL_UART1);
 }
 
+/*! \brief UART2 interrupt control.
+ *
+ * \param cmd Control command.
+ * \param *param Pointer to optional parameter.
+ *
+ * \return IrqCtlCommon 0 on success, -1 otherwise.
+ */
 static int IrqCtl2(int cmd, void *param)
 {
     uint32_t   no_imr;

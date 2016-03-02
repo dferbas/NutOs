@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,32 +29,34 @@
  *
  * For additional information see http://www.ethernut.de/
  */
+
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 #include <dev/gpio.h>
 
-int Mcf51cnPtmInitInputCapture(void (*handler) (void *), void *handler_arg, uint32_t devnum, uint32_t channel){
+int Mcf51cnPtmInitInputCapture(void (*handler)(void *), void *handler_arg, uint32_t devnum,
+		uint32_t channel)
+{
 	int bank, bit;
 	uint32_t flags = GPIO_CFG_ALT3;
 	IRQ_HANDLER *p_irqHandler = 0;
-
 
 	if (devnum == 1)
 	{
 		bank = PORTE;
 		if (channel == 0)
 		{
-			bit= 3;
+			bit = 3;
 			p_irqHandler = &sig_TPM1_CH0;
 		}
 		else if (channel == 1)
 		{
-			bit= 4;
+			bit = 4;
 			p_irqHandler = &sig_TPM1_CH1;
 		}
 		else if (channel == 2)
 		{
-			bit= 5;
+			bit = 5;
 			p_irqHandler = &sig_TPM1_CH2;
 		}
 		else
@@ -67,19 +69,19 @@ int Mcf51cnPtmInitInputCapture(void (*handler) (void *), void *handler_arg, uint
 		if (channel == 0)
 		{
 			bank = PORTB;
-			bit= 6;
+			bit = 6;
 			p_irqHandler = &sig_TPM2_CH0;
 		}
 		else if (channel == 1)
 		{
 			bank = PORTB;
-			bit= 7;
+			bit = 7;
 			p_irqHandler = &sig_TPM2_CH1;
 		}
 		else if (channel == 2)
 		{
 			bank = PORTC;
-			bit= 0;
+			bit = 0;
 			p_irqHandler = &sig_TPM2_CH2;
 		}
 		else
@@ -91,13 +93,13 @@ int Mcf51cnPtmInitInputCapture(void (*handler) (void *), void *handler_arg, uint
 	GpioPinConfigSet(bank, bit, flags);
 
 	/* Stop HW */
-	MCF_TPM_SC(devnum) = 0;
+	MCF_TPM_SC (devnum) = 0;
 
 	/* Disable modulo register */
-	MCF_TPM_MOD(devnum) = 0;
+	MCF_TPM_MOD (devnum) = 0;
 
 	/* Reset counter */
-	MCF_TPM_CNT(devnum) = 0;
+	MCF_TPM_CNT (devnum) = 0;
 
 	/* Clear capture register */
 	MCF_TPM_CV(devnum, channel) = 0;

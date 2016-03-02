@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,6 +29,7 @@
  *
  * For additional information see http://www.ethernut.de/
  */
+
 #include <cfg/os.h>
 #include <cfg/clock.h>
 
@@ -38,12 +39,12 @@
 
 /*!
  * \addtogroup xgNutArchM68kMCF5225OsTimer
+ * \addtogroup xgMcf5225
  */
 /*@{*/
 
 #ifndef NUT_TICK_FREQ
-/*!
- * \brief System timer interrupt frequency.
+/*! \brief System timer interrupt frequency.
  *
  * Specifies the number of interrupts per second, typically 1000.
  * In order to reduce overhead, you may choose lower values. Note,
@@ -57,8 +58,7 @@
 #define EXT_CLOCK_HZ    	48000000UL
 #define CHANEL				0	/* PIT0 */
 
-/*!
- * \brief Initialize system timer.
+/*! \brief Initialize system timer.
  *
  * Applications must not call this function.
  *
@@ -74,20 +74,20 @@
  * \param handler This routine should be called each time, when a 
  *                system timer interrupt occurs.
  */
-void NutRegisterTimer(void (*handler) (void *))
+void NutRegisterTimer(void (*handler)(void *))
 {
 	/*
-     * Note, that this timer will no longer be available for
-     * applications.
-     */
-     
+	 * Note, that this timer will no longer be available for
+	 * applications.
+	 */
+
 	uint8_t prescaler = 0;
 	uint32_t modulus;
 
 	/*
 	 * It is recommended to use NutClockGet() to determine the input
-     * clock frequency.
-     * 
+	 * clock frequency.
+	 *
 	 * Count PIT Count Register value.
 	 * Timeout Frequency = fsys/2 / (2^PCSRn[PRE] * (PMRn[PM] + 1)) in Hertz
 	 * PMRn[PM] = (fsys/2 / (2^PCSRn[PRE] * NUT_TICK_FREQ)) - 1
@@ -114,8 +114,7 @@ void NutRegisterTimer(void (*handler) (void *))
 }
 
 #ifndef NUT_CPU_FREQ
-/*!
- * \brief Return the specified clock frequency.
+/*! \brief Return the specified clock frequency.
  *
  * Applications must not call this function, but use NutClockGet()
  * instead.
@@ -134,7 +133,7 @@ void NutRegisterTimer(void (*handler) (void *))
  * \return Clock frequency in Hertz.
  */
 uint32_t NutArchClockGet(int idx)
- {
+{
 	int fout, fref, mfd, rfd, divider, lpdr;
 
 	/* The PLL pre divider - 48MHz / (CCHR + 1) = 8MHz */
@@ -144,24 +143,25 @@ uint32_t NutArchClockGet(int idx)
 	/* The LPDR divides down the system clock by a factor of 2^LPDR. */
 	lpdr = 1 << MCF_CLOCK_LPDR;
 
-
 	mfd = (MCF_CLOCK_SYNCR & 0x7000) >> 12;
 	mfd = 2 * (mfd + 2); // MIN_MFD
 	rfd = (MCF_CLOCK_SYNCR & 0x0700) >> 8;
 	rfd = 1 << rfd;
 
 	/* Return current PLL output */
-	if ((MCF_CLOCK_SYNCR & MCF_CLOCK_SYNCR_CLKSRC) && (MCF_CLOCK_SYNCR & MCF_CLOCK_SYNCR_PLLEN)) {
+	if ((MCF_CLOCK_SYNCR & MCF_CLOCK_SYNCR_CLKSRC) && (MCF_CLOCK_SYNCR & MCF_CLOCK_SYNCR_PLLEN))
+	{
 		fout = (fref * (mfd / rfd)) / lpdr;
-	} else {
+	}
+	else
+	{
 		fout = fref / lpdr;
 	}
 	return fout;
 }
 #endif
 
-/*!
- * \brief Return the number of system ticks per second.
+/*! \brief Return the number of system ticks per second.
  *
  * This routine is used by Nut/OS to convert tick counts into
  * milliseconds.
@@ -175,11 +175,10 @@ uint32_t NutArchClockGet(int idx)
  */
 uint32_t NutGetTickClock(void)
 {
-    return NUT_TICK_FREQ;
+	return NUT_TICK_FREQ;
 }
 
-/*!
- * \brief Calculate system ticks for a given number of milliseconds.
+/*! \brief Calculate system ticks for a given number of milliseconds.
  *
  * This routine is used by Nut/OS to retrieve the number of system
  * ticks for a given timeout.
@@ -192,10 +191,10 @@ uint32_t NutGetTickClock(void)
 uint32_t NutTimerMillisToTicks(uint32_t ms)
 {
 #if NUT_TICK_FREQ == 1000
-    return ms;
+	return ms;
 #else
-    uint64_t msll = ms;
-    return (uint32_t) ((msll * NutGetTickClock()) / 1000);
+	uint64_t msll = ms;
+	return (uint32_t) ((msll * NutGetTickClock()) / 1000);
 #endif
 }
 

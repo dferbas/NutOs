@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,28 +35,25 @@
 
 static int IrqCtl(int cmd, void *param);
 
-IRQ_HANDLER sig_ADC = {
+IRQ_HANDLER sig_ADC =
+{
 #ifdef NUT_PERFMON
-        0,
+		0,
 #endif
-        NULL,
-        NULL,
-        IrqCtl
-    };
-
+		NULL,
+		NULL, IrqCtl };
 
 static int IrqCtl(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_ADC, cmd, param, &MCF_ADC_SC1, MCF_ADC_SC1_AIEN, 1);
+	return IrqCtlCommon(&sig_ADC, cmd, param, &MCF_ADC_SC1, MCF_ADC_SC1_AIEN, 1);
 }
-
 
 SIGNAL(IH_ADC)
 {
-    /*
-     * Interrupt flag (MCF_ADC_SC1_COCO bit) is cleared when converted value (MCF_ADC_R) is read.
-     * This must be ensured by assigned signal handler.
-     */
-    CallHandler(&sig_ADC);
+	/*
+	 * Interrupt flag (MCF_ADC_SC1_COCO bit) is cleared when converted value (MCF_ADC_R) is read.
+	 * This must be ensured by assigned signal handler.
+	 */
+	CallHandler(&sig_ADC);
 }
 

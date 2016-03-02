@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,55 +35,76 @@
 #include <dev/irqreg.h>
 #include <sys/timer.h>
 
+/*!
+ * \addtogroup xgMcf5225
+ */
+/*@{*/
+
 static ureg_t nested;
 
 static void IrqHandler(void *arg)
 {
-    /* Reset */
-    MCF_RCM_RCR |= MCF_RCM_RCR_SOFTRST;
+	/* Reset */
+	MCF_RCM_RCR |= MCF_RCM_RCR_SOFTRST;
 }
 
+/*! \brief Initialize and start watchdog
+ *
+ * \param ms 	Value used in watchdog timing.
+ *
+ * \return (1 << shift[cwt]) / (NutGetCpuClock() / 1000)
+ */
 uint32_t Mcf5225WatchDogStart(uint32_t ms)
 {
-    int cwt;
-    uint8_t shift[8] = { 9, 11, 13, 15, 19, 23, 27, 31 };
+	int cwt;
+	uint8_t shift[8] =
+	{ 9, 11, 13, 15, 19, 23, 27, 31 };
 
-    /* Stop watchdog + Following steps must be taken to change CWT */
-    MCF_SCM_CWCR &= ~MCF_SCM_CWCR_CWE;
-    MCF_SCM_CWSR = 0x55;
-    MCF_SCM_CWSR = 0xAA;
+	/* Stop watchdog + Following steps must be taken to change CWT */
+	MCF_SCM_CWCR &= ~MCF_SCM_CWCR_CWE;
+	MCF_SCM_CWSR = 0x55;
+	MCF_SCM_CWSR = 0xAA;
 
-    /* Get Core Watchdog Timing */
-    for (cwt = 0; cwt < 8; cwt++)
-        if (((1 << shift[cwt]) / (NutGetCpuClock() / 1000)) > ms)
-            break;
+	/* Get Core Watchdog Timing */
+	for (cwt = 0; cwt < 8; cwt++)
+		if (((1 << shift[cwt]) / (NutGetCpuClock() / 1000)) > ms)
+			break;
 
-    /* Register interrupt handler */
-    NutRegisterIrqHandler(&sig_CWD, IrqHandler, NULL);
+	/* Register interrupt handler */
+	NutRegisterIrqHandler(&sig_CWD, IrqHandler, NULL);
 
-    /* Configure and enable watchdog */
-    MCF_SCM_CWCR = MCF_SCM_CWCR_CWE | MCF_SCM_CWCR_CWT(cwt);
-    nested = 1;
+	/* Configure and enable watchdog */
+	MCF_SCM_CWCR = MCF_SCM_CWCR_CWE | MCF_SCM_CWCR_CWT(cwt);
+	nested = 1;
 
-    return ((1 << shift[cwt]) / (NutGetCpuClock() / 1000));
+	return ((1 << shift[cwt]) / (NutGetCpuClock() / 1000));
 }
 
+/*! \brief Restart watchdog
+ *
+ */
 void Mcf5225WatchDogRestart(void)
 {
-    MCF_SCM_CWSR = 0x55;
-    MCF_SCM_CWSR = 0xAA;
+	MCF_SCM_CWSR = 0x55;
+	MCF_SCM_CWSR = 0xAA;
 }
 
+/*! \brief Disable watchdog
+ *
+ */
 void Mcf5225WatchDogDisable(void)
 {
-    if (nested)
-        nested++;
+	if (nested)
+		nested++;
 
-    MCF_SCM_CWCR &= ~MCF_SCM_CWCR_CWE;
+	MCF_SCM_CWCR &= ~MCF_SCM_CWCR_CWE;
 }
 
+/*! \brief Enable watchdog
+ *
+ */
 void Mcf5225WatchDogEnable(void)
 {
-    if (nested > 1 && --nested == 1)
-        MCF_SCM_CWCR |= MCF_SCM_CWCR_CWE;
+	if (nested > 1 && --nested == 1)
+		MCF_SCM_CWCR |= MCF_SCM_CWCR_CWE;
 }

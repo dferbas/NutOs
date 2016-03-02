@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,26 +29,27 @@
  *
  * For additional information see http://www.ethernut.de/
  */
+
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 #include <dev/gpio.h>
 
 uint16_t Mcf51qeAdcValue(void)
 {
-	MCF_ADC_SC1  = 0x5F; // One conversion only (continuous conversions disabled)
+	MCF_ADC_SC1 = 0x5F; // One conversion only (continuous conversions disabled)
 	return MCF_ADC_R;
 }
 
-
-void Mcf51qeAdcInit(void (*handler) (void *), void *handler_arg)
+void Mcf51qeAdcInit(void (*handler)(void *), void *handler_arg)
 {
 	MCF_SCGC1 |= MCF_SCGC1_ADC; // enable system clock
 	NutRegisterIrqHandler(&sig_ADC, handler, handler_arg);
 	MCF_APCTL2 = MCF_APCTL2_ADPC10 | MCF_APCTL2_ADPC11 | MCF_APCTL2_ADPC12;
-	MCF_ADC_CFG  =  MCF_ADC_CFG_MODE(0x1) | MCF_ADC_CFG_ADLSMP | MCF_ADC_CFG_ADLPC | MCF_ADC_CFG_ADIV(0x3); // 12bit conversion
-	MCF_ADC_CV  = 0;
-	MCF_ADC_SC2  = 0;
-	MCF_ADC_SC1  = 0x5F; // One conversion only (continuous conversions disabled)
+	MCF_ADC_CFG = MCF_ADC_CFG_MODE(0x1) | MCF_ADC_CFG_ADLSMP | MCF_ADC_CFG_ADLPC
+			| MCF_ADC_CFG_ADIV(0x3); // 12bit conversion
+	MCF_ADC_CV = 0;
+	MCF_ADC_SC2 = 0;
+	MCF_ADC_SC1 = 0x5F; // One conversion only (continuous conversions disabled)
 //	NutIrqEnable(&sig_ADC);
 }
 

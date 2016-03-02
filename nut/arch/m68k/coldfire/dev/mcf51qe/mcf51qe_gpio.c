@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,30 +42,35 @@
  */
 uint32_t GpioPinConfigGet(int bank, int bit)
 {
-    uint32_t rc = 0;
-    uint8_t mask = _BV(bit);
+	uint32_t rc = 0;
+	uint8_t mask = _BV(bit);
 
-    /* Verify bank */
-    if (bank > PORTJ) {
-        return 0;
-    }
+	/* Verify bank */
+	if (bank > PORTJ)
+	{
+		return 0;
+	}
 
-	if (MCF_GPIO_DD(bank) & mask) {
+	if (MCF_GPIO_DD(bank) & mask)
+	{
 		rc = GPIO_CFG_OUTPUT;
 	}
 
-    /* Read pin config */
-    if (MCF_GPIO_PE(bank) & mask) {
-        rc |= GPIO_CFG_PULLUP;
-    }
-    if (MCF_GPIO_SE(bank) & mask) {
-        rc |= GPIO_CFG_SLEW_RATE;
-    }
-    if (MCF_GPIO_DS(bank) & mask) {
-        rc |= GPIO_CFG_DRIVE_STRENGTH;
-    }
+	/* Read pin config */
+	if (MCF_GPIO_PE(bank) & mask)
+	{
+		rc |= GPIO_CFG_PULLUP;
+	}
+	if (MCF_GPIO_SE(bank) & mask)
+	{
+		rc |= GPIO_CFG_SLEW_RATE;
+	}
+	if (MCF_GPIO_DS(bank) & mask)
+	{
+		rc |= GPIO_CFG_DRIVE_STRENGTH;
+	}
 
-    return rc;
+	return rc;
 }
 
 /*!
@@ -87,13 +92,14 @@ uint32_t GpioPinConfigGet(int bank, int bit)
  */
 int GpioPinConfigSet(int bank, int bit, uint32_t flags)
 {
-    GpioPortConfigSet(bank, _BV(bit), flags);
+	GpioPortConfigSet(bank, _BV(bit), flags);
 
-    /* Check the result. */
-    if (GpioPinConfigGet(bank, bit) != flags) {
-        return -1;
-    }
-    return 0;
+	/* Check the result. */
+	if (GpioPinConfigGet(bank, bit) != flags)
+	{
+		return -1;
+	}
+	return 0;
 }
 
 /*!
@@ -111,39 +117,52 @@ int GpioPinConfigSet(int bank, int bit, uint32_t flags)
  */
 int GpioPortConfigSet(int bank, uint32_t mask, uint32_t flags)
 {
-    uint32_t role = flags & (GPIO_CFG_PERIPHERAL_MASK | GPIO_CFG_OUTPUT);
+	uint32_t role = flags & (GPIO_CFG_PERIPHERAL_MASK | GPIO_CFG_OUTPUT);
 
-    /* Verify bank */
-    if (bank > PORTJ) {
-        return 0;
-    }
+	/* Verify bank */
+	if (bank > PORTJ)
+	{
+		return 0;
+	}
 
-    /* Configure GPIO direction first */
-    /* For PTC3(Reset) and PTD6(BKGD) is GPIO function in GPIO_CFG_ALT1 */
-    if (role & GPIO_CFG_OUTPUT) {
-        MCF_GPIO_DD(bank) |= mask;
-    } else if (role == GPIO_CFG_INPUT) {
-        MCF_GPIO_DD(bank) &= ~mask;
-    }
+	/* Configure GPIO direction first */
+	/* For PTC3(Reset) and PTD6(BKGD) is GPIO function in GPIO_CFG_ALT1 */
+	if (role & GPIO_CFG_OUTPUT)
+	{
+		MCF_GPIO_DD(bank) |= mask;
+	}
+	else if (role == GPIO_CFG_INPUT)
+	{
+		MCF_GPIO_DD(bank) &= ~mask;
+	}
 
-    /* Configure pin features */
-    if (flags & GPIO_CFG_PULLUP) {
-        MCF_GPIO_PE(bank) |= mask;
-    } else {
-        MCF_GPIO_PE(bank) &= ~mask;
-    }
+	/* Configure pin features */
+	if (flags & GPIO_CFG_PULLUP)
+	{
+		MCF_GPIO_PE(bank) |= mask;
+	}
+	else
+	{
+		MCF_GPIO_PE(bank) &= ~mask;
+	}
 
-    if (flags & GPIO_CFG_SLEW_RATE) {
-        MCF_GPIO_SE(bank) |= mask;
-    } else {
-        MCF_GPIO_SE(bank) &= ~mask;
-    }
+	if (flags & GPIO_CFG_SLEW_RATE)
+	{
+		MCF_GPIO_SE(bank) |= mask;
+	}
+	else
+	{
+		MCF_GPIO_SE(bank) &= ~mask;
+	}
 
-    if (flags & GPIO_CFG_DRIVE_STRENGTH) {
-        MCF_GPIO_DS(bank) |= mask;
-    } else {
-        MCF_GPIO_DS(bank) &= ~mask;
-    }
+	if (flags & GPIO_CFG_DRIVE_STRENGTH)
+	{
+		MCF_GPIO_DS(bank) |= mask;
+	}
+	else
+	{
+		MCF_GPIO_DS(bank) &= ~mask;
+	}
 
-    return 0;
+	return 0;
 }

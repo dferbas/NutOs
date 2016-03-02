@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 by Embedded Technologies s.r.o
+ * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,38 +33,34 @@
 #include <arch/m68k.h>
 #include <dev/irqreg.h>
 
-
 static int IrqCtl1(int cmd, void *param);
 static int IrqCtl2(int cmd, void *param);
 
-IRQ_HANDLER sig_IIC1 = {
+IRQ_HANDLER sig_IIC1 =
+{
 #ifdef NUT_PERFMON
-        0,
+		0,
 #endif
-        NULL,
-        NULL,
-        IrqCtl1
-    };
+		NULL,
+		NULL, IrqCtl1 };
 
-IRQ_HANDLER sig_IIC2 = {
+IRQ_HANDLER sig_IIC2 =
+{
 #ifdef NUT_PERFMON
-        0,
+		0,
 #endif
-        NULL,
-        NULL,
-        IrqCtl2
-    };
+		NULL,
+		NULL, IrqCtl2 };
 
 static int IrqCtl1(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_IIC1, cmd, param, &MCF_IIC_CR(0), MCF_IIC_CR_IICIE, 1);
+	return IrqCtlCommon(&sig_IIC1, cmd, param, &MCF_IIC_CR(0), MCF_IIC_CR_IICIE, 1);
 }
 
 static int IrqCtl2(int cmd, void *param)
 {
-    return IrqCtlCommon(&sig_IIC2, cmd, param, &MCF_IIC_CR(1), MCF_IIC_CR_IICIE, 1);
+	return IrqCtlCommon(&sig_IIC2, cmd, param, &MCF_IIC_CR(1), MCF_IIC_CR_IICIE, 1);
 }
-
 
 #if defined (MCU_MCF51CN)
 SIGNAL(IH_IIC1)
@@ -81,12 +77,14 @@ SIGNAL(IH_IIC2)
 #elif defined (MCU_MCF51QE)
 SIGNAL(IH_IIC_X)
 {
-	if (MCF_IIC_SR(0) & MCF_IIC_SR_IICIF){
+	if (MCF_IIC_SR(0) & MCF_IIC_SR_IICIF)
+	{
 		MCF_IIC_SR(0) = MCF_IIC_SR_IICIF;
 		CallHandler(&sig_IIC1);
 	}
 
-	if (MCF_IIC_SR(1) & MCF_IIC_SR_IICIF){
+	if (MCF_IIC_SR(1) & MCF_IIC_SR_IICIF)
+	{
 		MCF_IIC_SR(1) = MCF_IIC_SR_IICIF;
 		CallHandler(&sig_IIC2);
 	}
