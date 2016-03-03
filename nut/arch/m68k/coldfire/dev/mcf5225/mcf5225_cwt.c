@@ -48,7 +48,8 @@ static void IrqHandler(void *arg)
 	MCF_RCM_RCR |= MCF_RCM_RCR_SOFTRST;
 }
 
-/*! \brief Initialize and start watchdog
+/*!
+ * \brief Initialize and start watchdog
  *
  * \param ms 	Value used in watchdog timing.
  *
@@ -80,8 +81,8 @@ uint32_t Mcf5225WatchDogStart(uint32_t ms)
 	return ((1 << shift[cwt]) / (NutGetCpuClock() / 1000));
 }
 
-/*! \brief Restart watchdog
- *
+/*!
+ * \brief Restart watchdog
  */
 void Mcf5225WatchDogRestart(void)
 {
@@ -89,8 +90,8 @@ void Mcf5225WatchDogRestart(void)
 	MCF_SCM_CWSR = 0xAA;
 }
 
-/*! \brief Disable watchdog
- *
+/*!
+ * \brief Disable watchdog
  */
 void Mcf5225WatchDogDisable(void)
 {
@@ -100,8 +101,8 @@ void Mcf5225WatchDogDisable(void)
 	MCF_SCM_CWCR &= ~MCF_SCM_CWCR_CWE;
 }
 
-/*! \brief Enable watchdog
- *
+/*!
+ * \brief Enable watchdog
  */
 void Mcf5225WatchDogEnable(void)
 {

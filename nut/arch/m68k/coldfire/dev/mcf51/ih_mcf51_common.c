@@ -39,7 +39,8 @@
  */
 /*@{*/
 
-/*! \brief Common interrupt control.
+/*!
+ * \brief Common interrupt control.
  *
  * \param cmd   Control command.
  *              - NUT_IRQCTL_INIT Initialize and disable interrupt.

@@ -54,8 +54,8 @@ static HANDLE spi_transfer_handler;	// waiting for spi transfer finished
 
 #define SPI_CHANNEL		2
 
-/*! \brief Set the specified chip select to a given level.
- *
+/*!
+ * \brief Set the specified chip select to a given level.
  */
 static int Mcf51cnSpiChipSelect(uint_fast8_t cs, uint_fast8_t level)
 {
@@ -77,7 +77,8 @@ static int Mcf51cnSpiChipSelect(uint_fast8_t cs, uint_fast8_t level)
 	return rc;
 }
 
-/*! \brief Select a device on the first SPI bus.
+/*!
+ * \brief Select a device on the first SPI bus.
  *
  * Locks and activates the bus for the specified node.
  *
@@ -114,7 +115,8 @@ int Mcf51cnSpiSelect(uint_fast8_t node_cs) //, uint32_t tmo)
 
 }
 
-/*! \brief Deselect a device on the first SPI bus.
+/*!
+ * \brief Deselect a device on the first SPI bus.
  *
  * Deactivates the chip select and unlocks the bus.
  *
@@ -176,7 +178,8 @@ static void Mcf51cnSpiInterrupt(void *arg)
 	}
 }
 
-/*! \brief Transfer data on the SPI bus using single buffered interrupt mode.
+/*!
+ * \brief Transfer data on the SPI bus using single buffered interrupt mode.
  *
  * A device must have been selected by calling Mcf51SpiSelect().
  *
@@ -226,8 +229,8 @@ int Mcf51cnSpiTransfer(const void *txbuf, void *rxbuf, int xlen)
 	return rc;
 }
 
-/*! \brief Initialize an SPI bus node.
- *
+/*!
+ * \brief Initialize an SPI bus node.
  */
 void Mcf51cnSpiInit(void)
 {

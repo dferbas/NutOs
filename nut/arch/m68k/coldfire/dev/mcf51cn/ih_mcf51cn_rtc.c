@@ -50,12 +50,13 @@ IRQ_HANDLER sig_RTC = {
     };
 
 
-/*! \brief RTC interrupt control.
+/*!
+ * \brief RTC interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtl(int cmd, void *param)
 {

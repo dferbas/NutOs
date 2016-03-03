@@ -62,8 +62,8 @@ static uint32_t Mcf5SciGetFlowControl(void);
 static int Mcf5SciInit(void);
 static int Mcf5SciDeinit(void);
 
-/*! \brief SCI1 device control block structure.
- *
+/*!
+ * \brief SCI1 device control block structure.
  */
 static USARTDCB dcb_sci1 = {
     0,                          /* dcb_modeflags */
@@ -98,7 +98,8 @@ static USARTDCB dcb_sci1 = {
  */
 /*@{*/
 
-/*! \brief Coldfire device information structure.
+/*!
+ * \brief Coldfire device information structure.
  *
  * An application must pass a pointer to this structure to
  * NutRegisterDevice() before using the serial communication

@@ -49,12 +49,13 @@ IRQ_HANDLER sig_QSPI_TF = {
     QspiIrqCtl     /* Interrupt control, ir_ctl. */
 };
 
-/*! \brief Qspi interrupt control.
+/*!
+ * \brief Qspi interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int QspiIrqCtl(int cmd, void *param)
 {

@@ -59,24 +59,26 @@ IRQ_HANDLER sig_MTIM2 = {
         IrqCtl2
     };
 
-/*! \brief MTIM1 interrupt control.
+/*!
+ * \brief MTIM1 interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtl1(int cmd, void *param)
 {
     return IrqCtlCommon(&sig_MTIM1, cmd, param, &MCF_MTIM_SC(1), MCF_MTIM_SC_TOIE, 1);
 }
 
-/*! \brief MTIM2 interrupt control.
+/*!
+ * \brief MTIM2 interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtl2(int cmd, void *param)
 {

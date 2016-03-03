@@ -43,7 +43,8 @@
  */
 /*@{*/
 
-/*! \brief M68k GCC context switch frame layout.
+/*!
+ * \brief M68k GCC context switch frame layout.
  *
  * This is the layout of the stack after a thread's context has been
  * switched-out. The stack pointer is stored in the thread info and
@@ -56,7 +57,8 @@ typedef struct
 	uint32_t a[4];	 // a2-a5
 } SWITCHFRAME;
 
-/*! \brief Thread entry frame layout.
+/*!
+ * \brief Thread entry frame layout.
  *
  * This is the stack layout being build to enter a new thread.
  */
@@ -79,8 +81,8 @@ void NutThreadExitAndYield(void)
 	NutThreadYield();
 }
 
-/*! \brief Enter a new thread.
- *
+/*!
+ * \brief Enter a new thread.
  */
 void NutThreadEntry(void)
 {
@@ -102,7 +104,8 @@ void NutThreadEntry(void)
 	NutThreadExitAndYield();
 }
 
-/*! \brief Switch to another thread.
+/*!
+ * \brief Switch to another thread.
  *
  * Stop the current thread, saving its context. Then start the
  * one with the highest priority, which is ready to run.
@@ -144,7 +147,8 @@ void NutThreadSwitch(void)
 	__asm__ volatile("move.w	%d1,%sr");
 }
 
-/*! \brief Create a new thread.
+/*!
+ * \brief Create a new thread.
  *
  * If the current thread's priority is lower or equal than the default
  * priority (64), then the current thread is stopped and the new one

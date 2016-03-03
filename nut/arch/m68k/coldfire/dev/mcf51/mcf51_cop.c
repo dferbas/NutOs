@@ -37,8 +37,8 @@
  */
 /*@{*/
 
-/*! \note Not supported by CPU
- *
+/*!
+ * \brief Not supported by CPU
  */
 uint32_t Mcf51CopStart(uint32_t ms)
 {
@@ -58,8 +58,8 @@ uint32_t Mcf51CopStart(uint32_t ms)
     return 0;
 }
 
-/*! \note Not supported by CPU
- *
+/*!
+ * \brief Not supported by CPU
  */
 void Mcf51CopRestart(void)
 {
@@ -76,8 +76,8 @@ void Mcf51CopRestart(void)
 #endif
 }
 
-/*! \note Not supported by CPU
- *
+/*!
+ * \brief Not supported by CPU
  */
 void Mcf51CopDisable(void)
 {
@@ -91,8 +91,8 @@ void Mcf51CopDisable(void)
      */
 }
 
-/*! \note Not supported by CPU
- *
+/*!
+ * \brief Not supported by CPU
  */
 void Mcf51CopEnable(void)
 {

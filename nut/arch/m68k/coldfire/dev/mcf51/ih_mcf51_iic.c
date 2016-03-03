@@ -60,24 +60,26 @@ IRQ_HANDLER sig_IIC2 =
 };
 
 
-/*! \brief IIC1 interrupt control.
+/*!
+ * \brief IIC1 interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtl1(int cmd, void *param)
 {
 	return IrqCtlCommon(&sig_IIC1, cmd, param, &MCF_IIC_CR(0), MCF_IIC_CR_IICIE, 1);
 }
 
-/*! \brief IIC2 interrupt control.
+/*!
+ * \brief IIC2 interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtl2(int cmd, void *param)
 {

@@ -58,7 +58,8 @@ __attribute__ ((section (".data.flash_ram"))) volatile int Mcf51IntFlashRamCMD(u
 	return 0;
 }
 
-/*! \brief Return flash protect register
+/*!
+ * \brief Return flash protect register
  *
  * \return MCF_FPROT
  */
@@ -75,7 +76,8 @@ int Mcf51IntFlashInit(void)
 	return 0;
 }
 
-/*! \brief Read data from flash memory
+/*!
+ * \brief Read data from flash memory
  *
  * \param dst		Destination in flash memory
  * \param *data		Pointer to data that you want read
@@ -96,7 +98,8 @@ int Mcf51IntFlashRead(uint32_t dst, uint32_t *data, uint32_t size)
 	return 0;
 }
 
-/*! \brief Write data to flash memory
+/*!
+ * \brief Write data to flash memory
  *
  * \param dst		Destination in flash memory
  * \param *data		Pointer to data that you want write
@@ -156,7 +159,8 @@ int Mcf51IntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size)
 	return 0;
 }
 
-/*! \brief Erase Sector (128 sectors of 1024 bytes each)
+/*!
+ * \brief Erase Sector (128 sectors of 1024 bytes each)
  *
  * \param addr	Flash memory adress
  *
@@ -196,7 +200,8 @@ int Mcf51IntFlashSectorErase(uint32_t addr)
 	return 0;
 }
 
-/*! \brief Erase entire flash
+/*!
+ * \brief Erase entire flash
  *
  * \return 0 = SUCCESS, -1 = ERROR
  */

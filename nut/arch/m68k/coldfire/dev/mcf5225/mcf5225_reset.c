@@ -39,7 +39,8 @@
 /*@{*/
 
 
-/*! \brief Reset control registers
+/*!
+ * \brief Reset control registers
  *
  * \note SOFTRST - Allows software to request a reset. The reset caused by setting this bit clears this bit.
  *
@@ -51,7 +52,8 @@ void Mcf5225_Reset(void)
 	MCF_RCM_RCR |= MCF_RCM_RCR_SOFTRST;
 }
 
-/*! \brief Reset status register (RSR)
+/*!
+ * \brief Reset status register (RSR)
  *
  * \note The RSR contains a status bit for every reset source. RSR can be read at any time. Writing to RSR has no effect.
  */

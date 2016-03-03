@@ -72,8 +72,8 @@ static struct _USART_CONTROL_REGISTER {
 
 } usartControlRegister ;
 
-/*! \brief USART1 device control block structure.
- *
+/*!
+ * \brief USART1 device control block structure.
  */
 static USARTDCB dcb_usart1 = {
     0,                          /* dcb_modeflags */
@@ -108,7 +108,8 @@ static USARTDCB dcb_usart1 = {
  */
 /*@{*/
 
-/*! \brief mcf5xxxx device information structure.
+/*!
+ * \brief mcf5xxxx device information structure.
  *
  * An application must pass a pointer to this structure to
  * NutRegisterDevice() before using the serial communication

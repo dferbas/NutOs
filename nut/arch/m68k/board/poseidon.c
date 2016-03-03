@@ -35,7 +35,8 @@
 #include <dev/gpio.h>
 
 
-/*! \brief Early poseidon hardware initialization.
+/*!
+ * \brief Early poseidon hardware initialization.
  *
  * \note It is called if NUT_INIT_BOARD macro is defined (using Nut/OS Configurator).
  */

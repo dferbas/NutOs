@@ -59,12 +59,13 @@ IRQ_HANDLER sig_PIT1 = {
         IrqCtl1
     };
 
-/*! \brief PIT0 interrupt control.
+/*!
+ * \brief PIT0 interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtl0(int cmd, void *param)
 {
@@ -74,12 +75,13 @@ static int IrqCtl0(int cmd, void *param)
             &MCF_INTC_ICR55(0), IPL_PIT0);
 }
 
-/*! \brief PIT1 interrupt control.
+/*!
+ * \brief PIT1 interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtl1(int cmd, void *param)
 {

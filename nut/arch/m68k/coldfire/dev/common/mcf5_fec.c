@@ -746,8 +746,8 @@ static int FecStart(FECINFO *ni, uint8_t *mac)
     return 0;
 }
 
-/*! \brief FEC Buffer Descriptor I/O functions
- *
+/*!
+ * \brief FEC Buffer Descriptor I/O functions
  */
 static void FecTxBdCleanup(FECINFO * ni)
 {
@@ -817,7 +817,8 @@ static inline void FecRxFrameErase(FECINFO * ni)
 	FecRxFrameReceive(ni, NULL, 0);
 }
 
-/*! \brief Fetch the next packet out of the receive buffers.
+/*!
+ * \brief Fetch the next packet out of the receive buffers.
  *
  * \return 0 on success, -1 otherwise.
  */
@@ -894,8 +895,8 @@ static int FecGetPacket(FECINFO * ni, NETBUF ** nbp)
 	return -1;
 }
 
-/*! \brief Load a packet into the transmit ring buffer.
- *
+/*!
+ * \brief Load a packet into the transmit ring buffer.
  */
 #ifdef TX_PACKET_ASSEMBLE
 static void FecPutPacket(FECINFO * ni, char *p_packet, int size)
@@ -982,7 +983,8 @@ static void FecPutPacketNetbuf(FECINFO * ni, NETBUF *nb)
     }
 }
 #endif
-/*! \brief Send Ethernet packet.
+/*!
+ * \brief Send Ethernet packet.
  *
  * \param dev 	Identifies the device to use.
  * \param nb  	Network buffer structure containing the packet to be sent.
@@ -1234,7 +1236,8 @@ THREAD(FecRxThread, arg)
 	}
 }
 
-/*! \brief Ioctl Functions
+/*!
+ * \brief Ioctl Functions
  *
  * SIOCGIFADDR - Get mac address
  * SIOCSIFADDR - Set mac address
@@ -1313,7 +1316,8 @@ static int FecIOCtl(NUTDEVICE * dev, int req, void *conf)
     return rc;
 }
 
-/*! \brief Initialize Ethernet hardware.
+/*!
+ * \brief Initialize Ethernet hardware.
  *
  * Applications should do not directly call this function. It is
  * automatically executed during device registration by
@@ -1395,7 +1399,8 @@ void Mcf5FecEthMWDTSetVariableFN(TMWDTSetVariableFN VariableFN)
 
 static FECINFO dcb_eth0  __attribute__ ((aligned (16)));
 
-/*! \brief Network interface information structure.
+/*!
+ * \brief Network interface information structure.
  *
  * Used to call.
  */
@@ -1415,7 +1420,8 @@ static IFNET ifn_eth0 = {
     NutEtherOutput              /*!< \brief Media output routine, if_output(). */
 };
 
-/*! \brief Device information structure.
+/*!
+ * \brief Device information structure.
  *
  * A pointer to this structure must be passed to NutRegisterDevice()
  * to bind this Ethernet device driver to the Nut/OS kernel.

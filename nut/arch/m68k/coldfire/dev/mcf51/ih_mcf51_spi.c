@@ -59,7 +59,8 @@ IRQ_HANDLER sig_SPI2 = {
         IrqCtl2
     };
 
-/*! \brief SPI1 interrupt control.
+/*!
+ * \brief SPI1 interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
@@ -72,7 +73,8 @@ static int IrqCtl1(int cmd, void *param)
     return IrqCtlCommon(&sig_SPI1, cmd, param, &MCF_SPI_C1(1), MCF_SPI_C1_SPIE, 1);
 }
 
-/*! \brief SPI2 interrupt control.
+/*!
+ * \brief SPI2 interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.

@@ -59,7 +59,8 @@ static HANDLE mutex_tran_start, mutex_tran_end;
 void QspiInterrupt(void *arg);
 
 //TODO: params desc
-/*! \brief Auxiliary common functions
+/*!
+ * \brief Auxiliary common functions
  *
  * \param *p_src
  * \param len
@@ -93,7 +94,8 @@ static inline void StartXmit(void)
 	MCF_QSPI_QDLYR |= MCF_QSPI_QDLYR_SPE;
 }
 
-/*! \brief qspi_tx1 - Transmit 1 byte
+/*!
+ * \brief qspi_tx1 - Transmit 1 byte
  *
  * \param uid 	unit ID
  * \param val 	value to send
@@ -128,7 +130,8 @@ t_spi_ret qspi_tx1(uint8_t uid, uint8_t val)
 	return QSPI_SUCCESS;
 }
 
-/*! \brief Transmit 'len' number of bytes
+/*!
+ * \brief Transmit 'len' number of bytes
  *
  * \param uid		unit ID
  * \param p_src		pointer to source buffer
@@ -191,7 +194,8 @@ t_spi_ret qspi_tx(uint8_t uid, uint8_t * p_src, uint32_t len)
 	return QSPI_SUCCESS;
 }
 
-/*! \brief Receive 'len' number of bytes
+/*!
+ * \brief Receive 'len' number of bytes
  *
  * \param uid		unit ID
  * \param p_dst		pointer to destination buffer
@@ -261,7 +265,8 @@ t_spi_ret qspi_rx(uint8_t uid, uint8_t * p_dst, uint32_t len)
 	return QSPI_SUCCESS;
 }
 
-/*! \brief Set chip select low.
+/*!
+ * \brief Set chip select low.
  *
  * \param uid	Unit ID
  */
@@ -270,7 +275,8 @@ void qspi_cs_lo(uint8_t uid)
 	MCF_GPIO_PORTQS &= ~(MCF_GPIO_PORTQS_PORTQS3);
 }
 
-/*! \brief Set chip select high.
+/*!
+ * \brief Set chip select high.
  *
  * \param uid	Unit ID
  */
@@ -279,7 +285,8 @@ void qspi_cs_hi(uint8_t uid)
 	MCF_GPIO_PORTQS |= MCF_GPIO_PORTQS_PORTQS3;
 }
 
-/*! \brief Lock the SPI for the specific unit.
+/*!
+ * \brief Lock the SPI for the specific unit.
  *
  * \note This can be useful if multiple units are attached to the same SPI bus.
  *
@@ -290,7 +297,8 @@ void qspi_lock(uint8_t uid)
 	return;
 }
 
-/*! \brief Unlock the SPI for the specific unit.
+/*!
+ * \brief Unlock the SPI for the specific unit.
  *
  * \note This can be useful if multiple units are attached to the same SPI bus.
  *
@@ -301,7 +309,8 @@ void qspi_unlock(uint8_t uid)
 	return;
 }
 
-/*! \brief Set baudrate.
+/*!
+ * \brief Set baudrate.
  *
  * \param uid	Unit ID
  * \param br	Baudrate in Hz
@@ -326,7 +335,8 @@ t_spi_ret qspi_set_baudrate(uint8_t uid, uint32_t br)
 		return QSPI_ERROR;
 }
 
-/*! \brief Get baudrate.
+/*!
+ * \brief Get baudrate.
  *
  * \param uid	Unit ID
  * \param p_br	Pointer to baudrate in Hz
@@ -344,7 +354,8 @@ t_spi_ret qspi_get_baudrate(uint8_t uid, uint32_t * p_br)
 }
 
 
-/*! \brief Init SPI port.
+/*!
+ * \brief Init SPI port.
  *
  * \param uid	Init ID
  *
@@ -389,7 +400,8 @@ t_spi_ret qspi_init(uint8_t uid)
 	return ret;
 }
 
-/*! \brief Start SPI port.
+/*!
+ * \brief Start SPI port.
  *
  * \param uid	Unit ID
  *
@@ -400,7 +412,8 @@ t_spi_ret qspi_start(uint8_t uid)
 	return QSPI_SUCCESS;
 }
 
-/*! \brief Stop SPI port.
+/*!
+ * \brief Stop SPI port.
  *
  * \param uid	Unit ID
  *
@@ -411,7 +424,8 @@ t_spi_ret qspi_stop(uint8_t uid)
 	return QSPI_SUCCESS;
 }
 
-/*! \brief Delete SPI port.
+/*!
+ * \brief Delete SPI port.
  *
  * \param uid	Unit ID
  *
@@ -422,7 +436,8 @@ t_spi_ret qspi_delete(uint8_t uid)
 	return QSPI_SUCCESS;
 }
 
-/*! \brief QSPI ISR
+/*!
+ * \brief QSPI ISR
  *
  * TODO: where is used param?, remake \brief
  */

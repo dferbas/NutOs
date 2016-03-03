@@ -48,8 +48,8 @@ struct _mcf51cn_rtc_dcb
 	int seconds;
 };
 
-/*! \brief Interrupt handler for RTC
- *
+/*!
+ * \brief Interrupt handler for RTC
  */
 static void Mcf51cnRtcInterrupt(void *arg)
 {
@@ -57,7 +57,8 @@ static void Mcf51cnRtcInterrupt(void *arg)
 	((mcf51cn_rtc_dcb *) rtc->dcb)->seconds++;
 }
 
-/*! \brief Get date and time from an Mcf51cn hardware clock.
+/*!
+ * \brief Get date and time from an Mcf51cn hardware clock.
  *
  * \param tm Points to a structure that receives the date and time
  *           information.
@@ -71,7 +72,8 @@ static int Mcf51cnRtcGetClock(NUTRTC *rtc, struct _tm *tm)
 	return 0;
 }
 
-/*! \brief Set the Mcf51cn hardware clock.
+/*!
+ * \brief Set the Mcf51cn hardware clock.
  *
  * \param tm Points to a structure which contains the date and time
  *           information.
@@ -90,7 +92,8 @@ static int Mcf51cnRtcSetClock(NUTRTC *rtc, const struct _tm *tm)
 	return 0;
 }
 
-/*! \brief Initialize the RTC in Mcf51cn controller
+/*!
+ * \brief Initialize the RTC in Mcf51cn controller
  *
  * \return 0 on success or -1 in case of an error.
  *

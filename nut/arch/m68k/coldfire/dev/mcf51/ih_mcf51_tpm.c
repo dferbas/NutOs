@@ -119,7 +119,8 @@ IRQ_HANDLER sig_TPM2_CH2 = {
         IrqCtl2_Ch2
     };
 
-/*! \brief TPM1_OVFL interrupt control.
+/*!
+ * \brief TPM1_OVFL interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
@@ -133,7 +134,8 @@ static int IrqCtl1_ovfl(int cmd, void *param)
 }
 
 
-/*! \brief TPM1_CH0 interrupt control.
+/*!
+ * \brief TPM1_CH0 interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
@@ -147,7 +149,8 @@ static int IrqCtl1_Ch0(int cmd, void *param)
 }
 
 
-/*! \brief TPM1_CH1 interrupt control.
+/*!
+ * \brief TPM1_CH1 interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
@@ -161,7 +164,8 @@ static int IrqCtl1_Ch1(int cmd, void *param)
 }
 
 
-/*! \brief TPM1_CH2 interrupt control.
+/*!
+ * \brief TPM1_CH2 interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
@@ -175,7 +179,8 @@ static int IrqCtl1_Ch2(int cmd, void *param)
 }
 
 
-/*! \brief TPM2_OVFL interrupt control.
+/*!
+ * \brief TPM2_OVFL interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
@@ -189,7 +194,8 @@ static int IrqCtl2_ovfl(int cmd, void *param)
 }
 
 
-/*! \brief TPM2_CH0 interrupt control.
+/*!
+ * \brief TPM2_CH0 interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
@@ -202,7 +208,8 @@ static int IrqCtl2_Ch0(int cmd, void *param)
     return IrqCtlCommon(&sig_TPM2_CH0, cmd, param, &MCF_TPM_CSC(2, 0), MCF_TPM_CSC_CHnIE, 1);
 }
 
-/*! \brief TPM2_CH1 interrupt control.
+/*!
+ * \brief TPM2_CH1 interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.
@@ -215,7 +222,8 @@ static int IrqCtl2_Ch1(int cmd, void *param)
     return IrqCtlCommon(&sig_TPM2_CH1, cmd, param, &MCF_TPM_CSC(2, 1), MCF_TPM_CSC_CHnIE, 1);
 }
 
-/*! \brief TPM2_CH2 interrupt control.
+/*!
+ * \brief TPM2_CH2 interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.

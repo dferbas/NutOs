@@ -35,6 +35,11 @@
 #include <dev/usart.h>
 #include <dev/gpio.h>
 
+/*!
+ * \addtogroup xgMcf5225
+ */
+/*@{*/
+
 /*
  * Local function prototypes.
  */
@@ -102,6 +107,7 @@ static USARTDCB dcb_usart0 = {
  * \name mcf5xxxx USART0 Device
  */
 /*@{*/
+
 /*!
  * \brief mcf5xxxx device information structure.
  *
@@ -254,11 +260,7 @@ NUTDEVICE devUartOldMcf5_0 = {
 #include "mcf5225_old_uart.c"
 
 /*!
- * \addtogroup xgMcf5225
- */
-/*@{*/
-
-/*! \brief Reset Rx0
+ * \brief Reset Rx0
  *
  * MCF_UARTn_UCR = MCF_UART_UCR_RESET_RX;
  *

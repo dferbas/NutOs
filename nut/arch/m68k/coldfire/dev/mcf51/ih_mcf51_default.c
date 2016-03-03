@@ -48,8 +48,8 @@ IRQ_HANDLER sig_DEFAULT =
 #endif
 		NULL, IrqHandler, IrqCtl };
 
-/*! \brief Default interrupt entry.
- *
+/*!
+ * \brief Default interrupt entry.
  */
 //NUTSIGNAL(IH_DEFAULT, sig_DEFAULT)
 SIGNAL(IH_DEFAULT)
@@ -57,8 +57,8 @@ SIGNAL(IH_DEFAULT)
 	CallHandler(&sig_DEFAULT);
 }
 
-/*! \brief Default interrupt handler.
- *
+/*!
+ * \brief Default interrupt handler.
  */
 static void IrqHandler(void *arg)
 {
@@ -92,7 +92,8 @@ static void IrqHandler(void *arg)
 		;
 }
 
-/*! \brief Default interrupt control.
+/*!
+ * \brief Default interrupt control.
  *
  * \param cmd   	Control command.
  *              	- NUT_IRQCTL_INIT Initialize and disable interrupt.

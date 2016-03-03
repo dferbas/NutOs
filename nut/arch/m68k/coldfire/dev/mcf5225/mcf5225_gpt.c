@@ -47,7 +47,8 @@
 static HANDLE *GptPAEHandler = NULL;
 
 
-/*! \brief GPT Pulse Accumulator Event Interrupt
+/*!
+ * \brief GPT Pulse Accumulator Event Interrupt
  *
  * \param *arg
  */
@@ -60,7 +61,8 @@ static void IntHandlerPAEvent(void *arg)
 	MCF_GPT_GPTPAFLG |= MCF_GPT_GPTPAFLG_PAIF;
 }
 
-/*! \brief Initialize GPT as a pulse accumulator counter
+/*!
+ * \brief Initialize GPT as a pulse accumulator counter
  *
  * \param *pae_handler Function used from interrupt
  */
@@ -92,33 +94,34 @@ void Mcf5225GptInitPA(HANDLE *pae_handler)
 	Mcf5225GptStartPA();
 }
 
-/*! \brief Enable Pulse accumulator.
+/*!
+ * \brief Enable Pulse accumulator.
  *	If enabled MCF_GPT_GPTSCR1_GPTEN, this function have not effect.
- *
  */
 void Mcf5225GptStartPA(void)
 {
     MCF_GPT_GPTPACTL |= MCF_GPT_GPTPACTL_PAE; // Enable PA
 }
 
-/*! \brief Disable Pulse accumulator.
+/*!
+ * \brief Disable Pulse accumulator.
  *	If enabled MCF_GPT_GPTSCR1_GPTEN, this function have not effect.
- *
  */
 void Mcf5225GptStopPA(void)
 {
 	MCF_GPT_GPTPACTL &= ~MCF_GPT_GPTPACTL_PAE; // Disable PA
 }
 
-/*! \brief Clear Pa
- *
+/*!
+ * \brief Clear Pa
  */
 void Mcf5225GptClearPACounter(void)
 {
 	MCF_GPT_GPTPACNT = 0; // Clear PA Counter
 }
 
-/*! \brief Get value of pulse accumulator
+/*!
+ * \brief Get value of pulse accumulator
  *
  * \return MCF_GPT_GPTPACNT
  */
@@ -164,7 +167,8 @@ static	int int_event_count = 0;
 #endif
 
 
-/*! \brief Fce called in interrupt event
+/*!
+ * \brief Fce called in interrupt event
  *
  * \param *arg 	Channel Index (1-3)
  */
@@ -209,7 +213,8 @@ static void IntHandlerCaptureEvent(void *arg)
 #endif
 }
 
-/*! \brief Start GPT Counting on channel (n)
+/*!
+ * \brief Start GPT Counting on channel (n)
  *
  * \param channel 			Channel Index (1-3)
  * \param *counter_handler 	Function used from interrupt
@@ -245,7 +250,8 @@ void Mcf5225GptCounterInit(int channel, HANDLE *counter_handler)
 	Mcf5225GptCounterClear(channel);
 }
 
-/*! \brief Start GPT Counting on channel (n)
+/*!
+ * \brief Start GPT Counting on channel (n)
  *
  * \param channel 	Channel Index (1-3)
  */
@@ -255,7 +261,8 @@ void Mcf5225GptCounterStart(int channel)
 	GpioPinConfigSet(PORTTA, channel, GPIO_CFG_PERIPHERAL0 | GPIO_CFG_INPUT);	//set PIN functionality to GPT
 }
 
-/*! \brief Stop GPT Counting on channel (n)
+/*!
+ * \brief Stop GPT Counting on channel (n)
  *
  * \param channel 	Channel Index (1-3)
  */
@@ -265,8 +272,8 @@ void Mcf5225GptCounterStop(int channel)
 	Gptcounter_GPCTL2_mask &= ~MCF_GPT_GPTCTL2_INPUT_MASK(channel);
 }
 
-/*! \brief Start GPT Counting input capture events
- *
+/*!
+ * \brief Start GPT Counting input capture events
  */
 void Mcf5225GptCountersEnable(void)
 {
@@ -274,8 +281,8 @@ void Mcf5225GptCountersEnable(void)
 	MCF_GPT_GPTSCR1 |=  MCF_GPT_GPTSCR1_GPTEN; // Enable GPT
 }
 
-/*! \brief Stop GPT Counting
- *
+/*!
+ * \brief Stop GPT Counting
  */
 void Mcf5225GptCountersDisable(void)
 {
@@ -284,7 +291,8 @@ void Mcf5225GptCountersDisable(void)
 }
 
 
-/*! \brief Clear GPT Channel Counter
+/*!
+ * \brief Clear GPT Channel Counter
  *
  * \param channel 	Channel Index (1-3)
  */
@@ -294,7 +302,8 @@ void Mcf5225GptCounterClear(int channel)
 }
 
 
-/*! \brief Get GPT Channel Counter
+/*!
+ * \brief Get GPT Channel Counter
  *
  * \param channel 	Channel Index (1-3)
  *

@@ -43,7 +43,8 @@
  */
 /*@{*/
 
-/*! \brief Get date and time from an MCF5225 hardware clock.
+/*!
+ * \brief Get date and time from an MCF5225 hardware clock.
  *
  * \param tm 	Points to a structure that receives the date and time
  *           	information.
@@ -74,7 +75,8 @@ int Mcf5225RtcGetClock(NUTRTC *rtc, struct _tm *tm)
 	return rslt;
 }
 
-/*! \brief Set an MCF5225 hardware clock.
+/*!
+ * \brief Set an MCF5225 hardware clock.
  *
  * \param tm 	Points to a structure which contains the date and time
  *           	information.
@@ -107,7 +109,8 @@ static int Mcf5225RtcSetClock(NUTRTC *rtc, const struct _tm *tm)
 	return rslt;
 }
 
-/*! \brief Initialize the RTC in Mcf5225 controller
+/*!
+ * \brief Initialize the RTC in Mcf5225 controller
  *
  * \return 0 on success or -1 in case of an error.
  */

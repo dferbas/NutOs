@@ -203,7 +203,8 @@ static void reenableDevice(int dcbBase)
 }
 
 //TODO check \param
-/*! \brief Transmit and/or receive data as a master.
+/*!
+ * \brief Transmit and/or receive data as a master.
  *
  * The two-wire serial interface must have been initialized by calling
  * TwInit() before this function can be used.
@@ -350,7 +351,8 @@ int TwMasterWrite(uint8_t sla, const void *addr, uint8_t addrlen, void *txdata, 
 	return TwMasterCommon(sla, addr, addrlen, txdata, txsiz, tmo, 1);
 }
 
-/*! \brief Get last master mode error only from IIC1!!!.
+/*!
+ * \brief Get last master mode error only from IIC1!!!.
  *
  * You may call this function to determine the specific cause
  * of an error after TwMasterTransact() failed.
@@ -368,7 +370,8 @@ int TwMasterError(void)
 	return rc;
 }
 
-/*! \brief Perform TWI control functions.
+/*!
+ * \brief Perform TWI control functions.
  *
  * This function is only available on mcf5xxxx systems.
  *
@@ -428,7 +431,8 @@ int TwIOCtl(int req, void *p_conf)
 	return rc;
 }
 
-/*! \brief Initialize TWI interface.
+/*!
+ * \brief Initialize TWI interface.
  *
  * The specified slave address is used only, if the local system
  * is running as a slave. Anyway, care must be taken that it doesn't

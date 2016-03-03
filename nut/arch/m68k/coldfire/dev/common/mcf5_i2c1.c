@@ -40,8 +40,8 @@
  */
 /*@{*/
 
-/*! \brief Processor specific Hardware Initiliaization
- *
+/*!
+ * \brief Processor specific Hardware Initiliaization
  */
 int Mcf5I2cBus1Init(void)
 {

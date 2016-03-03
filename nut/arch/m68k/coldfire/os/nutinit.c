@@ -62,8 +62,8 @@ struct __iobuf
 #define NUT_THREAD_IDLESTACK    512
 #endif
 
-/*! \brief Memory address and sizes.
- *
+/*!
+ * \brief Memory address and sizes.
  */
 extern void *__heap_start;
 extern void *__heap_size;
@@ -185,7 +185,8 @@ THREAD( NutIdle, arg)
 	}
 }
 
-/*! \brief Nut/OS Initialization.
+/*!
+ * \brief Nut/OS Initialization.
  *
  * Initializes the memory management and the thread system and starts
  * an idle thread, which in turn initializes the timer management.

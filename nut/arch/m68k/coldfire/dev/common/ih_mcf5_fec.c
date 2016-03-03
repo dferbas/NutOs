@@ -80,12 +80,13 @@ IRQ_HANDLER sig_FEC_TF = {
         IrqCtlTf
     };
 
-/*! \brief Rb interrupt control.
+/*!
+ * \brief Rb interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtlRb(int cmd, void *param)
 {
@@ -97,12 +98,13 @@ static int IrqCtlRb(int cmd, void *param)
 }
 
 
-/*! \brief Rf interrupt control.
+/*!
+ * \brief Rf interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtlRf(int cmd, void *param)
 {
@@ -113,12 +115,13 @@ static int IrqCtlRf(int cmd, void *param)
     		);
 }
 
-/*! \brief Tb interrupt control.
+/*!
+ * \brief Tb interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtlTb(int cmd, void *param)
 {
@@ -129,12 +132,13 @@ static int IrqCtlTb(int cmd, void *param)
     		);
 }
 
-/*! \brief Tf interrupt control.
+/*!
+ * \brief Tf interrupt control.
  *
  * \param cmd 		Control command.
  * \param *param 	Pointer to optional parameter.
  *
- * \return IrqCtlCommon 0 on success, -1 otherwise.
+ * \return 0 on success, -1 otherwise.
  */
 static int IrqCtlTf(int cmd, void *param)
 {
