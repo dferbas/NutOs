@@ -552,7 +552,9 @@ int NutTcpSend(TCPSOCKET * sock, const void *data, int len)
     /*
      * Check parameters.
      */
+#ifdef TCP_REENABLE_THREADYIELDS
     NutThreadYield();
+#endif
 
     if (sock == 0)
         return -1;
@@ -619,7 +621,9 @@ int NutTcpReceive(TCPSOCKET * sock, void *data, int size)
 {
     int i;
 
+#ifdef TCP_REENABLE_THREADYIELDS
     NutThreadYield();
+#endif
     /*
      * Check parameters.
      */
