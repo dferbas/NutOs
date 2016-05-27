@@ -38,7 +38,7 @@
  * \brief Network debug helper functions.
  *
  * \verbatim
- * $Id: netdebug.c 3683 2011-12-04 13:42:04Z haraldkipp $
+ * $Id: netdebug.c 5541 2014-01-10 17:10:49Z olereinhardt $
  * \endverbatim
  */
 
@@ -59,7 +59,7 @@ uint_fast8_t __tcp_trf;               /*!< \brief TCP trace flags. */
 
 void NutDumpTcpHeader(FILE * stream, char * ds, TCPSOCKET * sock, NETBUF * nb)
 {
-    static prog_char fmt[] = "%s%p[%u]-SEQ(%lx)";
+    static const char fmt[] PROGMEM = "%s%p[%u]-SEQ(%lx)";
     TCPHDR *th = (TCPHDR *) nb->nb_tp.vp;
 
     fprintf_P(stream, fmt, ds, sock, (unsigned int)nb->nb_ap.sz, ntohl(th->th_seq));
@@ -116,6 +116,8 @@ void NutDumpSockState(FILE * stream, uint8_t state, char * lead, char * trail)
     case TCPS_CLOSED:
         fputs("CLOSED", stream);
         break;
+    case TCPS_DESTROY:
+        fputs("DESTROY", stream);
     default:
         fputs("?UNK?", stream);
         break;
@@ -130,8 +132,8 @@ void NutDumpSocketList(FILE * stream)
     TCPSOCKET *ts;
     UDPSOCKET *us;
 
-    static prog_char fmt1[] = "%10p TCP %15s:%-6u ";
-    static prog_char fmt2[] = "%10p UDP %6u\r\n";
+    static const char fmt1[] PROGMEM = "%10p TCP %15s:%-6u ";
+    static const char fmt2[] PROGMEM = "%10p UDP %6u\r\n";
 
     fputs("\r\nSocket     Typ Local                  Remote                 State\n", stream);
     /*         1234567890 123 123456789012345:123456 123456789012345:123456 */

@@ -39,7 +39,7 @@
  * \brief PPP input functions.
  *
  * \verbatim
- * $Id: pppin.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: pppin.c 4602 2012-09-13 09:39:43Z haraldkipp $
  * \endverbatim
  */
 

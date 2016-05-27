@@ -39,7 +39,7 @@
  * \brief UDP input functions.
  *
  * \verbatim
- * $Id: udpin.c 4116 2012-04-12 22:35:23Z olereinhardt $
+ * $Id: udpin.c 5505 2014-01-01 11:15:16Z mifi $
  * \endverbatim
  */
 
@@ -68,6 +68,8 @@ int NutUdpInput(NUTDEVICE * dev, NETBUF * nb)
 {
     UDPHDR *uh;
     UDPSOCKET *sock;
+
+    (void)dev;
 
     uh = (UDPHDR *) nb->nb_tp.vp;
     /* Make sure that the datagram contains a full header. */

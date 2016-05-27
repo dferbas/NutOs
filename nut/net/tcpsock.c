@@ -39,11 +39,13 @@
  * \brief TCP socket interface.
  *
  * \verbatim
- * $Id: tcpsock.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: tcpsock.c 6285 2016-01-24 18:38:14Z olereinhardt $
  * \endverbatim
  */
 
 #include <cfg/os.h>
+#include <cfg/crt.h>
+#include <cfg/tcp.h>
 #include <sys/types.h>
 #include <string.h>
 #include <stdlib.h>
@@ -70,8 +72,6 @@
 #ifdef NUTDEBUG
 #include <net/netdebug.h>
 #endif
-
-#define TICK_RATE   1
 
 /*!
  * \addtogroup xgTcpSocket
@@ -101,11 +101,10 @@ void NutTcpDiscardBuffers(TCPSOCKET * sock)
     }
 }
 
-
 /*!
  * \brief Destroy a previously allocated socket.
  *
- * Remove socket from the socket list and release occupied memory.
+ * Release occupied socket memory.
  *
  * Applications must not call this function. It is automatically called
  * by a timer after the socket has been closed by NutTcpCloseSocket().
@@ -115,38 +114,19 @@ void NutTcpDiscardBuffers(TCPSOCKET * sock)
  */
 void NutTcpDestroySocket(TCPSOCKET * sock)
 {
-    TCPSOCKET *sp;
-    TCPSOCKET *volatile *spp;
-
     //@@@printf ("[%04X] Calling destroy.\n", (u_short) sock);
-
-    /*
-     * Remove socket from the list.
-     */
-    sp = tcpSocketList;
-    spp = &tcpSocketList;
-    while (sp) {
-        if (sp == sock) {
-            *spp = sp->so_next;
-            break;
-        }
-        spp = &sp->so_next;
-        sp = sp->so_next;
-    }
 
     /*
      * Free all memory occupied by the socket.
      */
-    if (sp) {
-        NutTcpDiscardBuffers(sock);
-        if (sock->so_devocnt)
-        {
-            free(sock->so_devobuf);
-            sock->so_devocnt = 0;
-        }
-        memset(sock, 0, sizeof(TCPSOCKET));
-        free(sock);
+    NutTcpDiscardBuffers(sock);
+    if (sock->so_devocnt)
+    {
+        free(sock->so_devobuf);
+        sock->so_devocnt = 0;
     }
+    memset(sock, 0, sizeof(TCPSOCKET));
+    free(sock);
 }
 
 /*!
@@ -174,7 +154,7 @@ TCPSOCKET *NutTcpFindSocket(uint16_t lport, uint16_t rport, uint32_t raddr)
      */
     for (sp = tcpSocketList; sp; sp = sp->so_next) {
         if (sp->so_local_port == lport) {
-            if (sp->so_remote_addr == raddr && sp->so_remote_port == rport && sp->so_state != TCPS_CLOSED) {
+            if (sp->so_remote_addr == raddr && sp->so_remote_port == rport && sp->so_state != TCPS_CLOSED && sp->so_state != TCPS_DESTROY) {
                 sock = sp;
                 break;
             }
@@ -227,8 +207,8 @@ TCPSOCKET *NutTcpCreateSocket(void)
         sock->so_state = TCPS_CLOSED;
 
         /*
-            * Initialize the virtual device interface.
-            */
+         * Initialize the virtual device interface.
+         */
         sock->so_devtype = IFTYP_TCPSOCK;
         sock->so_devread = NutTcpDeviceRead;
         sock->so_devwrite = NutTcpDeviceWrite;
@@ -236,7 +216,9 @@ TCPSOCKET *NutTcpCreateSocket(void)
         sock->so_devwrite_P = NutTcpDeviceWrite_P;
 #endif
         sock->so_devioctl = NutTcpDeviceIOCtl;
-
+#if 0 //JD
+        sock->so_devselect = NutTcpDeviceSelect;
+#endif
         sock->so_tx_isn = NutGetTickCount();  /* Generate the ISN from the nut_ticks counter */
         sock->so_tx_una = sock->so_tx_isn;
         sock->so_tx_nxt = sock->so_tx_isn;
@@ -422,6 +404,10 @@ int NutTcpGetSockOpt(TCPSOCKET * sock, int optname, void *optval, int optlen)
  * remote port of the specified remote server. The calling thread
  * will be suspended until a connection is successfully established
  * or an error occurs.
+ *
+ * If a write timeout is set for this socket, the function will return
+ * an error, if the connection could not be established before the
+ * timeout. In this case the last error is set to ETIMEOUT.
  *
  * This function is typically used by TCP client applications.
  *
@@ -653,10 +639,10 @@ int NutTcpReceive(TCPSOCKET * sock, void *data, int size)
         size = sock->so_rx_cnt - sock->so_rd_cnt;
     if (size) {
         NETBUF *nb;
-        uint16_t rd_cnt;         /* Bytes read from NETBUF. */
-        uint16_t nb_cnt;         /* Bytes left in NETBUF. */
-        uint16_t ab_cnt;         /* Total bytes in app buffer. */
-        uint16_t mv_cnt;         /* Bytes to move to app buffer. */
+        int rd_cnt;         /* Bytes read from NETBUF. */
+        int nb_cnt;         /* Bytes left in NETBUF. */
+        int ab_cnt;         /* Total bytes in app buffer. */
+        int mv_cnt;         /* Bytes to move to app buffer. */
 
         rd_cnt = sock->so_rd_cnt;
 
@@ -690,10 +676,13 @@ int NutTcpReceive(TCPSOCKET * sock, void *data, int size)
                 i = sock->so_rx_bsz;
 
             if (sock->so_rx_win <= sock->so_mss && i > sock->so_mss) {
+                /* Force immediate window update. */
                 sock->so_rx_win = i;
                 NutTcpStateWindowEvent(sock);
             } else {
+                /* Lazy window update. */
                 sock->so_rx_win = i;
+                sock->so_tx_flags |= SO_ACK;
             }
         }
     }
@@ -837,7 +826,7 @@ static int SendBuffer(TCPSOCKET * sock, const void *buffer, int size)
 int NutTcpDeviceWrite(TCPSOCKET * sock, const void *buf, int size)
 {
     int rc;
-    uint16_t sz;
+    int sz;
     /* hack alert for ICCAVR */
     uint8_t *buffer = (uint8_t*) buf;
 
@@ -871,7 +860,7 @@ int NutTcpDeviceWrite(TCPSOCKET * sock, const void *buf, int size)
          * send first part of data to NIC and store remaining
          * bytes in buffer
          */
-        if ((uint16_t) size >= sock->so_devobsz) {
+        if (size >= sock->so_devobsz) {
             rc = size % sock->so_devobsz;
             if (SendBuffer(sock, buffer, size - rc) < 0)
                 return -1;
@@ -1021,4 +1010,59 @@ int NutTcpDeviceIOCtl(TCPSOCKET * sock, int cmd, void *param)
     return rc;
 }
 
+
+#ifndef CRT_DISABLE_SELECT_POLL
+/*!
+ * \brief Callback function called by select routine to check, if read
+ *        or write to this socket would block
+ * \internal
+ *
+ * This function is called by select_scan routine of the C runtime library
+ * as part of the select() implementation. If select if currently waiting
+ * on a waitqueue, this function will be called to check the current state
+ * as soon as the select waitqueues got signalled by the tcp statemachine
+ *
+ * \param sock  Socket descriptor. This pointer must have been
+ *              retrieved by calling NutTcpCreateSocket().
+ * \param flags Flags representing what we are waiting for (read / write / exception)
+ * \param wq    Waitqueue, which should be added to the drivers waitqueue list. The
+ *              thread that called select is waiting on this waitqueue
+ * \param cmd   Internal command, that is passed to NutSelectManageWq
+ *
+ * \return Flags representing the current filedescriptor state
+ */
+#if 0 //JD
+
+int NutTcpDeviceSelect (TCPSOCKET * sock, int flags, HANDLE *wq, select_cmd_t cmd)
+{
+    int rflags = 0;
+
+    /* Manage the wait queue lists for the select call */
+    NutSelectManageWq(&sock->so_rx_wq_list, wq, flags & WQ_FLAG_READ, cmd);
+    NutSelectManageWq(&sock->so_tx_wq_list, wq, flags & WQ_FLAG_WRITE, cmd);
+
+    if (sock->so_state == TCPS_ESTABLISHED) {
+        /* Check if there is some data available for reading (compare to NutTcpReceive) */
+        if (sock->so_rx_cnt - sock->so_rd_cnt > 0) {
+            rflags |= WQ_FLAG_READ;
+        }
+
+        /* Check if there is some free space in the output buffer. */
+        if (sock->so_devocnt < sock->so_devobsz) {
+            rflags |= WQ_FLAG_WRITE;
+        }
+    }
+    if ((sock->so_state == TCPS_CLOSED) || (sock->so_state == TCPS_CLOSE_WAIT) || (sock->so_state == TCPS_DESTROY)) {
+        /* The socket has been closed. Signal for read and write.
+           Send and receive routines will then return EOF.
+         */
+        rflags |= WQ_FLAG_READ | WQ_FLAG_WRITE;
+    }
+
+    rflags &= flags;
+
+    return rflags;
+}
+#endif
+#endif
 /*@}*/

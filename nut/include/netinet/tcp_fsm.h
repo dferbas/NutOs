@@ -103,6 +103,7 @@ extern "C" {
 #define TCPS_LAST_ACK       8   /*!< \brief had fin and close; await FIN ACK */
 #define TCPS_FIN_WAIT_2     9   /*!< \brief have closed, fin is acked */
 #define TCPS_TIME_WAIT      10  /*!< \brief in 2*msl quiet wait after close */
+#define TCPS_DESTROY        11  /*!< \brief socket marked to be destroyed by the garbage collection */
 
 extern void NutTcpStateMachine(NETBUF *nb);
 extern int NutTcpInitStateMachine(void);

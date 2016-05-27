@@ -37,7 +37,7 @@
  * \brief MAC address conversion functions.
  *
  * \verbatim
- * $Id: ether_addr.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: ether_addr.c 4473 2012-08-20 15:12:45Z haraldkipp $
  * \endverbatim
  */
 

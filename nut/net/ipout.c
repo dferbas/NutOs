@@ -39,7 +39,7 @@
  * \brief IP output functions.
  *
  * \verbatim
- * $Id: ipout.c 3686 2011-12-04 14:20:38Z haraldkipp $
+ * $Id: ipout.c 5505 2014-01-01 11:15:16Z mifi $
  * \endverbatim
  */
 
@@ -219,6 +219,86 @@ int NutIpOutput(uint8_t proto, uint32_t dest, NETBUF * nb)
 
     NutNetBufFree(nb);
     return -1;
+}
+
+/*!
+ * \brief Forward IP datagram.
+ *
+ * Forwards IP datagram to the proper destination if NET_IP_FORWARD has
+ * been configured.
+ *
+ * \param nb    Network buffer structure containing the datagram.
+ *              This buffer will be released if the function returns
+ *              an error.
+ *
+ * \return Always 0.
+ */
+int NutIpForward(NETBUF *nb)
+{
+#ifdef NUT_IP_FORWARDING
+
+    NUTDEVICE *dev;
+    IFNET *nif;
+    NETBUF *r_nb;
+    IPHDR *ip;
+    uint32_t dest;
+
+    /* Check the time to live. */
+    ip = nb->nb_nw.vp;
+    if (ip->ip_ttl <= 1) {
+        return 0;
+    }
+
+    /* Retrieve interface and gateway to the destination. */
+    dev = NutIpRouteQuery(ip->ip_dst, &dest);
+    if (dev == NULL) {
+        return 0;
+    }
+    if (dest == 0) {
+        dest = ip->ip_dst;
+    }
+    nif = dev->dev_icb;
+
+    /* Allocate a new NETBUF and copy the payload to it. */
+    r_nb = NutNetBufAlloc(NULL, NBAF_TRANSPORT, nb->nb_tp.sz);
+    if (r_nb == NULL) {
+        return 0;
+    }
+    memcpy(r_nb->nb_tp.vp, nb->nb_tp.vp, nb->nb_tp.sz);
+
+    /* Copy the IP header to the new NETBUF. */
+    r_nb = NutNetBufAlloc(r_nb, NBAF_NETWORK, nb->nb_nw.sz);
+    if (r_nb == NULL) {
+        return 0;
+    }
+    memcpy(r_nb->nb_nw.vp, nb->nb_nw.vp, nb->nb_nw.sz);
+
+    ip = r_nb->nb_nw.vp;
+    ip->ip_ttl--;
+    ip->ip_sum = 0;
+    ip->ip_sum = NutIpChkSum(0, ip, sizeof(IPHDR));
+
+    /* Forward the new NETBUF to the interface. */
+    if (nif->if_type == IFT_ETHER) {
+        uint8_t ha[6];
+
+        if (NutArpCacheQuery(dev, dest, ha)) {
+            return 0;
+        }
+        if ((*nif->if_output) (dev, ETHERTYPE_IP, ha, r_nb)) {
+            return 0;
+        }
+    }
+    else if (nif->if_type == IFT_PPP) {
+        if ((*nif->if_output) (dev, PPP_IP, 0, r_nb)) {
+            return 0;
+        }
+    }
+    NutNetBufFree(r_nb);
+#else
+    (void)nb;
+#endif
+    return 0;
 }
 
 /*@}*/

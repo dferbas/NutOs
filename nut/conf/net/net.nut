@@ -150,7 +150,7 @@ nutnet =
                 macro = "TCP_COLLECT_INADV",
                 brief = "Segment Collection",
                 description = "TCP segments received in advance are stored in a special queue "..
-                              " with complete headers. Due to this overhead, available memory may "..
+                              "with complete headers. Due to this overhead, available memory may "..
                               "become exhausted when the remote sends many small segments after one "..
                               "segment got lost.\n\n"..
                               "When the number of segments received in advance reaches the given "..
@@ -170,6 +170,52 @@ nutnet =
                               "This option specifies the limit, below which segments are conidered "..
                               "small. Segments equal or larger in size will not be collected.",
                 default = "256",
+                file = "include/cfg/tcp.h"
+            },
+            {
+                macro = "TCP_SOCK_RXBUF_LIMIT",
+                brief = "Socket Receive Buffer Limit",
+                description = "Limit the socket receive buffer. The value is a multiple of the ".. 
+                              "software configured socket receive buffer (SO_RCVBUF).\n\n"..
+                              "Under normal conditons no buffering beyond the SO_RCVBUF should occur, "..
+                              "but some TCP implementations seem to not follow the TCP RFCs correctly "..
+                              "and continue sending bytes, even when sending a zero-window ack. So this "..
+                              "option is for limitting the used HEAP in these situations.\n\n"..
+                              "If configured to a value > 0, we allow to buffer a maxmimum of "..
+                              "TCP_SOCK_RXBUF_LIMIT * SO_RCVBUF bytes, until we drop further "..
+                              "incomming packets for this socket. A value of '0' (default) will result "..
+                              "in the known default behaviour, where the buffer size is unlimmited.",
+
+                default = "0",
+                file = "include/cfg/tcp.h"
+            },
+            {
+                macro = "TCP_TOTAL_INBUF_HEAP_LIMIT",
+                brief = "TCP incomming buffer heap limit (system wide)",
+                description = "The TCP statemachines buffers all incomming packets, until they "..
+                              "are evaluated and used. This can cause the available heap to drop "..
+                              "very fast.\n\n"..
+                              "This option limit the amount of heap used for buffering. If the "..
+                              "availabl heap drops below this limit, further incomming packets "..
+                              "will be dropped.",
+                default = "2048",
+                file = "include/cfg/tcp.h"
+            },
+            {
+                macro = "TCP_ADV_MAX",
+                brief = "TCP advance receive buffer global limit",
+                description = "The TCP statemachines buffers packages, received in advance. "..
+                              "This speeds up recovery in case of package lost, but needs extra "..
+                              "heap memory.\n\n"..
+                              "This option introduces a system wide limit for the advance package "..
+                              "If the size of all currently buffered advance packages reaches this "..
+                              "limit, further packages received in advance are dropped.\n\n"..
+                              "The higher this value is, the faster the tcp recovery will work "..
+                              "on unreliable connections. "..
+                              "The default value is the default window size.\n"..
+                              "Set this value to 0 to disable the advance buffer limit and allow "..
+                              "pre-buffering up to TCP_SOCK_RXBUF_LIMIT",
+                default = "3216",
                 file = "include/cfg/tcp.h"
             },
             {
@@ -203,6 +249,18 @@ nutnet =
                               "This option is ignored, if TCP_BACKLOG_MAX is zero.",
                 default = "5",
                 file = "include/cfg/tcp.h"
+            },
+            {
+                macro = "TCP_REENABLE_THREADYIELDS",
+                brief = "Re-Enable NutThreadYield in NutTcpSend, NutTcpReceive and NutTcpStateCloseEvent",
+                description = "A NutThreadYield had been added to the head of the following functions: \n"..
+                              "NutTcpSend, NutTcpReceive and NutTcpStateCloseEvente \n"..
+                              "for unknown reasons. Especially for single character stream access (putc / getc) "..
+                              "these yields heavily slowed down the communication, so that these yields had been "..
+                              "removed by default. \n" ..
+                              "Enable this option to re-enable the old implementation",
+                flavor = "boolean",
+                file = "include/cfg/tcp.h"
             }
         }
     },
@@ -220,12 +278,14 @@ nutnet =
         options =
         {
             {
-                macro = "NUT_UDP_ICMP_SUPPORT",
-                brief = "ICMP support for UDP sockets",
+                macro = "NUT_UDP_ICMP_EXCLUDE",
+                brief = "Disable ICMP support for UDP sockets for backwards compatibility",
                 requires = { "NET_ICMP" },
-                description = "Allows ICMP error reporting on UDP sockets. e.g. ICMP destination "..
-                              "unreachable, ICMP host unreachable etc. will trigger errors on "..
-                              "UDP send / receive functions.",
+                description = "ICMP support for UDP sockets allows error reporting on UDP sockets. "..
+                              "e.g. ICMP destination unreachable, ICMP host unreachable etc. "..
+                              "This will trigger errors on UDP send / receive functions. Unfortunately"..
+                              "changes to the old API were necessary and therefor you can disable ICMP"..
+                              "support for UDP sockets here.",
                 flavor = "boolean",
                 file = "include/cfg/udp.h"
             }
@@ -244,6 +304,17 @@ nutnet =
             "ipout.c",
             "ipdemux.c",
             "route.c"
+        },
+        options =
+        {
+            {
+                macro = "NUT_IP_FORWARDING",
+                brief = "IP Forwarding",
+                description = "If enabled, incoming IP datagrams to other destinations are forwarded "..
+                              "to the most specific route.\n",
+                flavor = "boolean",
+                file = "include/cfg/ip.h"
+            }
         }
     },
     {
@@ -388,12 +459,12 @@ nutnet =
                               "for the MAC address and 16 bytes for the IP configuration.\n\n"..
                               "The length of the host name is configurable.\n\n"..
                               "This item is disabled if the system doesn't offer any "..
-                              "non-volatile memory. Check the non-volatile memory"..
+                              "non-volatile memory. Check the non-volatile memory "..
                               "module in the device driver section.",
                 requires = { "DEV_NVMEM" },
                 provides = { "CONFNET_INIT_IN_NVMEM" },
                 flavor = "boolean",
-                exclusivity = { "CONFNET_NVMEM", "CONFNET_HARDCODED" },
+                exclusivity = { "CONFNET_NVMEM", "CONFNET_HARDCODED", "CONFNET_HARDCODED_DEFAULTS" },
                 file = "include/cfg/eeprom.h"
             },
             {
@@ -407,7 +478,25 @@ nutnet =
                               "solution when porting Nut/Net to a new platform.",
                 provides = { "CONFNET_INIT_IN_CODE" },
                 flavor = "boolean",
-                exclusivity = { "CONFNET_NVMEM", "CONFNET_HARDCODED" },
+                exclusivity = { "CONFNET_NVMEM", "CONFNET_HARDCODED", "CONFNET_HARDCODED_DEFAULTS" },
+                file = "include/cfg/eeprom.h"
+            },
+            {
+                macro = "CONFNET_HARDCODED_DEFAULTS",
+                brief = "Use Hard-Coded Default Values",
+                description = "Initial network settings are stored in non volatile memory."..
+                              "The current version uses 10 bytes for validity check, 6 bytes "..
+                              "for the MAC address and 16 bytes for the IP configuration.\n "..
+							  "If the non volatile memory is invalid or empty, load hard-coded "..
+							  "settings specified below\n\n"..
+                              "The length of the host name is configurable.\n\n"..
+                              "This item is disabled if the system doesn't offer any "..
+                              "non-volatile memory. Check the non-volatile memory "..
+                              "module in the device driver section.",
+				requires = { "DEV_NVMEM" },
+                provides = { "CONFNET_INIT_IN_CODE", "CONFNET_INIT_IN_NVMEM" },
+                flavor = "boolean",
+                exclusivity = { "CONFNET_NVMEM", "CONFNET_HARDCODED", "CONFNET_HARDCODED_DEFAULTS" },
                 file = "include/cfg/eeprom.h"
             },
             {

@@ -40,7 +40,7 @@
  * \brief Ethernet input functions.
  *
  * \verbatim
- * $Id: ethin.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: ethin.c 4407 2012-08-05 17:06:22Z haraldkipp $
  * \endverbatim
  */
 

@@ -39,7 +39,7 @@
  * \brief TCP output functions.
  *
  * \verbatim
- * $Id: tcpout.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: tcpout.c 5899 2014-11-19 10:50:57Z haraldkipp $
  * \endverbatim
  */
 
@@ -141,7 +141,7 @@ int NutTcpOutput(TCPSOCKET * sock, const uint8_t * data, uint16_t size)
      * Process ACK flag.
      */
     th->th_seq = htonl(sock->so_tx_nxt);
-    if (sock->so_tx_flags & SO_ACK) {
+    if (size || (sock->so_tx_flags & SO_ACK) != 0) {
         th->th_flags = TH_ACK;
         sock->so_tx_flags &= ~SO_ACK;
         th->th_ack = htonl(sock->so_rx_nxt);

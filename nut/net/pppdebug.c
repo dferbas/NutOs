@@ -38,7 +38,7 @@
  * \brief PPP debug helper functions.
  *
  * \verbatim
- * $Id: pppdebug.c 3686 2011-12-04 14:20:38Z haraldkipp $
+ * $Id: pppdebug.c 5101 2013-04-30 13:14:20Z olereinhardt $
  * \endverbatim
  */
 
@@ -55,17 +55,17 @@ uint_fast8_t __ppp_trf;               /*!< \brief PPP trace flags. */
 
 static uint8_t ppp_header_sz;    /* Size of the PPP header. */
 
-static prog_char dbg_confreq[] = "[CONFREQ]";
-static prog_char dbg_confack[] = "[CONFACK]";
-static prog_char dbg_confnak[] = "[CONFNAK]";
-static prog_char dbg_confrej[] = "[CONFREJ]";
-static prog_char dbg_termreq[] = "[TERMREQ]";
-static prog_char dbg_termack[] = "[TERMACK]";
-static prog_char dbg_coderej[] = "[CODEREJ]";
-static prog_char dbg_protrej[] = "[PROTREJ]";
-static prog_char dbg_echoreq[] = "[ECHOREQ]";
-static prog_char dbg_echorsp[] = "[ECHORSP]";
-static prog_char dbg_discreq[] = "[DISCREQ]";
+static const char dbg_confreq[] PROGMEM = "[CONFREQ]";
+static const char dbg_confack[] PROGMEM = "[CONFACK]";
+static const char dbg_confnak[] PROGMEM = "[CONFNAK]";
+static const char dbg_confrej[] PROGMEM = "[CONFREJ]";
+static const char dbg_termreq[] PROGMEM = "[TERMREQ]";
+static const char dbg_termack[] PROGMEM = "[TERMACK]";
+static const char dbg_coderej[] PROGMEM = "[CODEREJ]";
+static const char dbg_protrej[] PROGMEM = "[PROTREJ]";
+static const char dbg_echoreq[] PROGMEM = "[ECHOREQ]";
+static const char dbg_echorsp[] PROGMEM = "[ECHORSP]";
+static const char dbg_discreq[] PROGMEM = "[DISCREQ]";
 
 
 void NutDumpLcpOption(FILE * stream, NETBUF * nb)
@@ -251,7 +251,7 @@ void NutDumpPap(FILE * stream, NETBUF * nb)
 
 void NutDumpIpcpOption(FILE * stream, NETBUF * nb)
 {
-    XCPOPT *xcpo;
+    XCPOPT *xcpo = NULL;
     uint16_t len;
 
     if ((nb->nb_nw.sz + nb->nb_ap.sz) != 0) {	// packet already parsed, there are packets with no option, in that case ap.sz == 0
@@ -260,7 +260,10 @@ void NutDumpIpcpOption(FILE * stream, NETBUF * nb)
     }
     else {
         len = nb->nb_dl.sz - ppp_header_sz - sizeof(XCPHDR);
-        xcpo = (XCPOPT *) (((char *) nb->nb_dl.vp) + ppp_header_sz + sizeof(XCPHDR));
+        if (len > 0)
+            xcpo = (XCPOPT *) (((char *) nb->nb_dl.vp) + ppp_header_sz + sizeof(XCPHDR));
+        else
+            len = 0;
     }
     fprintf(stream, "[OPT(%u)]", len);
     while (len) {

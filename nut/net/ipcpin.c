@@ -38,7 +38,7 @@
  * \brief PPP IPC input functions.
  *
  * \verbatim
- * $Id: ipcpin.c 3686 2011-12-04 14:20:38Z haraldkipp $
+ * $Id: ipcpin.c 5505 2014-01-01 11:15:16Z mifi $
  * \endverbatim
  */
 
@@ -50,15 +50,28 @@
 #include <netinet/if_ppp.h>
 #include <netinet/ppp_fsm.h>
 #include <netinet/in.h>
+
 /*!
  * \addtogroup xgIPCP
  */
 /*@{*/
 
+static uint16_t IpcpValidateIpReq(uint32_t *expected_ip, uint32_t *requested_ip)
+{
+    if (*expected_ip == 0 && *requested_ip) {
+        *expected_ip = *requested_ip;
+    }
+    else if (*expected_ip != *requested_ip) {
+        *requested_ip = *expected_ip;
+        return 6;
+    }
+    return 0;
+}
+
 /*
  * Received Configure-Request.
  */
-void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
+static void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 {
     PPPDCB *dcb = dev->dev_dcb;
     int rc = XCP_CONFACK;
@@ -68,6 +81,7 @@ void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
     uint16_t xcps;
     uint16_t len = 0;
     uint_fast8_t i;
+    uint32_t ip;
 
     switch (dcb->dcb_ipcp_state) {
     case PPPS_CLOSED:
@@ -116,11 +130,15 @@ void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
             len = xcpl;
         else {
             switch (xcpo->xcpo_type) {
-            case IPCP_COMPRESSTYPE:
-                break;
-            case IPCP_ADDR:
             case IPCP_MS_DNS1:
+                if (xcpo->xcpo_.ul == 0 && dcb->dcb_ip_dns1 == 0) {
+                    break;
+                }
             case IPCP_MS_DNS2:
+                if (xcpo->xcpo_.ul == 0 && dcb->dcb_ip_dns2 == 0) {
+                    break;
+                }
+            case IPCP_ADDR:
                 if (xcpo->xcpo_len == 6)
                     len = 0;
                 break;
@@ -132,7 +150,6 @@ void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
                 xcpr->xcpo_type = xcpo->xcpo_type;
                 xcpr->xcpo_len = len;
                 for (i = 0; i < len - 2; i++)
-                    /* Bug fix by Michel Hendriks. Thanks! */
                     xcpr->xcpo_.uc[i] = xcpo->xcpo_.uc[i];
             }
             xcpr = (XCPOPT *) ((char *) xcpr + len);
@@ -157,24 +174,16 @@ void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         xcps = 0;
         len = 0;
         while (xcpl >= 2) {
+            ip = xcpo->xcpo_.ul;
             switch (xcpo->xcpo_type) {
             case IPCP_ADDR:
-                if (xcpo->xcpo_.ul)
-                    dcb->dcb_remote_ip = xcpo->xcpo_.ul;
-                else if (dcb->dcb_remote_ip == 0)
-                    len = xcpo->xcpo_len;
-                break;
-            case IPCP_COMPRESSTYPE:
-                len = 6;
-                xcpr->xcpo_.ul = 0;
+                len = IpcpValidateIpReq(&dcb->dcb_remote_ip, &ip);
                 break;
             case IPCP_MS_DNS1:
-                if (xcpo->xcpo_.ul)
-                    dcb->dcb_ip_dns1 = xcpo->xcpo_.ul;
+                len = IpcpValidateIpReq(&dcb->dcb_ip_dns1, &ip);
                 break;
             case IPCP_MS_DNS2:
-                if (xcpo->xcpo_.ul)
-                    dcb->dcb_ip_dns2 = xcpo->xcpo_.ul;
+                len = IpcpValidateIpReq(&dcb->dcb_ip_dns2, &ip);
                 break;
             }
 
@@ -183,6 +192,7 @@ void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
                     xcpr->xcpo_type = xcpo->xcpo_type;
                     xcpr->xcpo_len = len;
                 }
+                xcpr->xcpo_.ul = ip;
                 xcpr = (XCPOPT *) ((char *) xcpr + len);
                 xcps += len;
                 len = 0;
@@ -212,7 +222,7 @@ void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 /*
  * Configure-Ack received.
  */
-void IpcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
+static void IpcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 {
     PPPDCB *dcb = dev->dev_dcb;
     XCPOPT *xcpo;
@@ -383,7 +393,7 @@ static void IpcpRxConfNakRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb, uint8_t r
 /*
  * \brief Terminate request received.
  */
-void IpcpRxTermReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
+static void IpcpRxTermReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 {
     PPPDCB *dcb = dev->dev_dcb;
 
@@ -405,9 +415,12 @@ void IpcpRxTermReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 /*
  * Terminate-Ack received.
  */
-void IpcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
+static void IpcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 {
     PPPDCB *dcb = dev->dev_dcb;
+
+    (void)id;
+    (void)nb;
 
     switch (dcb->dcb_ipcp_state) {
     case PPPS_CLOSING:
@@ -466,6 +479,8 @@ static void IpcpRxCodeRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 {
     PPPDCB *dcb = dev->dev_dcb;
 
+    (void)id;
+
     NutNetBufFree(nb);
     if (dcb->dcb_ipcp_state == PPPS_ACKRCVD)
         dcb->dcb_ipcp_state = PPPS_REQSENT;
@@ -494,14 +509,6 @@ void NutIpcpInput(NUTDEVICE * dev, NETBUF * nb)
     uint16_t len;
 
     /*
-     * Discard all packets while we are in initial or starting state.
-     */
-    if (dcb->dcb_ipcp_state == PPPS_INITIAL || dcb->dcb_ipcp_state == PPPS_STARTING) {
-        NutNetBufFree(nb);
-        return;
-    }
-
-    /*
      * Discard packets with illegal lengths.
      */
     if (nb->nb_nw.sz < sizeof(XCPHDR)) {
@@ -515,10 +522,18 @@ void NutIpcpInput(NUTDEVICE * dev, NETBUF * nb)
     }
 
     /*
+     * Discard all packets while we are in initial or starting state.
+     */
+    if (dcb->dcb_ipcp_state == PPPS_INITIAL || dcb->dcb_ipcp_state == PPPS_STARTING) {
+        NutNetBufFree(nb);
+        return;
+    }
+
+    /*
      * Split the IPCP packet.
      */
     nb->nb_ap.vp = xch + 1;
-    nb->nb_ap.sz = len - sizeof(XCPHDR);
+    nb->nb_ap.sz = ntohs(xch->xch_len) - sizeof(XCPHDR);
 
     /*
      * Action depends on code.

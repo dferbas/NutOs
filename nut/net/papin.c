@@ -38,7 +38,7 @@
  * \brief PPP PAP output functions.
  *
  * \verbatim
- * $Id: papin.c 3686 2011-12-04 14:20:38Z haraldkipp $
+ * $Id: papin.c 5505 2014-01-01 11:15:16Z mifi $
  * \endverbatim
  */
 
@@ -67,6 +67,9 @@ void PapRxAuthAck(NUTDEVICE *dev, uint8_t id, NETBUF *nb)
 {
     PPPDCB *dcb = dev->dev_dcb;
 
+    (void)id;
+    (void)nb;
+
     if(dcb->dcb_auth_state == PAPCS_AUTHREQ) {
         /*
          * Flag us open and start the network.
@@ -79,6 +82,9 @@ void PapRxAuthAck(NUTDEVICE *dev, uint8_t id, NETBUF *nb)
 void PapRxAuthNak(NUTDEVICE *dev, uint8_t id, NETBUF *nb)
 {
     PPPDCB *dcb = dev->dev_dcb;
+
+    (void)id;
+    (void)nb;
 
     if(dcb->dcb_auth_state == PAPCS_AUTHREQ) {
         dcb->dcb_auth_state = PAPCS_BADAUTH;

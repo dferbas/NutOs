@@ -37,7 +37,7 @@
  * \brief Persistent storage of network configuration.
  *
  * \verbatim
- * $Id: confnet.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: confnet.c 6174 2015-09-30 14:46:26Z u_bonnes $
  * \endverbatim
  */
 
@@ -46,10 +46,11 @@
 #include <netinet/if_ether.h>
 #include <sys/confnet.h>
 #include <dev/nvmem.h>
+#include <dev/hw_signature.h>
 
 #ifdef CONFNET_VIRGIN_MAC
 #define VIRGIN_MAC  ether_aton(CONFNET_VIRGIN_MAC)
-#else
+#elif !defined(UNIQUE_PRIVATE_MAC)
 static uint8_t virgin_mac[6] = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00 };
 #define VIRGIN_MAC  virgin_mac
 #endif
@@ -69,17 +70,22 @@ static uint8_t virgin_mac[6] = { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00 };
 /*!
  * \brief Global network configuration structure.
  *
- * Contains the current network configuration. Nut/Net will load
- * this structure from non-volatile memory during initialization.
+ * Contains the current network configuration.
+ * \sa NutNetLoadConfig NutNetSaveConfig
  */
 CONFNET confnet;
 
 /*!
- * \brief Load network configuration from non-volatile memory.
+ * \brief Load network configuration from non-volatile memory
+ * into the Global network configuration structure confnet.
  *
- * If no configuration is available in EEPROM, all configuration
- * parameters are cleared to zero. Except the MAC address, which
+ * If no configuration is available in non-volatile and 
+ * CONFNET_HARDCODED_DEFAULTS configuration option is not set, 
+ * all configuration parameters are cleared to zero. Except the MAC address, which
  * is set to the locally administered address 02-00-00-00-00-00.
+ * When CONFNET_HARDCODED_DEFAULTS option is set, the Nut/OS compile
+ * time defaults specified in the configuration is used and the
+ * function will return 0.
  *
  * \param name Name of the device.
  *
@@ -92,14 +98,21 @@ int NutNetLoadConfig(const char *name)
     /* Read non-volatile memory. */
     if (NutNvMemLoad(CONFNET_EE_OFFSET, &confnet, sizeof(CONFNET)) == 0) {
         /* Sanity check. */
-        if (confnet.cd_size == sizeof(CONFNET) && strcmp(confnet.cd_name, name) == 0) {
+        if (confnet.cd_size == sizeof(CONFNET) &&
+            strcmp(confnet.cd_name, name) == 0 &&
+            !ETHER_IS_ZERO(confnet.cdn_mac) &&
+            !ETHER_IS_BROADCAST(confnet.cdn_mac)) {
             /* Got a (hopefully) valid configuration. */
             return 0;
         }
     }
 #endif
     memset(&confnet, 0, sizeof(CONFNET));
+#if defined(UNIQUE_PRIVATE_MAC)
+    UNIQUE_PRIVATE_MAC(confnet.cdn_mac);
+#else
     memcpy(confnet.cdn_mac, VIRGIN_MAC, sizeof(confnet.cdn_mac));
+#endif
 
     /* Set local IP and the gate's IP, if configured. */
 #ifdef CONFNET_VIRGIN_IP
@@ -109,7 +122,7 @@ int NutNetLoadConfig(const char *name)
     confnet.cdn_gateway = inet_addr(CONFNET_VIRGIN_GATE);
 #endif
 
-#ifdef CONFNET_HARDCODED
+#if defined(CONFNET_HARDCODED) || defined(CONFNET_HARDCODED_DEFAULTS)
     /* If hard coded, set the default mask and return success. */
     confnet.cdn_ip_mask = VIRGIN_NETMASK;
     return 0;
@@ -128,6 +141,10 @@ int NutNetSaveConfig(void)
 {
 #if !defined (__NUT_EMULATION__) && !defined (CONFNET_HARDCODED)
     confnet.cd_size = sizeof(CONFNET);
+    /* Sanity Checks */
+    if ((ETHER_IS_BROADCAST(confnet.cdn_mac)) ||
+        (ETHER_IS_ZERO     (confnet.cdn_mac)))
+        return -1;
     if (NutNvMemSave(CONFNET_EE_OFFSET, &confnet, sizeof(CONFNET))) {
         return -1;
     }

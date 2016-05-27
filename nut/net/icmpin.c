@@ -39,7 +39,7 @@
  * \brief ICMP input functions.
  *
  * \verbatim
- * $Id: icmpin.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: icmpin.c 6135 2015-09-28 11:47:06Z olereinhardt $
  * \endverbatim
  */
 
@@ -117,7 +117,7 @@ static int NutIcmpUnreach(NETBUF * nb, int icmp_code)
             TCPHDR *th;
             TCPSOCKET *sock_tcp;
 
-            th = (TCPHDR *) ((char *) ih) + sizeof(IPHDR);
+            th = (TCPHDR *) (((char *) ih) + sizeof(IPHDR));
             sock_tcp = NutTcpFindSocket(th->th_dport, th->th_sport, ih->ip_src);
             if (sock_tcp == 0)
                 return -1;
@@ -129,7 +129,7 @@ static int NutIcmpUnreach(NETBUF * nb, int icmp_code)
         }
         break;
 
-#ifdef NUT_UDP_ICMP_SUPPORT
+#ifndef NUT_UDP_ICMP_EXCLUDE
         case IPPROTO_UDP:
         {
             UDPHDR *uh;

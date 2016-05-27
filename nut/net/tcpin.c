@@ -39,7 +39,7 @@
  * \brief TCP input functions.
  *
  * \verbatim
- * $Id: tcpin.c 3686 2011-12-04 14:20:38Z haraldkipp $
+ * $Id: tcpin.c 5505 2014-01-01 11:15:16Z mifi $
  * \endverbatim
  */
 
@@ -74,6 +74,8 @@
 int NutTcpInput(NUTDEVICE * dev, NETBUF * nb)
 {
     TCPHDR *th = (TCPHDR *) nb->nb_tp.vp;
+
+    (void)dev;
 
     /* Process unicasts only. */
     if (th && (nb->nb_flags & NBAF_UNICAST) != 0) {

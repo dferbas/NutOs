@@ -39,7 +39,7 @@
  * \brief IP routing functions.
  *
  * \verbatim
- * $Id: route.c 3686 2011-12-04 14:20:38Z haraldkipp $
+ * $Id: route.c 5571 2014-01-30 18:38:37Z mifi $
  * \endverbatim
  */
 
@@ -185,6 +185,7 @@ RTENTRY *NutIpRouteList(int *numEntries)
 {
     RTENTRY *rc;
     RTENTRY *rte;
+    int i;
 
     /* First count the number of entries. */
     *numEntries = 0;
@@ -197,8 +198,9 @@ RTENTRY *NutIpRouteList(int *numEntries)
 
     /* Fill in the result. */
     if (rc) {
-        for (rte = rteList; rte; rc++, rte = rte->rt_next) {
-            memcpy(rc, rte, sizeof(RTENTRY));
+        i = 0;
+        for (rte = rteList; rte; i++, rte = rte->rt_next) {
+            memcpy(&rc[i], rte, sizeof(RTENTRY));
         }
     }
     else {

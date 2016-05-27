@@ -39,7 +39,7 @@
  * \brief PPP PAP output functions.
  *
  * \verbatim
- * $Id: papout.c 3683 2011-12-04 13:42:04Z haraldkipp $
+ * $Id: papout.c 5505 2014-01-01 11:15:16Z mifi $
  * \endverbatim
  */
 
@@ -104,6 +104,8 @@ void PapTxAuthReq(NUTDEVICE *dev, uint8_t id)
     char *cp;
     int len;
 
+    (void)id;
+
     /*
      * Create the request.
      */
@@ -124,6 +126,8 @@ void PapTxAuthReq(NUTDEVICE *dev, uint8_t id)
             memcpy(cp + 1, dcb->dcb_pass, *cp);
 
         dcb->dcb_auth_state = PAPCS_AUTHREQ;
+        //NutPapOutput(dev, XCP_CONFREQ, ++dcb->dcb_reqid, nb);
+        //already incremented in lcpin.c:LcpRxConfReq
         NutPapOutput(dev, XCP_CONFREQ, id, nb);
     }
 }

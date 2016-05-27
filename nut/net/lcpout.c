@@ -38,7 +38,7 @@
  * \brief PPP LCP output functions.
  *
  * \verbatim
- * $Id: lcpout.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: lcpout.c 4602 2012-09-13 09:39:43Z haraldkipp $
  * \endverbatim
  */
 
@@ -110,7 +110,7 @@ static INLINE void LcpResetOptions(NUTDEVICE * dev)
     dcb->dcb_loc_magic = 0;
     dcb->dcb_rem_magic = 0;
     dcb->dcb_accm = 0xFFffFFff;
-    dcb->dcb_loc_mru = 1500;
+    dcb->dcb_loc_mru = PPP_MRU;
 
     _ioctl(dcb->dcb_fd, HDLC_SETTXACCM, &dcb->dcb_accm );
 }

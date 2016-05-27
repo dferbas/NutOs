@@ -38,7 +38,7 @@
  * \brief PPP LCP input functions.
  *
  * \verbatim
- * $Id: lcpin.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: lcpin.c 5505 2014-01-01 11:15:16Z mifi $
  * \endverbatim
  */
 
@@ -136,6 +136,7 @@ static INLINE void LcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
                     len = 0;
                 break;
             case LCP_PCOMPRESSION:
+                break;
             case LCP_ACCOMPRESSION:
                 break;
             }
@@ -260,7 +261,7 @@ static INLINE void LcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         while (xcpl >= 2) {
             switch (xcpo->xcpo_type) {
             case LCP_MRU:
-                if (ntohs(xcpo->xcpo_.us) != 1500)
+                if (ntohs(xcpo->xcpo_.us) != PPP_MRU)
                     dcb->dcb_acked = 0;
                 break;
             case LCP_ASYNCMAP:
@@ -279,6 +280,8 @@ static INLINE void LcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
                 }
                 break;
             case LCP_PCOMPRESSION:
+                dcb->dcb_acked = 0;
+                break;
             case LCP_ACCOMPRESSION:
                 dcb->dcb_acked = 0;
                 break;
@@ -350,6 +353,11 @@ static INLINE void LcpRxConfNakRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb, uin
     PPPDCB *dcb = dev->dev_dcb;
 
     /*
+    XCPOPT *xcpo;
+    uint16_t xcpl;
+    */
+
+    /*
      * Ignore, if we are not expecting this id.
      */
     if (id != dcb->dcb_reqid || dcb->dcb_acked) {
@@ -361,6 +369,15 @@ static INLINE void LcpRxConfNakRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb, uin
      * TODO: Process acked options.
      */
     dcb->dcb_acked = 1;
+
+    /*
+    xcpo = nb->nb_ap.vp;
+    xcpl = nb->nb_ap.sz;
+    while (xcpl >= 2) {
+        xcpl -= xcpo->xcpo_len;
+        xcpo = (XCPOPT *) ((char *) xcpo + xcpo->xcpo_len);
+    }
+    */
 
     NutNetBufFree(nb);
 
@@ -426,6 +443,8 @@ static INLINE void LcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 {
     PPPDCB *dcb = dev->dev_dcb;
 
+    (void)id;
+
     NutNetBufFree(nb);
 
     switch (dcb->dcb_lcp_state) {
@@ -484,6 +503,8 @@ void LcpRxProtRej(NUTDEVICE * dev)
 static INLINE void LcpRxCodeRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 {
     PPPDCB *dcb = dev->dev_dcb;
+
+    (void)id;
 
     NutNetBufFree(nb);
 

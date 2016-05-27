@@ -40,11 +40,9 @@
  * \brief IP input functions.
  *
  * \verbatim
- * $Id: ipin.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: ipin.c 4636 2012-09-20 09:02:23Z haraldkipp $
  * \endverbatim
  */
-
-#include <cfg/ip.h>
 
 #include <net/route.h>
 #include <netinet/in.h>
@@ -184,9 +182,10 @@ void NutIpInput(NUTDEVICE * dev, NETBUF * nb)
         }
 
         /*
-         * Not for us, discard silently.
+         * Not for us, forward.
          */
         else {
+            NutIpForward(nb);
             NutNetBufFree(nb);
             return;
         }
@@ -195,7 +194,7 @@ void NutIpInput(NUTDEVICE * dev, NETBUF * nb)
     /*
      * Calculate IP data length.
      */
-    nb->nb_tp.sz = htons(ip->ip_len);
+    nb->nb_tp.sz = ntohs(ip->ip_len);
     if (nb->nb_tp.sz < hdrlen || nb->nb_tp.sz > nb->nb_nw.sz) {
         NutNetBufFree(nb);
         return;

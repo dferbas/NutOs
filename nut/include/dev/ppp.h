@@ -121,6 +121,20 @@ extern "C" {
 #define LCP_DEFOPT_ASYNCMAP 0x000A0000UL
 
 /*!
+ * \brief PPP server configuration type.
+ */
+typedef struct _PPPSERVER_CFG PPPSERVER_CFG;
+
+/*!
+ * \brief PPP server configuration structure.
+ */
+struct _PPPSERVER_CFG {
+    uint32_t ppsc_remote_ip;
+    uint32_t ppsc_dns1;
+    uint32_t ppsc_dns2;
+};
+
+/*!
  * \brief PPP interface type.
  */
 typedef struct _PPPDCB PPPDCB;

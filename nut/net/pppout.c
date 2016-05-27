@@ -37,7 +37,7 @@
  * \brief PPP output functions.
  *
  * \verbatim
- * $Id: pppout.c 3683 2011-12-04 13:42:04Z haraldkipp $
+ * $Id: pppout.c 5505 2014-01-01 11:15:16Z mifi $
  * \endverbatim
  */
 
@@ -82,6 +82,8 @@ int NutPppOutput(NUTDEVICE * dev, uint16_t type, uint8_t * ha, NETBUF * nb)
     PPPHDR *ph;
     IFNET *nif = dev->dev_icb;
     PPPDCB *dcb = dev->dev_dcb;
+
+    (void)ha;
 
     /*
      * Allocate and set the HDLC header.

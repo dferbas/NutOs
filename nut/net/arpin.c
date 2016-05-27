@@ -131,7 +131,7 @@ void NutArpInput(NUTDEVICE * dev, NETBUF * nb)
     /*
      * Reply to ARP requests.
      */
-    if (htons(ea->ea_hdr.ar_op) == ARPOP_REQUEST) {
+    if (ntohs(ea->ea_hdr.ar_op) == ARPOP_REQUEST) {
         NETBUF *nbr =
             NutArpAllocNetBuf(ARPOP_REPLY, ea->arp_spa, ea->arp_sha);
 

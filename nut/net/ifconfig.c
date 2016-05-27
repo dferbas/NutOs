@@ -39,7 +39,7 @@
  * \brief Network interface configuration functions.
  *
  * \verbatim
- * $Id: ifconfig.c 4608 2012-09-14 13:14:15Z haraldkipp $
+ * $Id: ifconfig.c 5800 2014-08-27 14:30:23Z thiagocorrea $
  * \endverbatim
  */
 
@@ -73,6 +73,93 @@
  * \addtogroup xgIP
  */
 /*@{*/
+
+/*
+ * \brief Configure a network interface.
+ *
+ * Devices must have been registered by NutRegisterDevice() and CONFNET
+ * cdn_mac should have a valid MAC address before calling this function
+ *
+ * Applications may alternatively call NutDhcpIfConfig(), which allows
+ * automatic configuration by DHCP or the so called ARP method.
+ *
+ * \param name    Name of the device to configure.
+ * \param ip_addr Specified IP address in network byte order. This must
+ *                be a unique address within the Internet. If you do not
+ *                directly communicate with other Internet hosts, you can
+ *                use a locally assigned address.
+ * \param ip_mask Specified IP network mask in network byte order.
+ *                Typical Ethernet networks use 255.255.255.0, which
+ *                allows up to 254 hosts.
+ * \param gateway Specified IP for the default gateway in network byte order.
+ *                This argument might be 0 in which case the default route
+ *                will be disabled.
+ *
+ * \return 0 on success, -1 otherwise.
+ *
+ */
+int NutNetStaticIfSetup(const char* name, uint32_t ip_addr, uint32_t ip_mask, uint32_t gateway)
+{
+    NUTDEVICE *dev;
+    IFNET *nif;
+
+    /*
+     * Check if arguments are valid.
+     */
+    if (ip_addr == 0 || ip_mask == 0)
+        return -1;
+
+    /*
+     * Check if this is a registered network device.
+     */
+    if ((dev = NutDeviceLookup(name)) == 0 || dev->dev_type != IFTYP_NET)
+        return -1;
+
+    /*
+     * Setup Ethernet interface with MAC address.
+     */
+    nif = dev->dev_icb;
+    if (nif->if_type == IFT_ETHER) {
+        /* Check if ioctl is supported. */
+        if (dev->dev_ioctl) {
+            uint32_t flags;
+
+            /* Driver has ioctl, use it. */
+            dev->dev_ioctl(dev, SIOCGIFFLAGS, &flags);
+            dev->dev_ioctl(dev, SIOCSIFADDR, confnet.cdn_mac);
+            flags |= IFF_UP;
+            dev->dev_ioctl(dev, SIOCSIFFLAGS, &flags);
+        } else {
+            /* No ioctl, set MAC address to start driver. */
+            memcpy(nif->if_mac, confnet.cdn_mac, sizeof(nif->if_mac));
+        }
+    }
+
+    nif->if_local_ip = ip_addr;
+
+    /*
+     * Add routing entries.
+     */
+    NutIpRouteAdd(ip_addr & ip_mask, ip_mask, 0, dev);
+    if (gateway)
+        NutIpRouteAdd(0, 0, gateway, dev);
+
+    /*
+     * Load confnet with current settings.
+     */
+    memcpy(confnet.cd_name, dev->dev_name, sizeof(confnet.cd_name));
+    confnet.cdn_ip_addr = ip_addr;
+    confnet.cdn_ip_mask = ip_mask;
+
+    /*
+     * Set gateway, if one was provided by the caller. Remove
+     * gateway, if it's outside of our network.
+     */
+    if (gateway || (confnet.cdn_gateway & ip_mask) != (ip_addr & ip_mask))
+        confnet.cdn_gateway = gateway;
+
+    return 0;
+}
 
 /*!
  * \brief Network interface setup.
@@ -157,8 +244,10 @@ int NutNetIfSetup(NUTDEVICE * dev, uint32_t ip_addr, uint32_t ip_mask, uint32_t 
  *                override the MAC address stored in the non-volatile
  *                configuration memory. If this memory is uninitialized
  *                or not available, the MAC address must be specified.
- *                For PPP interfaces this parameter is ignored and should
- *                be set to zero.
+ *                For PPP client interfaces this parameter is NULL,
+ *                while PPP server interfaces expect a pointer to a
+ *                \ref PPPSERVER_CFG structure containing the server
+ *                configuration.
  * \param ip_addr Specified IP address in network byte order. This must
  *                be a unique address within the Internet. If you do not
  *                directly communicate with other Internet hosts, you can
@@ -191,7 +280,16 @@ int NutNetIfConfig(const char *name, void *params, uint32_t ip_addr, uint32_t ip
  * the so called ARP method.
  *
  * \param name    Name of the device to configure.
- * \param params  Pointer to interface specific parameters.
+ * \param params  Pointer to interface specific parameters. For Ethernet
+ *                interfaces this parameter may be a pointer to a buffer
+ *                containing the 6 byte long MAC address. This will
+ *                override the MAC address stored in the non-volatile
+ *                configuration memory. If this memory is uninitialized
+ *                or not available, the MAC address must be specified.
+ *                For PPP client interfaces this parameter is NULL,
+ *                while PPP server interfaces expect a pointer to a
+ *                \ref PPPSERVER_CFG structure containing the server
+ *                configuration.
  * \param ip_addr Specified IP address in network byte order. This must
  *                be a unique address within the Internet. If you do not
  *                directly communicate with other Internet hosts, you can
@@ -247,6 +345,7 @@ int NutNetIfConfig2(const char *name, void *params, uint32_t ip_addr, uint32_t i
      */
     else if (nif->if_type == IFT_PPP) {
         PPPDCB *dcb = dev->dev_dcb;
+        PPPSERVER_CFG *ppsc = params;
 
         /*
          * Set the interface's IP address, make sure that the state
@@ -255,6 +354,9 @@ int NutNetIfConfig2(const char *name, void *params, uint32_t ip_addr, uint32_t i
          */
         dcb->dcb_local_ip = ip_addr;
         dcb->dcb_ip_mask = ip_mask ? ip_mask : 0xffffffff;
+        if (ppsc) {
+            dcb->dcb_remote_ip = ppsc->ppsc_remote_ip;
+        }
         NutEventBroadcast(&dcb->dcb_state_chg);
         _ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev);
 
