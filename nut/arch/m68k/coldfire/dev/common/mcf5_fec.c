@@ -137,7 +137,7 @@ uint8_t resetPHY = 0;
 
 static TMWDTSetVariableFN	EthMWDTSetVariableFN = NULL;
 /*
- * Minimal number of free BDs required for trasmitting maximal packet.
+ * Minimal number of free BDs required for transmitting maximal packet.
  * One free BD must left all times - HW requirement (more info in datasheet)
  */
 #ifdef TX_PACKET_ASSEMBLE
@@ -1042,6 +1042,7 @@ static int FecOutput(NUTDEVICE * dev, NETBUF * nb)
 	{
 		/* Unlock tx mutex */
 		NutEventPost(&ni->tx_mutex);
+		errno = ENOMEM;
 		return -1;
 	}
 
