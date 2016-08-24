@@ -214,6 +214,10 @@ NUTDEVICE devUartOldMcf5_0 = {
 	#define MCF_GPIO_PORT_RE2		    MCF_GPIO_PORTAN_PORTAN1
 	#define MCF_GPIO_PORT_DE2     		MCF_GPIO_PORTAN_PORTAN2
 
+	/* 232 chip - special solution (1x232, 1x485) */
+	#define MCF_GPIO_PORT_EN_IN		    MCF_GPIO_PORTUA_PORTUA2
+	#define MCF_GPIO_PORT_F_OFF    		MCF_GPIO_PORTUA_PORTUA3
+
 #endif
 
 /* RTS, CTS flow control */
@@ -252,6 +256,7 @@ NUTDEVICE devUartOldMcf5_0 = {
 	#ifndef UART_HDB_FDX_BIT
 	#define UART_HDB_FDX_BIT
 	#endif
+
 #elif PLATFORM == POSEIDON
 	#define UART_RTS_BIT
 	#define UART_CTS_BIT

@@ -46,7 +46,8 @@
 //#define UART_NO_SW_FLOWCONTROL
 
 /* IOCtrl Halfduplex flag, ktery urci komunkaci pres porty AB, XY */
-#define USART_MF_HALFDUPLEX_YZ	0x1000
+#define USART_MF_HALFDUPLEX_YZ	0x2000
+#define USART_MF_FULLDUPLEX_232	0x4000
 
 /* Priznak, ktery urci jaky z portu AB, XY je vybran. */
 #define HDX_CONTROL_YZ			0x10
@@ -167,20 +168,20 @@ static ureg_t cts_sense;
  */
 static void McfUsartTxEmpty(void *arg)
 {
+	/* Last byte from shift register was sent. */
 
 #if (PLATFORM_SUB == REV_D && defined(UART_HDB_FDX_BIT))
 	if (hdx_control & HDX_CONTROL_YZ)
 	{
-
 		/* Set Half duplex on second chip*/
-		/* Enable receiver, Transceiver DE2 Enable */
+		/* RE2 = 0 Enable Receiver, DE2 = 0 Disable Transmitter */
 		MCF_GPIO_PORT_CHIP2 &= ~(MCF_GPIO_PORT_RE2 | MCF_GPIO_PORT_DE2);
+
 	}
 	else
 #endif
 	{
-		/* Last byte from shift register was sent. */
-		/* Enable receiver, Transceiver DE2 Enable */
+		/* RE1 = 0 Enable Receiver, DE1 = 0 Disable Transmitter */
 		MCF_GPIO_PORT_CHIP1 &= ~(MCF_GPIO_PORT_RE1 | MCF_GPIO_PORT_DE1);
 	}
 
@@ -1008,78 +1009,92 @@ static int McfUsartSetFlowControl(uint32_t flags)
 
 #ifdef UART_HDB_FDX_BIT
 
+	/* Set RS232 mode - Komunikace pres porty YZ */
+	if (flags & USART_MF_FULLDUPLEX_232)
+	{
+		//disable RS485 on AB, enable RS232 on YZ
+		// Disable first chip
+		MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_RE1;	/* RE1 = 1 Disable Receiver */
+		MCF_GPIO_PORT_CHIP1 &= ~MCF_GPIO_PORT_DE1;	/* DE1 = 0 Disable Transmitter */
+
+		// Enable Full duplex on second chip (Intersil ICL3221)
+		MCF_GPIO_PORT_CHIP2 &= ~MCF_GPIO_PORT_RE2;	/* RE2 = 0 Enable Receiver, in this case EN_IN (enable input)*/
+		MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_DE2;	/* DE2 = 1 Enable Transmitter, in this case F_OFF (force off)*/
+	}
 	/*
 	 * Set half duplex mode.
 	 */
-	if (flags & USART_MF_HALFDUPLEX)
+	else if (flags & USART_MF_HALFDUPLEX)
 	{
-
-		/* Half duplex Komunikace pres porty YZ */
-		if(flags & USART_MF_HALFDUPLEX_YZ)
+		/* Half duplex komunikace pres porty YZ */
+		if (flags & USART_MF_HALFDUPLEX_YZ)
 		{
-
 			// Disable Half duplex on first chip
-			/* Disable Transmitter DE1 = 0 */
-			MCF_GPIO_PORT_CHIP1 &= ~MCF_GPIO_PORT_DE1;
-			/* Disable Receiver RE1 = 1 */
-			MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_RE1;
+			MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_RE1;	/* RE1 = 1 Disable Receiver */
+			MCF_GPIO_PORT_CHIP1 &= ~MCF_GPIO_PORT_DE1;	/* DE1 = 0 Disable Transmitter */
 
 #if PLATFORM_SUB == REV_C
 
 			/* H/F Duplex  - 1 Half duplex*/
 			MCF_GPIO_PORTAN |= MCF_GPIO_PORTAN_PORTAN5;
 #elif PLATFORM_SUB == REV_D
+			//TODO: conditionally not compile?
+			/*
+			 * If this mode is selected on REV_D boards with RS232 piggy-back,
+			 * it enables RS232 transceiver to Rx from YZ which will interfere with Rx from AB!!!
+			 */
 
 			/* Enable Half duplex on second chip*/
-			/* RE2 = 0 Enabled */
+			/* RE2 = 0 Enable Receiver, DE2 = 0 Disable Transmitter */
 			MCF_GPIO_PORT_CHIP2 &= ~(MCF_GPIO_PORT_RE2 | MCF_GPIO_PORT_DE2);
 #else
 #error "Please define User Platform Macro PLATFORM_SUB in Nut/OS Configurator."
 #endif
-			hdx_control = HDX_CONTROL_YZ | 1;
+			hdx_control = 1 | HDX_CONTROL_YZ;
 		}
 		/* Half duplex Komunikace pres porty AB */
 		else
 		{
-
-			/* Enable Receiver RE1 = 0, Disable Transmitter DE1 = 1 */
+			/* RE1 = 0 Enable Receiver, DE1 = 0 Disable Transmitter */
 			MCF_GPIO_PORT_CHIP1 &= ~(MCF_GPIO_PORT_RE1 | MCF_GPIO_PORT_DE1);
 
 #if PLATFORM_SUB == REV_C
-
 			/* H/F Duplex  - 1 Half duplex*/
 			MCF_GPIO_PORTAN |= MCF_GPIO_PORTAN_PORTAN5;
+
 #elif PLATFORM_SUB == REV_D
-
-			/* Disable Transmitter and Receiver on second chip*/
-			/* RE2 = 1 Disabled */
-			MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_RE2;
-
-			/* DE2 = 0 Disabled*/
-			MCF_GPIO_PORT_CHIP2 &= ~MCF_GPIO_PORT_DE2;
+			/* Disable Receiver and Transmitter on second chip*/
+			MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_RE2;	/* RE2 = 1 Disable Receiver */
+			MCF_GPIO_PORT_CHIP2 &= ~MCF_GPIO_PORT_DE2;	/* DE2 = 0 Disable Transmitter*/
 #else
 #error "Please define User Platform Macro PLATFORM_SUB in Nut/OS Configurator."
 #endif
 			hdx_control = 1;
 		}
-		/* Full duplex */
 	}
+	/*
+	 * Set full duplex mode
+	 */
 	else if (hdx_control)
 	{
+		//TODO: conditionally not compile?
+		/*
+		 * If this mode is selected on REV_D boards with RS232 piggy-back,
+		 * it enables RS232 transceiver to Tx to YZ which can be of no care?
+		 */
 		hdx_control = 0;
 
-		/* Enable Receiver RE1 = 0 */
-		MCF_GPIO_PORT_CHIP1 &= ~MCF_GPIO_PORT_RE1;
+		/* RE1 = 0 Enable Receiver, DE1 = 0 Disable Transmitter */
+		MCF_GPIO_PORT_CHIP1 &= ~(MCF_GPIO_PORT_RE1 | MCF_GPIO_PORT_DE1);
+
 #if PLATFORM_SUB == REV_C
-		/* DE - transmit enable: 1 enabled */
-		MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_DE1;
+		MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_DE1;		/* DE - transmit enable: 1 enabled */
 
 		/* H/F Duplex  - 0 Full duplex*/
 		MCF_GPIO_PORTAN &= ~MCF_GPIO_PORTAN_PORTAN5;
-#elif PLATFORM_SUB == REV_D
 
-		/* Transmitter */
-		/* RE2 = 1 Disabled, DE2 = 1 Enabled */
+#elif PLATFORM_SUB == REV_D
+		/* RE2 = 1 Disable Receiver, DE2 = 1 Enable Transmitter */
 		MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_RE2 | MCF_GPIO_PORT_DE2;
 #endif
 	}
@@ -1111,15 +1126,14 @@ static void McfUsartTxStart(void)
 #if (PLATFORM_SUB == REV_D && defined(UART_HDB_FDX_BIT))
 		if (hdx_control & HDX_CONTROL_YZ)
 		{
-
 			/* Set Half duplex on second chip*/
-			/* Receiver RE2 Disable, Enable Transceiver */
+			/* RE2 = 1 Disable Receiver, DE2 = 1 Enable Transmitter */
 			MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_RE2 | MCF_GPIO_PORT_DE2;
 		}
 		else
 #endif
 		{
-			/* Disable receiver, Enable Transceiver  */
+			/* RE1 = 1 Disable Receiver, DE1 = 1 Enable Transmitter */
 			MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_RE1 | MCF_GPIO_PORT_DE1;
 		}
 	}
@@ -1230,7 +1244,7 @@ static int McfUsartInit(void)
 	MCF_GPIO_DDR_CHIP1 |= MCF_GPIO_DDR_RE1 | MCF_GPIO_DDR_DE1;
 
 	/* Enable Receiver / Half duplex */
-	/* Enable RE1 = 0 */
+	/* RE1 = 0 Enable Receiver, DE1 = 0 Disable Transmitter */
 	MCF_GPIO_PORT_CHIP1 &= ~(MCF_GPIO_PORT_RE1 | MCF_GPIO_PORT_DE1);
 #endif
 
@@ -1245,7 +1259,7 @@ static int McfUsartInit(void)
 #ifdef UART_HDB_FDX_BIT
 
 #if PLATFORM_SUB == REV_C
-	/* Enable Transceiver = 1 */
+	/* Enable Transmitter = 1 */
 	MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_DE1;
 
 	/* Set GPIO function for RE - reset enable PUA2 and for DE - data enable PUA3 */
@@ -1265,7 +1279,7 @@ static int McfUsartInit(void)
 	MCF_GPIO_DDR_CHIP2 |= MCF_GPIO_DDR_RE2 | MCF_GPIO_PAR_DE2;
 
 	/* Enable Transmitter */
-	/* RE2 = 1 Disabled, DE2 = 1 Enabled */
+	/* RE2 = 1 Disable Receiver, DE2 = 1 Enable Transmitter */
 	MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_RE2 | MCF_GPIO_PORT_DE2;
 #endif
 #endif
