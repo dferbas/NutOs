@@ -1037,7 +1037,7 @@ static int McfUsartSetFlowControl(uint32_t flags)
 
 			/* H/F Duplex  - 1 Half duplex*/
 			MCF_GPIO_PORTAN |= MCF_GPIO_PORTAN_PORTAN5;
-#elif PLATFORM_SUB == REV_D
+#elif (PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)
 			//TODO: conditionally not compile?
 			/*
 			 * If this mode is selected on REV_D boards with RS232 piggy-back,
@@ -1062,7 +1062,7 @@ static int McfUsartSetFlowControl(uint32_t flags)
 			/* H/F Duplex  - 1 Half duplex*/
 			MCF_GPIO_PORTAN |= MCF_GPIO_PORTAN_PORTAN5;
 
-#elif PLATFORM_SUB == REV_D
+#elif (PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)
 			/* Disable Receiver and Transmitter on second chip*/
 			MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_RE2;	/* RE2 = 1 Disable Receiver */
 			MCF_GPIO_PORT_CHIP2 &= ~MCF_GPIO_PORT_DE2;	/* DE2 = 0 Disable Transmitter*/

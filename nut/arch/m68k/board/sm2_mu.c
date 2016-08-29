@@ -41,12 +41,16 @@ void NutBoardInit(void)
     GpioPinConfigSet(PORTAN, 7, GPIO_CFG_OUTPUT);
     GpioPinSetHigh(PORTAN, 7);
 
-#elif PLATFORM_SUB == REV_D
+#elif (PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)
     /* Set GPIO function for enable Usart2 (RS-232). Set pins \EN and SD (shutdown)*/
     GpioPinSetLow(PORTAN, 3);
     GpioPinSetLow(PORTAN, 4);
     GpioPinConfigSet(PORTAN, 3, GPIO_CFG_OUTPUT);
     GpioPinConfigSet(PORTAN, 4, GPIO_CFG_OUTPUT);
+	#if PLATFORM_SUB == REV_F
+    	/*Set GPIO function for check 485/232 piggy bag*/
+    	GpioPinConfigSet(PORTQS, 6, GPIO_CFG_INPUT);
+	#endif
 #else
 	#error "Please define User Platform Macro PLATFORM_SUB in Nut/OS Configurator."
 #endif
