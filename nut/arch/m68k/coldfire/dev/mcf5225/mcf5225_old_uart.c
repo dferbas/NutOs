@@ -170,7 +170,7 @@ static void McfUsartTxEmpty(void *arg)
 {
 	/* Last byte from shift register was sent. */
 
-#if (PLATFORM_SUB == REV_D && defined(UART_HDB_FDX_BIT))
+#if (((PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)) && defined(UART_HDB_FDX_BIT))
 	if (hdx_control & HDX_CONTROL_YZ)
 	{
 		/* Set Half duplex on second chip*/
@@ -1093,7 +1093,7 @@ static int McfUsartSetFlowControl(uint32_t flags)
 		/* H/F Duplex  - 0 Full duplex*/
 		MCF_GPIO_PORTAN &= ~MCF_GPIO_PORTAN_PORTAN5;
 
-#elif PLATFORM_SUB == REV_D
+#elif (PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)
 		/* RE2 = 1 Disable Receiver, DE2 = 1 Enable Transmitter */
 		MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_RE2 | MCF_GPIO_PORT_DE2;
 #endif
@@ -1123,7 +1123,7 @@ static void McfUsartTxStart(void)
 #if defined(UART_HDX_BIT) || defined(UART_HDB_FDX_BIT)
 	if (hdx_control)
 	{
-#if (PLATFORM_SUB == REV_D && defined(UART_HDB_FDX_BIT))
+#if (((PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)) && defined(UART_HDB_FDX_BIT))
 		if (hdx_control & HDX_CONTROL_YZ)
 		{
 			/* Set Half duplex on second chip*/
@@ -1270,7 +1270,7 @@ static int McfUsartInit(void)
 
 	/* H/F Duplex  - 0 Full duplex*/
 	MCF_GPIO_PORTAN &= ~MCF_GPIO_PORTAN_PORTAN5;
-#elif PLATFORM_SUB == REV_D
+#elif (PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)
 	/* Usart1 enable full duplex */
 	/* Set GPIO function for RE2, DE2 */
 	MCF_GPIO_PAR_CHIP2 &= ~(MCF_GPIO_PAR_RE2 | MCF_GPIO_PAR_DE2);
