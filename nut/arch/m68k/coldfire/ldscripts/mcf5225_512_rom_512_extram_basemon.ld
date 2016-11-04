@@ -35,7 +35,7 @@ STARTUP(crt_common.o)
 INPUT(crt_common_c.o)
 INPUT(crt_mcf5225.o)
 INPUT(crt_mcf5225_c.o)
-INPUT(crt_mcf5225_512_rom_512_extram_basemon.o)
+INPUT(crt_mcf5225_512_rom_512_extram.o)
 ENTRY(_start)
 
 /*
@@ -43,7 +43,8 @@ ENTRY(_start)
  */
 MEMORY
 {
-    rom(rx)       : ORIGIN = 0x00000000, LENGTH = 512K
+    bootloader(r) : ORIGIN = 0x00000000, LENGTH = 16K
+    rom(rx)       : ORIGIN = 0x00000000 + LENGTH(bootloader), LENGTH = 512K - LENGTH(bootloader)
     intram(rwx)   : ORIGIN = 0x20000000, LENGTH = 64K
     ipsbar(rw)    : ORIGIN = 0x40000000, LENGTH = 1024M
     extram(rwx)   : ORIGIN = 0x80000000, LENGTH = 512K
@@ -52,15 +53,13 @@ MEMORY
 /* 
  * Symbols for CPU initialization 
  */
-PROVIDE (__rom_start    = ORIGIN(rom));
-PROVIDE (__rom_size     = LENGTH(rom)); 
 PROVIDE (__intram_start   = ORIGIN(intram));
 PROVIDE (__intram_size    = LENGTH(intram));
 PROVIDE (__extram_start   = ORIGIN(extram));
 PROVIDE (__extram_size    = LENGTH(extram));
 
 PROVIDE (__rambar         = __intram_start);
-PROVIDE (__flashbar       = ORIGIN(rom));
+PROVIDE (__flashbar       = ORIGIN(bootloader));
 PROVIDE (__ipsbar         = ORIGIN(ipsbar));
 PROVIDE (__stack_init     = __intram_start + __intram_size);
 

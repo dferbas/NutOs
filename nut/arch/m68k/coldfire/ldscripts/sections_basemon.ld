@@ -32,37 +32,14 @@
 
 SECTIONS
 {
-    .text :
+    .text.boot :
     {
-    	PROVIDE (__vectors_start = .) ;
-        KEEP(*(.vectors))
-        /* Set bootloader info, BEAF, BL_ID */
-        . = /*__rom_start + */0x300;
-        LONG (0xbeaf0002)
-        
-        /* Erase production data */
-        . = /*__rom_start + */0x380;
+        LONG(__stack_init)/* Initial SP */
+        LONG(_start)      /* Initial PC */
+        LONG(0)           /* Placeholder for custom data */
+        LONG(0)           /* Placeholder for custom data */
 
-/*        
-        LONG (0xbeaf0001)
-        LONG (0x00010080)
-        LONG (0x70B59911)	/* MAC */
-	LONG (0x00020000)	/* MAC */
-        LONG (0x31303034)	/* SN */
-        LONG (0x35303030)	/* SN */
-        LONG (0x30320000)	/* SN */
-        LONG (0x00000000)	/* za poslednim znakem SN musi byt ukoncovaci 0x00, vypisuje se jako retezec */
-*/
 
-				/* Emit a CFM Key */
-				. = /*__rom_start + */0x400;
-				LONG (0xce7c8dff) /* Backdoor Key */
-				LONG (0xfaac9e44) /* Backdoor Key */
-				LONG (0xffffffff) /* Sector Protection */
-				LONG (0x00000000) /* Supervisor Access */
-				LONG (0x00000000) /* Data Access */
-				/* Set 0x80004AC8 to protect */
-				LONG (0xffffffff) /* Security Word */
 
 
         KEEP(*(.init0))   /* Basic CPU initialization (family dependant code). */
@@ -80,10 +57,6 @@ SECTIONS
         KEEP(*(.init12))  /* C++ constructors (NOT implemented yet). */
         KEEP(*(.init13))
         KEEP(*(.init14))  /* Enter Nut/OS Initialization. */
-
-        *(.text)
-        *(.text.*)
-        *(.gnu.linkonce.t.* .gcc_except_table .gcc_except_table.*)
 
         /* following table is used in InitRegions() */
         . = ALIGN(4);
@@ -106,6 +79,36 @@ SECTIONS
         LONG (__bss_start)       /* No init data */
 
         PROVIDE (__regions_end = .);
+
+        /* test production data */
+				. = 0x380;
+        LONG (0xbeaf0001)
+        LONG (0x00010003)
+        LONG (0x70b59900)
+        LONG (0x0004000A)
+        LONG (0x31303034)
+        LONG (0x34303030)
+        LONG (0x30340000)
+        LONG (0x00000000)
+         */
+
+        /* cfm konfig */
+        . = 0x400;
+        LONG (0xce7c8dff) /* Backdoor Key */
+        LONG (0xfaac9e44) /* Backdoor Key */
+        LONG (0xffffffff) /* Sector Protection */
+        LONG (0x00000000) /* Supervisor Access */
+        LONG (0x00000000) /* Data Access */
+        /* Set 0x80004AC8 to protect */
+        LONG (0xffffffff) /* Security Word */
+    } > bootloader AT > bootloader
+
+    .text :
+    {
+        *(.text)
+        *(.text.*)
+        *(.gnu.linkonce.t.* .gcc_except_table .gcc_except_table.*)
+
     } > REGION_TEXT AT > REGION_LOAD
 
     .rodata : ALIGN (4)
@@ -118,6 +121,8 @@ SECTIONS
     .dataint : ALIGN(4)
     {
         PROVIDE (__dataint_start = .) ;
+        PROVIDE (__vectors_start = .) ;
+        KEEP(*(.vectors))
         *(.dataint)
         *(.dataint.*)
         . = ALIGN(4);
@@ -138,6 +143,7 @@ SECTIONS
     .data : ALIGN(4)
     {
         PROVIDE (__data_start = .) ;
+        *(.ram_code)
         *(.data)
         *(.data.*)
         *(.gnu.linkonce.d.*)
