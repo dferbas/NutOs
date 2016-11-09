@@ -38,8 +38,8 @@ SECTIONS
         LONG(_start)      /* Initial PC */
         LONG(0)           /* Placeholder for custom data */
         LONG(0)           /* Placeholder for custom data */
-        
-        KEEP(*(.init0))   /* Basic CPU initialization (family dependant code). */
+
+        KEEP(*(.init0))   /* Basic CPU initialization (family dependant code, _start is here). */
         KEEP(*(.init1))
         KEEP(*(.init2))   /* Set up stack pointer.  */
         KEEP(*(.init3))
@@ -54,10 +54,6 @@ SECTIONS
         KEEP(*(.init12))  /* C++ constructors (NOT implemented yet). */
         KEEP(*(.init13))
         KEEP(*(.init14))  /* Enter Nut/OS Initialization. */
-
-        *(.text)
-        *(.text.*)
-        *(.gnu.linkonce.t.* .gcc_except_table .gcc_except_table.*)
 
         /* following table is used in InitRegions() */
         . = ALIGN(4);
@@ -80,7 +76,12 @@ SECTIONS
         LONG (__bss_start)       /* No init data */
 
         PROVIDE (__regions_end = .);
-    } > REGION_TEXT AT > REGION_LOAD
+
+        *(.text)
+        *(.text.*)
+        *(.gnu.linkonce.t.* .gcc_except_table .gcc_except_table.*)
+
+    } > REGION_TEXT AT > REGION_LOAD =0xFF
 
     .rodata : ALIGN (4)
     {

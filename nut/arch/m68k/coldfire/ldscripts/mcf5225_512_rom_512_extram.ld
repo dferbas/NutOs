@@ -35,7 +35,7 @@ STARTUP(crt_common.o)
 INPUT(crt_common_c.o)
 INPUT(crt_mcf5225.o)
 INPUT(crt_mcf5225_c.o)
-INPUT(crt_mcf5225_512_rom_512_extram.o)
+INPUT(crt_mcf5225_extram.o)
 ENTRY(_start)
 
 /*
@@ -49,12 +49,6 @@ MEMORY
     ipsbar(rw)    : ORIGIN = 0x40000000, LENGTH = 1024M
     extram(rwx)   : ORIGIN = 0x80000000, LENGTH = 512K
 }
-
-/* 
- * Symbols for dynamic drivers
- */
-PROVIDE (__driver_size    = 160k );
-PROVIDE (__driver_start   = __extram_start + __extram_size - __driver_size);
 
 /* 
  * Symbols for CPU initialization 

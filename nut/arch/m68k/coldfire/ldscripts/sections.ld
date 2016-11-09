@@ -37,28 +37,7 @@ SECTIONS
     	PROVIDE (__vectors_start = .) ;
         KEEP(*(.vectors))
         
-        /* Set Mac info */
-        . = 0x380;
-        LONG (0xbeaf0001)
-        LONG (0x00010080)
-        LONG (0x70B59911)	/* MAC */
-		LONG (0x00020000)	/* MAC */
-        LONG (0x31303034)	/* SN */
-        LONG (0x35303030)	/* SN */
-        LONG (0x30320000)	/* SN */
-        LONG (0x00000000)	/* za poslednim znakem SN musi byt ukoncovaci 0x00, vypisuje se jako retezec */
-
-        /* Emit a CFM Key */
-        . = 0x400;          /* JS TODO .. musi byt vzdy ve FLASH .. stejne jako vektory, kdyby nekdo dal .text do RAM */ 
-        LONG (0x98563182) /* Backdoor Key */
-        LONG (0x87519645) /* Backdoor Key */
-        LONG (0xffffffff) /* Reserved */
-        LONG (0x008100F2) /* Flash protection, only last sector unprotected 81, back door key disabled, security enabled F2 */
-        /* LONG (0x008100FF) */ /* For TEST HW - Flash protection, only last sector unprotected 81, back door key disabled, security disabled FF */
-        LONG (0x701011C0) /* Data Access */
-        LONG (0x82A070C2) /* Security Word */
-
-        KEEP(*(.init0))   /* Basic CPU initialization (family dependant code). */
+        KEEP(*(.init0))   /* Basic CPU initialization (family dependant code, _start is here). */
         KEEP(*(.init1))
         KEEP(*(.init2))   /* Set up stack pointer.  */
         KEEP(*(.init3))
@@ -73,10 +52,6 @@ SECTIONS
         KEEP(*(.init12))  /* C++ constructors (NOT implemented yet). */
         KEEP(*(.init13))
         KEEP(*(.init14))  /* Enter Nut/OS Initialization. */
-
-        *(.text)
-        *(.text.*)
-        *(.gnu.linkonce.t.* .gcc_except_table .gcc_except_table.*)
 
         /* following table is used in InitRegions() */
         . = ALIGN(4);
@@ -99,7 +74,33 @@ SECTIONS
         LONG (__bss_start)       /* No init data */
 
         PROVIDE (__regions_end = .);
-    } > REGION_TEXT AT > REGION_LOAD
+
+        /* Set MAC info */
+        . = 0x380;
+        LONG (0xbeaf0001)
+        LONG (0x00010080)
+        LONG (0x70B59911)	/* MAC */
+	LONG (0x00020000)	/* MAC */
+        LONG (0x31303034)	/* SN */
+        LONG (0x35303030)	/* SN */
+        LONG (0x30320000)	/* SN */
+        LONG (0x00000000)	/* za poslednim znakem SN musi byt ukoncovaci 0x00, vypisuje se jako retezec */
+
+        /* Emit a CFM Key */
+        . = 0x400;          /* JS TODO .. musi byt vzdy ve FLASH .. stejne jako vektory, kdyby nekdo dal .text do RAM */ 
+        LONG (0x98563182) /* Backdoor Key */
+        LONG (0x87519645) /* Backdoor Key */
+        LONG (0xffffffff) /* Reserved */
+        LONG (0x008100F2) /* Flash protection, only last sector unprotected 81, back door key disabled, security enabled F2 */
+        /* LONG (0x008100FF) */ /* For TEST HW - Flash protection, only last sector unprotected 81, back door key disabled, security disabled FF */
+        LONG (0x701011C0) /* Data Access */
+        LONG (0x82A070C2) /* Security Word */
+
+        *(.text)
+        *(.text.*)
+        *(.gnu.linkonce.t.* .gcc_except_table .gcc_except_table.*)
+
+    } > REGION_TEXT AT > REGION_LOAD =0xFF
 
     .rodata : ALIGN (4)
     {
@@ -131,6 +132,7 @@ SECTIONS
     .data : ALIGN(4)
     {
         PROVIDE (__data_start = .) ;
+        *(.ram_code)
         *(.data)
         *(.data.*)
         *(.gnu.linkonce.d.*)

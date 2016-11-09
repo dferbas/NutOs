@@ -50,12 +50,12 @@ void InitClock(void)
 	/* Select clock source. */
 	MCF_CLOCK_CCLR = 0x00;
 
-	/* Disable on-chip oscilator. */
+	/* Disable on-chip oscillator. */
 	MCF_CLOCK_OCHR = 0x00;
 
 	/*
 	 * Configure PLL dividers:
-	 *  - PLL pre-divider = 48MHz / (CCHR + 1) = 8MHz
+	 *  - PLL pre-divider = 48MHz / (CCHR + 1) = 8MHz (must be < 12 MHz)
 	 *  - MFD, RFD = x10 .. 8*10 = 80MHz (system clock)
 	 */
 	MCF_CLOCK_CCHR = 0x05;

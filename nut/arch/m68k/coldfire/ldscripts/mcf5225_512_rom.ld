@@ -35,7 +35,6 @@ STARTUP(crt_common.o)
 INPUT(crt_common_c.o)
 INPUT(crt_mcf5225.o)
 INPUT(crt_mcf5225_c.o)
-INPUT(crt_mcf5225_512_rom.o)
 ENTRY(_start)
 
 /*

@@ -581,20 +581,10 @@ lpc17xx_ld_choice =
     "lpc1778_flash",
 }
 
-mcf51cn_ld_description = {
-        mcf51cn_512_rom                    = "MCF51cn, code running in FLASH",
-}
-
-mcf51cn_ld_choice = {
-        " ",
-        "mcf51cn_128_rom",
-}
-
 mcf5225_ld_description = {
         mcf5225_512_rom                    		= "MCF5225x, code running in FLASH",
         mcf5225_512_rom_512_extram         		= "MCF5225x, code running in FLASH, data in external SDRAM",
         mcf5225_512_rom_512_extram_boot    		= "MCF5225x, code running in FLASH, data in external SDRAM, started by bootloader at address 0x4000, vectors in external SDRAM",
-        mcf5225_512_rom_512_extram_boot_driver = "MCF5225x, code running in FLASH, data in external SDRAM, started by bootloader at address 0x4000, vectors in external SDRAM, drivers savad in RAM"
 }
 
 mcf5225_ld_choice = {
@@ -602,7 +592,24 @@ mcf5225_ld_choice = {
         "mcf5225_512_rom",
         "mcf5225_512_rom_512_extram",
         "mcf5225_512_rom_512_extram_boot",
-        "mcf5225_512_rom_512_extram_boot_driver"
+}
+
+mcf51cn_ld_description = {
+        mcf51cn_128_rom                    = "MCF51cn, code running in FLASH",
+}
+
+mcf51cn_ld_choice = {
+        " ",
+        "mcf51cn_128_rom",
+}
+
+mcf51qe_ld_description = {
+        mcf51qe_128_rom                    = "MCF51qe, code running in FLASH",
+}
+
+mcf51qe_ld_choice = {
+        " ",
+        "mcf51qe_128_rom",
 }
 
 --
@@ -675,14 +682,19 @@ function GetLDScripts()
             return lpc17xx_ld_choice
         end
     end
-	if c_is_provided("TOOL_CC_M68K") then
+    if c_is_provided("TOOL_CC_M68K") then
         if c_is_provided("HW_MCU_MCF5225") then
             return mcf5225_ld_choice
         end
         if c_is_provided("HW_MCU_MCF51CN") then
             return mcf51cn_ld_choice
         end
-	end
+        if c_is_provided("HW_MCU_MCF51QE") then
+            return mcf51qe_ld_choice
+        end
+        
+        return "Unknown Platform - Check GetLDScripts in tools.nut"
+    end
 end
 
 --
@@ -730,16 +742,19 @@ function GetLDScriptDescription()
            return FormatLDScriptDescription(lpc17xx_ld_description)
        end
     end
-	if c_is_provided("TOOL_CC_M68K") then
-	   if c_is_provided("MCU_MCF5525X") then
+    if c_is_provided("TOOL_CC_M68K") then
+       if c_is_provided("MCU_MCF5525X") then
            return FormatLDScriptDescription(mcf5225_ld_description)
        end
        if c_is_provided("MCU_MCF51CN") then
            return FormatLDScriptDescription(mcf51cn_ld_description)
        end
-           return ""
-	end
-end
+       if c_is_provided("HW_MCU_MCF51QE") then
+           return FormatLDScriptDescription(mcf51qe_ld_description)
+       end
+
+       return "Unknown Platform - Check GetLDScriptDescription in tools.nut"
+    end
 
 --
 -- Returns pairs sorted by keys in alphabetic order

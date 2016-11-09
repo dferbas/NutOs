@@ -39,10 +39,7 @@ SECTIONS
         LONG(0)           /* Placeholder for custom data */
         LONG(0)           /* Placeholder for custom data */
 
-
-
-
-        KEEP(*(.init0))   /* Basic CPU initialization (family dependant code). */
+        KEEP(*(.init0))   /* Basic CPU initialization (family dependant code, _start is here). */
         KEEP(*(.init1))
         KEEP(*(.init2))   /* Set up stack pointer.  */
         KEEP(*(.init3))
@@ -81,7 +78,8 @@ SECTIONS
         PROVIDE (__regions_end = .);
 
         /* test production data */
-				. = 0x380;
+        /*
+	. = 0x380;
         LONG (0xbeaf0001)
         LONG (0x00010003)
         LONG (0x70b59900)
@@ -101,7 +99,7 @@ SECTIONS
         LONG (0x00000000) /* Data Access */
         /* Set 0x80004AC8 to protect */
         LONG (0xffffffff) /* Security Word */
-    } > bootloader AT > bootloader
+    } > bootloader AT > bootloader =0xFF
 
     .text :
     {
@@ -109,7 +107,7 @@ SECTIONS
         *(.text.*)
         *(.gnu.linkonce.t.* .gcc_except_table .gcc_except_table.*)
 
-    } > REGION_TEXT AT > REGION_LOAD
+    } > REGION_TEXT AT > REGION_LOAD =0xFF
 
     .rodata : ALIGN (4)
     {
