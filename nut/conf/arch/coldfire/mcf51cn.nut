@@ -51,14 +51,12 @@ nutarch_m68k_coldfire_mcf51_mcf51cn =
         brief = "Initialization",
         description = "System startup code for Coldfire V1 Core MCUs.",
         sources = { 
-                    "m68k/coldfire/init/crt_$(LDNAME).S",
                     "m68k/coldfire/init/crt_common.S",
                     "m68k/coldfire/init/crt_common_c.c", 
                     "m68k/coldfire/init/crt_mcf51cn.S",
                     "m68k/coldfire/init/crt_mcf51cn_c.c",
                   },
         targets = { 
-                    "m68k/coldfire/init/crt_$(LDNAME).o",
                     "m68k/coldfire/init/crt_common.o",
                     "m68k/coldfire/init/crt_common_c.o", 
                     "m68k/coldfire/init/crt_mcf51cn.o", 

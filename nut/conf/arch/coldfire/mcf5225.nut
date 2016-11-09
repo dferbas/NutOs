@@ -113,14 +113,14 @@ nutarch_m68k_coldfire_mcf52_mcf5225 =
         brief = "Initialization",
         description = "System startup code for Coldfire V2 Core MCUs.",
         sources = { 
-                    "m68k/coldfire/init/crt_$(LDNAME).S",
+                    "m68k/coldfire/init/crt_mcf5225_extram.S",
                     "m68k/coldfire/init/crt_common.S",
                     "m68k/coldfire/init/crt_common_c.c", 
                     "m68k/coldfire/init/crt_mcf5225.S",
                     "m68k/coldfire/init/crt_mcf5225_c.c",
                   },
         targets = { 
-                    "m68k/coldfire/init/crt_$(LDNAME).o",
+                    "m68k/coldfire/init/crt_mcf5225_extram.o",
                     "m68k/coldfire/init/crt_common.o",
                     "m68k/coldfire/init/crt_common_c.o",
                     "m68k/coldfire/init/crt_mcf5225.o", 

@@ -755,6 +755,7 @@ function GetLDScriptDescription()
 
        return "Unknown Platform - Check GetLDScriptDescription in tools.nut"
     end
+end
 
 --
 -- Returns pairs sorted by keys in alphabetic order
