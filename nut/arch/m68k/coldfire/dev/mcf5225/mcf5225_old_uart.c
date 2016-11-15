@@ -1016,6 +1016,7 @@ static int McfUsartSetFlowControl(uint32_t flags)
 		// Disable first chip
 		MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_RE1;	/* RE1 = 1 Disable Receiver */
 		MCF_GPIO_PORT_CHIP1 &= ~MCF_GPIO_PORT_DE1;	/* DE1 = 0 Disable Transmitter */
+		hdx_control = 0;
 
 		// Enable Full duplex on second chip (Intersil ICL3221)
 		MCF_GPIO_PORT_CHIP2 &= ~MCF_GPIO_PORT_RE2;	/* RE2 = 0 Enable Receiver, in this case EN_IN (enable input)*/
