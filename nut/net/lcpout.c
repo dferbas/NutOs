@@ -141,7 +141,7 @@ void LcpTxConfReq(NUTDEVICE * dev, uint8_t id, uint8_t rejected)
         xcpo = nb->nb_ap.vp;
         xcpo->xcpo_type = LCP_ASYNCMAP;
         xcpo->xcpo_len = 6;
-        xcpo->xcpo_.ul = htonl(dcb->dcb_accm);	//TODO:LCP_DEFOPT_ASYNCMAP); /* Should this be "= 0;" instead? */
+        xcpo->xcpo_.ul = LCP_DEFOPT_ASYNCMAP; /* configure remote host hdlc escaping */
 
         /*
          * This is a temporary hack. In the initial version

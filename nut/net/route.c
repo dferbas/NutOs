@@ -160,15 +160,22 @@ int NutIpRouteDel(uint32_t ip, uint32_t mask, uint32_t gate, NUTDEVICE * dev)
     RTENTRY **rtpp;
     RTENTRY *rte;
 
-    for (rtpp = &rteList; *rtpp; *rtpp = (*rtpp)->rt_next) {
+    rtpp = &rteList;
+
+    while (*rtpp)
+    {
         rte = *rtpp;
 
-        if (rte->rt_ip == ip && rte->rt_mask == mask && rte->rt_gateway == gate && rte->rt_dev == dev) {
-            *rtpp = rte->rt_next;
+        if (rte->rt_ip == ip && rte->rt_mask == mask && rte->rt_gateway == gate && rte->rt_dev == dev)
+        {
+        	*rtpp = rte->rt_next;
             free(rte);
             rc = 0;
         }
+        else
+        	*rtpp = (*rtpp)->rt_next;
     }
+
     return rc;
 }
 

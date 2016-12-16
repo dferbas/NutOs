@@ -68,6 +68,19 @@ static uint16_t IpcpValidateIpReq(uint32_t *expected_ip, uint32_t *requested_ip)
     return 0;
 }
 
+
+//TODO: DF more variable code for case if any required option is missing
+static inline XCPOPT *add_option(XCPOPT * xcpr, uint8_t type, uint8_t len, uint32_t ul)
+{
+	xcpr->xcpo_type = type;
+	xcpr->xcpo_len = len;
+	xcpr->xcpo_.ul = ul;
+	xcpr = (XCPOPT *) ((char *) xcpr + len);
+
+	return xcpr;
+}
+//df
+
 /*
  * Received Configure-Request.
  */
@@ -173,33 +186,45 @@ static void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         xcpr = nb->nb_ap.vp;
         xcps = 0;
         len = 0;
-        while (xcpl >= 2) {
-            ip = xcpo->xcpo_.ul;
-            switch (xcpo->xcpo_type) {
-            case IPCP_ADDR:
-                len = IpcpValidateIpReq(&dcb->dcb_remote_ip, &ip);
-                break;
-            case IPCP_MS_DNS1:
-                len = IpcpValidateIpReq(&dcb->dcb_ip_dns1, &ip);
-                break;
-            case IPCP_MS_DNS2:
-                len = IpcpValidateIpReq(&dcb->dcb_ip_dns2, &ip);
-                break;
-            }
+        if (xcpl > 0)
+        {
+			while (xcpl >= 2) {
+				ip = xcpo->xcpo_.ul;
+				switch (xcpo->xcpo_type) {
+				case IPCP_ADDR:
+					len = IpcpValidateIpReq(&dcb->dcb_remote_ip, &ip);
+					break;
+				case IPCP_MS_DNS1:
+					len = IpcpValidateIpReq(&dcb->dcb_ip_dns1, &ip);
+					break;
+				case IPCP_MS_DNS2:
+					len = IpcpValidateIpReq(&dcb->dcb_ip_dns2, &ip);
+					break;
+				}
 
-            if (len) {
-                if (xcpr != xcpo) {
-                    xcpr->xcpo_type = xcpo->xcpo_type;
-                    xcpr->xcpo_len = len;
-                }
-                xcpr->xcpo_.ul = ip;
-                xcpr = (XCPOPT *) ((char *) xcpr + len);
-                xcps += len;
-                len = 0;
-            }
-            xcpl -= xcpo->xcpo_len;
-            xcpo = (XCPOPT *) ((char *) xcpo + xcpo->xcpo_len);
+				if (len) {
+					if (xcpr != xcpo) {
+						xcpr->xcpo_type = xcpo->xcpo_type;
+						xcpr->xcpo_len = len;
+					}
+					xcpr->xcpo_.ul = ip;
+					xcpr = (XCPOPT *) ((char *) xcpr + len);
+					xcps += len;
+					len = 0;
+				}
+				xcpl -= xcpo->xcpo_len;
+				xcpo = (XCPOPT *) ((char *) xcpo + xcpo->xcpo_len);
+			}
         }
+        else
+        {
+        	//TODO: DF more variable code for case if any required option is missing
+        	xcpr = add_option(xcpr, IPCP_ADDR, 6, 0);
+        	xcpr = add_option(xcpr, IPCP_MS_DNS1, 6, 0);
+        	xcpr = add_option(xcpr, IPCP_MS_DNS2, 6, 0);
+        	xcps += 3 * 6;
+        }
+
         if (xcps) {
             nb->nb_ap.sz = xcps;
             rc = XCP_CONFNAK;
