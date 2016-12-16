@@ -135,7 +135,7 @@ int NutIpRouteDelAll(NUTDEVICE * dev)
             *rtpp = rte->rt_next;
             free(rte);
         } else
-            *rtpp = (*rtpp)->rt_next;
+            rtpp = &rte->rt_next;
     }
     return 0;
 }
@@ -173,7 +173,7 @@ int NutIpRouteDel(uint32_t ip, uint32_t mask, uint32_t gate, NUTDEVICE * dev)
             rc = 0;
         }
         else
-        	*rtpp = (*rtpp)->rt_next;
+            rtpp = &rte->rt_next;
     }
 
     return rc;
