@@ -143,10 +143,17 @@ static PPPHDLC_DCB dcb_ppp0;
  *
  * \return 0 on success, -1 in case of any errors.
  */
-static int INLINE PppHdlcSendByte(int fd, uint8_t ch, uint8_t flush)
+static int PppHdlcSendByte(int fd, uint8_t ch, uint8_t flush)
 {
     if (_write(fd, &ch, 1) != 1)
         return -1;
+
+    if (flush)
+    {
+    	if (_write(fd, NULL, 0) <= 0)	//flush, rc = # of sent bytes
+    		return -1;
+    }
+
     return 0;
 }
 
