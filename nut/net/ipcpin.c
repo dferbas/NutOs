@@ -58,7 +58,10 @@
 
 static uint16_t IpcpValidateIpReq(uint32_t *expected_ip, uint32_t *requested_ip)
 {
-    if (*expected_ip == 0 && *requested_ip) {
+	if (!*requested_ip) {
+	    return 6;
+	}
+	else if (*expected_ip == 0 && *requested_ip) {
         *expected_ip = *requested_ip;
     }
     else if (*expected_ip != *requested_ip) {
@@ -79,7 +82,6 @@ static inline XCPOPT *add_option(XCPOPT * xcpr, uint8_t type, uint8_t len, uint3
 
 	return xcpr;
 }
-//df
 
 /*
  * Received Configure-Request.
@@ -218,11 +220,23 @@ static void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         }
         else
         {
+        	NETBUF	*new_nb;
+        	//clone netbuf to make space for additional options
+        	nb->nb_ap.sz += 6;
+        	new_nb = NutNetBufClone(nb);
+        	nb->nb_ap.sz -= 6;
+        	NutNetBufFree(nb);
+
+        	//treat new netbuf as the old one
+        	nb = new_nb;
+        	xcpr = nb->nb_ap.vp;
+
         	//TODO: DF more variable code for case if any required option is missing
-        	xcpr = add_option(xcpr, IPCP_ADDR, 6, 0);
-        	xcpr = add_option(xcpr, IPCP_MS_DNS1, 6, 0);
-        	xcpr = add_option(xcpr, IPCP_MS_DNS2, 6, 0);
-        	xcps += 3 * 6;
+        	xcpr = add_option(xcpr, IPCP_ADDR, 6, 0xC0A8FEFE);
+        	//xcpr = add_option(xcpr, IPCP_MS_DNS1, 6, 0);
+        	//xcpr = add_option(xcpr, IPCP_MS_DNS2, 6, 0);
+        	//xcps += 3 * 6;
+        	xcps += 1 * 6;
         }
 
         if (xcps) {
