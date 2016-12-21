@@ -258,7 +258,8 @@ static void ProtocolPortClose(int pppcom)
 {
 #ifdef PPP_DEV
     /* Set the UART back to normal mode. */
-    _ioctl(pppcom, HDLC_SETIFNET, NULL);
+    NUTDEVICE *dev_null = NULL;
+    _ioctl(pppcom, HDLC_SETIFNET, &dev_null);
     /* Close the physical port. This may or may not hang up. Please
        check the modem's documentation. */
     _close(pppcom);

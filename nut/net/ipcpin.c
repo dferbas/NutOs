@@ -464,6 +464,7 @@ static void IpcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
     switch (dcb->dcb_ipcp_state) {
     case PPPS_CLOSING:
         dcb->dcb_ipcp_state = PPPS_CLOSED;
+        IpcpLowerDown(dev);
         break;
     case PPPS_STOPPING:
         dcb->dcb_ipcp_state = PPPS_STOPPED;
@@ -474,7 +475,6 @@ static void IpcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         break;
 
     case PPPS_OPENED:
-        IpcpLowerDown(dev);
         IpcpTxConfReq(dev, ++dcb->dcb_reqid);
         break;
     }

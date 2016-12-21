@@ -272,6 +272,10 @@ void LcpClose(NUTDEVICE * dev)
         dcb->dcb_lcp_state = PPPS_CLOSING;
         IpcpLowerDown(dev);
         NutLcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
+        /*
+         * Wait until termination action ends.
+         */
+        NutEventWait(&dcb->dcb_state_chg, 5000);
         break;
     }
 }
@@ -319,6 +323,7 @@ void LcpLowerUp(NUTDEVICE * dev)
 void LcpLowerDown(NUTDEVICE * dev)
 {
     PPPDCB *dcb = dev->dev_dcb;
+    NUTDEVICE *dev_null = NULL;
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
@@ -329,6 +334,8 @@ void LcpLowerDown(NUTDEVICE * dev)
     switch (dcb->dcb_lcp_state) {
     case PPPS_CLOSED:
         dcb->dcb_lcp_state = PPPS_INITIAL;
+        _ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
+        NutEventPost(&dcb->dcb_state_chg);
         break;
 
     case PPPS_STOPPED:
@@ -439,7 +446,7 @@ void IpcpClose(NUTDEVICE * dev)
          */
         NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
         dcb->dcb_ipcp_state = PPPS_CLOSING;
-        NutEventPost(&dcb->dcb_state_chg);
+//        NutEventPost(&dcb->dcb_state_chg);
         break;
     }
 }
@@ -481,6 +488,7 @@ void IpcpLowerUp(NUTDEVICE * dev)
 void IpcpLowerDown(NUTDEVICE * dev)
 {
     PPPDCB *dcb = dev->dev_dcb;
+//    NUTDEVICE *dev_null = NULL;
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
@@ -491,7 +499,8 @@ void IpcpLowerDown(NUTDEVICE * dev)
     switch (dcb->dcb_ipcp_state) {
     case PPPS_CLOSED:
         dcb->dcb_ipcp_state = PPPS_INITIAL;
-        _ioctl(dcb->dcb_fd, HDLC_SETIFNET, 0);
+//        _ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
+//        LcpLowerDown(dev);
         break;
 
     case PPPS_STOPPED:
@@ -510,8 +519,9 @@ void IpcpLowerDown(NUTDEVICE * dev)
         break;
 
     case PPPS_OPENED:
-        dcb->dcb_ipcp_state = PPPS_STARTING;
-        NutEventPost(&dcb->dcb_state_chg);
+        dcb->dcb_ipcp_state = PPPS_CLOSING;
+    	NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
+//        NutEventPost(&dcb->dcb_state_chg);
         break;
     }
 }

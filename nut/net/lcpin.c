@@ -450,6 +450,7 @@ static INLINE void LcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
     switch (dcb->dcb_lcp_state) {
     case PPPS_CLOSING:
         dcb->dcb_lcp_state = PPPS_CLOSED;
+        LcpLowerDown(dev);
         break;
     case PPPS_STOPPING:
         dcb->dcb_lcp_state = PPPS_STOPPED;
@@ -461,7 +462,7 @@ static INLINE void LcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 
     case PPPS_OPENED:
         IpcpLowerDown(dev);
-        LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
+//        LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
         break;
     }
 }
