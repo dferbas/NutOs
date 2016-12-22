@@ -270,7 +270,7 @@ void LcpClose(NUTDEVICE * dev)
          * request.
          */
         dcb->dcb_lcp_state = PPPS_CLOSING;
-        IpcpLowerDown(dev);
+//        IpcpLowerDown(dev);
         NutLcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
         /*
          * Wait until termination action ends.
@@ -519,8 +519,10 @@ void IpcpLowerDown(NUTDEVICE * dev)
         break;
 
     case PPPS_OPENED:
-        dcb->dcb_ipcp_state = PPPS_CLOSING;
-    	NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
+//        dcb->dcb_ipcp_state = PPPS_CLOSING;
+//    	NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
+        dcb->dcb_ipcp_state = PPPS_STARTING;
+
 //        NutEventPost(&dcb->dcb_state_chg);
         break;
     }

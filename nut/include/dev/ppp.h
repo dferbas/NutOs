@@ -274,6 +274,7 @@ extern NUTDEVICE devPpp;
 #define LCP_CLOSE       2
 #define LCP_LOWERUP     3
 #define LCP_LOWERDOWN   4
+#define LCP_REOPEN      5
 
 /*@}*/
 

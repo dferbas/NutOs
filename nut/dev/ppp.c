@@ -194,6 +194,10 @@ static int NutPppIOCtl(NUTDEVICE * dev, int req, void *conf)
         LcpOpen(dev);
         break;
 
+    case LCP_REOPEN:
+        IpcpOpen(dev);
+        break;
+
     case LCP_CLOSE:
         LcpClose(dev);
         break;
@@ -294,6 +298,9 @@ static int NutPppClose(NUTFILE * fp)
     PPPDCB *dcb = fp->nf_dev->dev_dcb;
 
     IpcpClose(fp->nf_dev);
+    //Following will wait until termination action ends.
+    LcpClose(fp->nf_dev);
+
     _close(dcb->dcb_fd);
 
     if (dcb->dcb_user)
