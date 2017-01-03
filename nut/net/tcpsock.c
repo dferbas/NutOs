@@ -918,7 +918,6 @@ int NutTcpDeviceWrite(TCPSOCKET * sock, const void *buf, int size)
     /* If there are some remaining bytes, store them in buffer
      */
     if (rc)
-        // JS TODO - co kdyz je to tak velike, že se nevejde? Muze to nastat?
         memcpy(sock->so_devobuf, buffer, rc);
     else                        /* Otherwise free buffer */
         free(sock->so_devobuf);

@@ -53,9 +53,9 @@
 #define MCF_CLOCK_SYNCR_FWKUP                0x20
 #define MCF_CLOCK_SYNCR_DISCLK               0x40
 #define MCF_CLOCK_SYNCR_LOCEN                0x80
-#define MCF_CLOCK_SYNCR_RFD(x)               (((x) & 0x7) << 0x8)
+#define MCF_CLOCK_SYNCR_RFD(x)               (((x) & 0x7) <<  8)
 #define MCF_CLOCK_SYNCR_LOCRE                0x800
-#define MCF_CLOCK_SYNCR_MFD(x)               (((x) & 0x7) << 0xC)
+#define MCF_CLOCK_SYNCR_MFD(x)               (((x) & 0x7) << 12)
 #define MCF_CLOCK_SYNCR_LOLRE                0x8000
 
 /* MCF_CLOCK_SYNSR */

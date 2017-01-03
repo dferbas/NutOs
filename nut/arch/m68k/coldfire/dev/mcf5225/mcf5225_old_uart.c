@@ -176,7 +176,6 @@ static void McfUsartTxEmpty(void *arg)
 		/* Set Half duplex on second chip*/
 		/* RE2 = 0 Enable Receiver, DE2 = 0 Disable Transmitter */
 		MCF_GPIO_PORT_CHIP2 &= ~(MCF_GPIO_PORT_RE2 | MCF_GPIO_PORT_DE2);
-
 	}
 	else
 #endif
@@ -531,7 +530,7 @@ static int McfUsartSetSpeed(uint32_t rate)
 	divider = NutGetCpuClock() / divisor;
 	divider_reminder = NutGetCpuClock() % divisor;
 
-	if ((divider_reminder * 2) > divisor) // pokud je zbytek po delelni vetsi nez polovina delitele (vynasobeno dvema), zaokrohli divider nahoru (pricti jedna)
+	if ((divider_reminder * 2) > divisor) // pokud je zbytek po delelni vetsi nez polovina delitele (vynasobeno dvema), "zaokrouhli" divider nahoru (pricti jedna)
 		divider++;
 
 	usartControlRegister.ubg1 = (uint8_t) ((divider & 0xFF00) >> 8);
@@ -1018,7 +1017,7 @@ static int McfUsartSetFlowControl(uint32_t flags)
 		MCF_GPIO_PORT_CHIP1 &= ~MCF_GPIO_PORT_DE1;	/* DE1 = 0 Disable Transmitter */
 		hdx_control = 0;
 
-		// Enable Full duplex on second chip (Intersil ICL3221)
+		// Configure RS232 on second chip (Intersil ICL3221)
 		MCF_GPIO_PORT_CHIP2 &= ~MCF_GPIO_PORT_RE2;	/* RE2 = 0 Enable Receiver, in this case EN_IN (enable input)*/
 		MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_DE2;	/* DE2 = 1 Enable Transmitter, in this case F_OFF (force off)*/
 	}
@@ -1027,7 +1026,7 @@ static int McfUsartSetFlowControl(uint32_t flags)
 	 */
 	else if (flags & USART_MF_HALFDUPLEX)
 	{
-		/* Half duplex komunikace pres porty YZ */
+		/* Half duplex, komunikace pres porty YZ */
 		if (flags & USART_MF_HALFDUPLEX_YZ)
 		{
 			// Disable Half duplex on first chip
@@ -1053,7 +1052,7 @@ static int McfUsartSetFlowControl(uint32_t flags)
 #endif
 			hdx_control = 1 | HDX_CONTROL_YZ;
 		}
-		/* Half duplex Komunikace pres porty AB */
+		/* Half duplex, komunikace pres porty AB */
 		else
 		{
 			/* RE1 = 0 Enable Receiver, DE1 = 0 Disable Transmitter */
@@ -1139,7 +1138,7 @@ static void McfUsartTxStart(void)
 		}
 	}
 #endif
-	/* Enable Transmit Ready Interrupt */
+	/* Enable Transmitter Ready Interrupt */
 	SET_TXRDY_INTERRUPT()
 	;
 }
@@ -1277,7 +1276,7 @@ static int McfUsartInit(void)
 	MCF_GPIO_PAR_CHIP2 &= ~(MCF_GPIO_PAR_RE2 | MCF_GPIO_PAR_DE2);
 
 	/* Set as an output */
-	MCF_GPIO_DDR_CHIP2 |= MCF_GPIO_DDR_RE2 | MCF_GPIO_PAR_DE2;
+	MCF_GPIO_DDR_CHIP2 |= MCF_GPIO_DDR_RE2 | MCF_GPIO_DDR_DE2;
 
 	/* Enable Transmitter */
 	/* RE2 = 1 Disable Receiver, DE2 = 1 Enable Transmitter */

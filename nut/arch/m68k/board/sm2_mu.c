@@ -37,12 +37,12 @@
 void NutBoardInit(void)
 {
 #if PLATFORM_SUB == REV_C
-	/* Set GPIO function for enable Usart2 (RS-232). Set pin FORCEON. */
+	/* Set GPIO function to enable Usart2 (RS-232). Set pin FORCEON. */
     GpioPinConfigSet(PORTAN, 7, GPIO_CFG_OUTPUT);
     GpioPinSetHigh(PORTAN, 7);
 
 #elif (PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)
-    /* Set GPIO function for enable Usart2 (RS-232). Set pins \EN and SD (shutdown)*/
+    /* Set GPIO function to enable Usart2 (RS-232). Set pins \EN and SD (shutdown)*/
     GpioPinSetLow(PORTAN, 3);
     GpioPinSetLow(PORTAN, 4);
     GpioPinConfigSet(PORTAN, 3, GPIO_CFG_OUTPUT);
