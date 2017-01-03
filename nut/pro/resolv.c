@@ -327,36 +327,6 @@ static uint16_t DecodeDnsResource(DNSRESOURCE * dor, uint8_t * buf)
 }
 
 /*!
- * \brief Sets DNS configuration.
- *
- * \deprecated New applications should use NutDnsConfig2().
- *
- * \param hostname DNS name of the local host.
- * \param domain Name of the domain of the local host.
- * \param dnsip IP address of the DNS server.
- */
-void NutDnsConfig(const uint8_t * hostname, const uint8_t * domain, uint32_t dnsip)
-{
-    NutDnsConfig2(hostname, domain, dnsip, 0);
-}
-
-void NutDnsGetConfig2(char **hostname, char **domain, uint32_t * pdnsip, uint32_t * sdnsip)
-{
-    if (hostname) {
-        *hostname = (char *) confdns.doc_hostname;
-    }
-    if (domain) {
-        *domain = (char *) confdns.doc_domain;
-    }
-    if (pdnsip) {
-        *pdnsip = confdns.doc_ip1;
-    }
-    if (sdnsip) {
-        *sdnsip = confdns.doc_ip2;
-    }
-}
-
-/*!
  * \brief Retrieves IP-address corresponding to a host name.
  *
  * This is a very simple implementation, which will not return
