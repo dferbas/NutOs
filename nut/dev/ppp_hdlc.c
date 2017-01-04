@@ -356,7 +356,7 @@ THREAD(PppHdlcReceive, arg)
     /* Signal the link driver that we are down. */
     netdev->dev_ioctl(netdev, LCP_LOWERDOWN, 0);
     dev->dev_type = IFTYP_CHAR;
-    NutEventPost(&dcb->dcb_mode_evt);
+    NutEventPostAsync(&dcb->dcb_mode_evt);
 
     NutThreadExit();
     for (;;);

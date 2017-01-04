@@ -206,6 +206,7 @@ void LcpOpen(NUTDEVICE * dev)
          * layer comes up.
          */
         dcb->dcb_lcp_state = PPPS_STARTING;
+        dcb->dcb_reqid = dcb->dcb_rejid = dcb->dcb_rejects = dcb->dcb_auth_state = 0;
         break;
 
     case PPPS_CLOSED:
@@ -236,6 +237,7 @@ void LcpOpen(NUTDEVICE * dev)
 void LcpClose(NUTDEVICE * dev)
 {
     PPPDCB *dcb = dev->dev_dcb;
+    NUTDEVICE *dev_null = NULL;
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
@@ -272,10 +274,22 @@ void LcpClose(NUTDEVICE * dev)
         dcb->dcb_lcp_state = PPPS_CLOSING;
         IpcpLowerDown(dev);
         NutLcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
+
         /*
          * Wait until termination action ends.
          */
         NutEventWait(&dcb->dcb_state_chg, 5000);
+
+    	/*
+    	 * Signal hdlc thread its termination and wait up to 2 sec for its exit.
+    	 */
+        _ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
+        /*
+         * Wait until hdlc thread exits.
+         */
+//        NutEventWait(&dcb->dcb_state_chg, 5000);
+
+        dcb->dcb_lcp_state = PPPS_INITIAL;
         break;
     }
 }
@@ -323,7 +337,6 @@ void LcpLowerUp(NUTDEVICE * dev)
 void LcpLowerDown(NUTDEVICE * dev)
 {
     PPPDCB *dcb = dev->dev_dcb;
-    NUTDEVICE *dev_null = NULL;
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
@@ -332,18 +345,16 @@ void LcpLowerDown(NUTDEVICE * dev)
 #endif
 
     switch (dcb->dcb_lcp_state) {
-    //here we comes if TERMACK was received to a TERMREQ, issued from LcpClose
     case PPPS_CLOSED:
+		/*
+		 * Here we comes (hdlc thread context) when TERM ACK was received to a TERM REQ, issued from LcpClose (application context).
+		 */
     	dcb->dcb_lcp_state = PPPS_STOPPING;
-        //signal hdlc thread its termination (we are here in context of it)
-        //thread still exists, NutEventPost releases CPU (to the same thread?)
-        _ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
-        //now we should be in PPPS_STOPPED state
 
-        //TODO: check if we are in STOPPED state
-        dcb->dcb_lcp_state = PPPS_STARTING/*PPPS_INITIAL*/;
-        //wake up the LCP_CLOSE ioctl (different thread)
-        NutEventPost(&dcb->dcb_state_chg);
+        /*
+         * Wake up the LCP_CLOSE ioctl (application thread) and return back to hdlc thread.
+         */
+        NutEventPostAsync(&dcb->dcb_state_chg);
         break;
 
     case PPPS_STOPPED:
@@ -354,9 +365,16 @@ void LcpLowerDown(NUTDEVICE * dev)
         dcb->dcb_lcp_state = PPPS_INITIAL;
         break;
 
-    //we will arrive here from hdlc thread exiting (in its context)
     case PPPS_STOPPING:
+		/*
+		 * We will arrive here when hdlc thread is exiting (hdlc thread context).
+		 */
         dcb->dcb_lcp_state = PPPS_STOPPED;
+
+        /*
+         * Wake up the LCP_CLOSE ioctl (application thread) and proceed with hdlc thread exit.
+         */
+//        NutEventPostAsync(&dcb->dcb_state_chg);
         break;
 
     case PPPS_REQSENT:
@@ -530,7 +548,7 @@ void IpcpLowerDown(NUTDEVICE * dev)
         break;
 
     case PPPS_OPENED:
-        dcb->dcb_ipcp_state = PPPS_STARTING;
+        dcb->dcb_ipcp_state = PPPS_STARTING;	//to be properly reopened (IPCP has no thread for reading, which should be terminated as HDLC)
 //        NutEventPost(&dcb->dcb_state_chg);
         break;
     }

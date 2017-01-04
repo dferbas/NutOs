@@ -177,7 +177,6 @@ struct _PPPDCB {
     uint16_t dcb_rem_mru;
 
     /*! \brief Asynch control character map.
-     * TODO: Pass to ahdlc driver.
      */
     uint32_t dcb_accm;
 
@@ -242,19 +241,19 @@ struct _PPPDCB {
 
     /*! \brief LCP NAK counter, avoids endless loops.
      */
-    uint8_t dcb_lcp_naks;
+    uint8_t dcb_lcp_naks;	//currently not used
 
-    /*! \brief Identifier of our last LCP request.
-     */
-    uint8_t dcb_lcp_reqid;
-
+//    /*! \brief Identifier of our last LCP request.
+//     */
+//    uint8_t dcb_lcp_reqid;
+//
     /*! \brief Current state of the network layer.
      */
     uint8_t dcb_ipcp_state;
 
     /*! \brief LCP NAK counter, avoids endless loops.
      */
-    uint8_t dcb_ipcp_naks;
+    uint8_t dcb_ipcp_naks;	//currently not used
 
     /*! \brief Current authentication state.
      */
@@ -274,7 +273,6 @@ extern NUTDEVICE devPpp;
 #define LCP_CLOSE       2
 #define LCP_LOWERUP     3
 #define LCP_LOWERDOWN   4
-#define LCP_REOPEN      5
 
 /*@}*/
 

@@ -232,7 +232,7 @@ static void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         	xcpr = nb->nb_ap.vp;
 
         	//TODO: DF more variable code for case if any required option is missing
-        	xcpr = add_option(xcpr, IPCP_ADDR, 6, 0xC0A8FEFE);
+        	xcpr = add_option(xcpr, IPCP_ADDR, 6, dcb->dcb_remote_ip);
         	//xcpr = add_option(xcpr, IPCP_MS_DNS1, 6, 0);
         	//xcpr = add_option(xcpr, IPCP_MS_DNS2, 6, 0);
         	//xcps += 3 * 6;

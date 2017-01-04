@@ -356,6 +356,8 @@ int NutNetIfConfig2(const char *name, void *params, uint32_t ip_addr, uint32_t i
         dcb->dcb_ip_mask = ip_mask ? ip_mask : 0xffffffff;
         if (ppsc) {
             dcb->dcb_remote_ip = ppsc->ppsc_remote_ip;
+            dcb->dcb_ip_dns1 = ppsc->ppsc_dns1;
+            dcb->dcb_ip_dns2 = ppsc->ppsc_dns2;
         }
         NutEventBroadcast(&dcb->dcb_state_chg);
         _ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev);

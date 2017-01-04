@@ -194,10 +194,6 @@ static int NutPppIOCtl(NUTDEVICE * dev, int req, void *conf)
         LcpOpen(dev);
         break;
 
-    case LCP_REOPEN:
-        IpcpOpen(dev);
-        break;
-
     case LCP_CLOSE:
         LcpClose(dev);
         break;
