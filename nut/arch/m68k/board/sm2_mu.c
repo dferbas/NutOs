@@ -33,29 +33,147 @@
 #include <cfg/arch.h>
 #include <arch/m68k.h>
 #include <dev/gpio.h>
+#include <dev/board.h>
 
+/*!
+ * \brief Early poseidon hardware initialization.
+ *
+ * Add code here to configure board for all applications.
+ *
+ * \note It is called if NUT_INIT_BOARD macro is defined (using Nut/OS Configurator).
+ */
 void NutBoardInit(void)
 {
 #if PLATFORM_SUB == REV_C
 	/* Set GPIO function to enable Usart2 (RS-232). Set pin FORCEON. */
-    GpioPinConfigSet(PORTAN, 7, GPIO_CFG_OUTPUT);
-    GpioPinSetHigh(PORTAN, 7);
+	GpioPinConfigSet(PORTAN, 7, GPIO_CFG_OUTPUT);
+	GpioPinSetHigh(PORTAN, 7);
 
-#elif (PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)
-    /* Set GPIO function to enable Usart2 (RS-232). Set pins \EN and SD (shutdown)*/
-    GpioPinSetLow(PORTAN, 3);
-    GpioPinSetLow(PORTAN, 4);
-    GpioPinConfigSet(PORTAN, 3, GPIO_CFG_OUTPUT);
-    GpioPinConfigSet(PORTAN, 4, GPIO_CFG_OUTPUT);
-	#if PLATFORM_SUB == REV_F
-    	/*Set GPIO function for check 485/232 piggy bag*/
-    	GpioPinConfigSet(PORTQS, 6, GPIO_CFG_INPUT);
-	#endif
+	/*
+		BUT   .. PORTTA .. 0x0001
+
+		IN 1  .. PORTTA .. 0x0008
+		IN 2  .. PORTNQ .. 0x0002
+		IN 3  .. PORTNQ .. 0x0080
+
+		LED 1 .. PORTAN .. 0x0002
+		LED 2 .. PORTAN .. 0x0004
+		LED 3 .. PORTAN .. 0x0008
+		LED 4 .. PORTAN .. 0x0010
+
+		OUT   .. PORTAN .. 0x0001
+	 */
+
+	/*
+	 * PORT AN
+	 */
+	/* After start, Relay is switched off */
+	MCF_GPIO_CLRAN = ~0x01;
+
+#if 0	//this doubles clearing the port through CLR register
+	/* PORTAN: PORTAN4=0,PORTAN3=0,PORTAN2=0,PORTAN1=0,PORTAN0=0 */
+	MCF_GPIO_PORTAN &= ~0x1E;
+#endif
+
+	/* DDRAN: DDRAN4=1,DDRAN3=1,DDRAN2=1,DDRAN1=1,DDRAN0=1 */
+	MCF_GPIO_DDRAN |= 0x1F;
+
+	/* PANPAR: PANPAR4=0,PANPAR3=0,PANPAR2=0,PANPAR1=0,PANPAR0=0 */
+	MCF_GPIO_PANPAR &= ~0x1F;
+
+	/*
+	 * PORT TA
+	 */
+	/* DDRTA: DDRTA3=0,DDRTA0=0 */
+	MCF_GPIO_DDRTA &= ~0x09;
+
+	/* PTAPAR: PTAPAR3=0,PTAPAR0=0 */
+	MCF_GPIO_PTAPAR &= ~0xC3;
+
+	/*
+	 * PORT NQ
+	 */
+	/* DDRNQ: DDRNQ7=0,DDRNQ1=0 */
+	MCF_GPIO_DDRNQ &= ~0x82;
+
+	/* PNQPAR: PNQPAR7=0,PNQPAR1=0 */
+	MCF_GPIO_PNQPAR &= ~0xC00C;
+
+#elif PLATFORM_SUB == REV_D || PLATFORM_SUB == REV_F
+	/*
+		NEW:
+		BUT   .. PORTTA .. 0x0001 (0)
+
+		IN1   .. PORTTA .. 0x0002 (1)
+		IN2   .. PORTTA .. 0x0004 (2)
+		IN3   .. PORTTA .. 0x0008 (3)
+
+		LED 1 .. PORTTC .. 0x0001 (0)
+		LED 2 .. PORTTC .. 0x0002 (1)
+		LED 3 .. PORTTC .. 0x0004 (2)
+		LED 4 .. PORTTC .. 0x0008 (3)
+
+		OUT   .. PORTAN .. 0x0001 (0)
+	 232 EN-  .. PORTAN .. 0x0008 (3)
+	 232 SD   .. PORTAN .. 0x0010 (4)
+	 232 DTR  .. PORTAN .. 0x0020 (5)
+	 */
+
+	/*
+	 * Set GPIO function to enable Usart2 (HBUS RS-232).
+	 * Set pins \EN and SD (shutdown).
+	 * relay OFF (OUT)
+	 */
+	GpioPortSetLow(PORTAN, _BV(4) | _BV(3) | _BV(0));
+	GpioPinSetHigh(PORTAN, 5);
+
+	GpioPortConfigSet(PORTAN, _BV(5) | _BV(4) | _BV(3) | _BV(0), GPIO_CFG_OUTPUT);
+
+#if PLATFORM_SUB == REV_F
+	/* Set GPIO function to check 485/232 piggy back. */
+	GpioPinConfigSet(PORTQS, 6, GPIO_CFG_INPUT);
+#endif
+
+	/*
+	 * PORT TA - button, IN1-3 (inputs)
+	 */
+	GpioPortConfigSet(PORTTA, _BV(3) | _BV(2) | _BV(1) | _BV(0), GPIO_CFG_INPUT);	//button, IN1-3
+
+	/*
+	 * PORT TC - LEDs (output)
+	 */
+	GpioPortSetLow(PORTTC, _BV(3) | _BV(2) | _BV(1) | _BV(0));							//LEDs OFF
+	GpioPortConfigSet(PORTTC, _BV(3) | _BV(2) | _BV(1) | _BV(0), GPIO_CFG_OUTPUT);		//LEDs 1-4
+
 #else
 	#error "Please define User Platform Macro PLATFORM_SUB in Nut/OS Configurator."
 #endif
 }
 
+/*
+ * Application API
+ */
+void SetDtrState(int state)
+{
+	/*
+	 * For control signals (ie. RTS, CTS, DTR, DSR, ...):
+	 *  logical 0: -3 V .. -15 V
+	 *  logical 1: +3 V .. +15 V.
+	 * DTE signals its ready state with logical 1 on this pin.
+	 * We set log. 0 for DTR by setting the pin to log. 1.
+	 */
+	GpioPinSet(HBUS232_DTR_OUT_PORT, HBUS232_DTR_OUT_PIN, 1 - state);
+}
+
+EPiggyBackState GetPiggyBackState(void)
+{
+	if (GpioPinGet(PIGGYBACK232_IN_PORT, PIGGYBACK232_IN_PIN))
+		return YZ_HALFDUP_485;
+
+	return YZ_FULLDUP_232;
+}
+
+//------------------------------------------------------------------------------
 void BoardInitExtram(void)
 {
     extern void *__extram_start;

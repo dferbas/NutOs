@@ -80,3 +80,21 @@ extern NUTDEVICE devMcf5Fec;
 #define DEV_ETHER   devMcf5Fec
 #endif
 
+/*
+ * Application API
+ */
+#define HBUS232_DTR_OUT_PORT		PORTAN
+#define HBUS232_DTR_OUT_PIN			5
+
+#define PIGGYBACK232_IN_PORT		PORTQS
+#define PIGGYBACK232_IN_PIN			6
+
+
+typedef enum
+{
+	YZ_HALFDUP_485,
+	YZ_FULLDUP_232,
+} EPiggyBackState;
+
+void SetDtrState(int state);
+EPiggyBackState GetPiggyBackState(void);
