@@ -228,7 +228,7 @@ static uint16_t PhyRead(uint8_t reg_addr)
         | MCF_FEC_MMFR_TA_10;
 
     /* Poll for the MII interrupt */
-    while(!(MCF_FEC_EIR & MCF_FEC_EIR_MII))
+    while (!(MCF_FEC_EIR & MCF_FEC_EIR_MII))
     	;
 
     /* Clear the MII interrupt bit */
@@ -252,7 +252,7 @@ static void PhyWrite(uint8_t reg_addr, uint16_t data)
         | MCF_FEC_MMFR_DATA(data);
 
     /* Poll for the MII interrupt (interrupt should be masked) */
-    while(!(MCF_FEC_EIR & MCF_FEC_EIR_MII))
+    while (!(MCF_FEC_EIR & MCF_FEC_EIR_MII))
     	;
 
     /* Clear the MII interrupt bit */
@@ -442,21 +442,18 @@ static int FecBdInit(FECINFO *ni)
 		bd->buffer = ni->rx_buf[i];
 		bd->length = 0;
 		bd->flags = MCF_FEC_RX_BD_EMPTY;
-
-		if (i == (FEC_RX_BUFFERS - 1))
-			bd->flags |= MCF_FEC_RX_BD_WRAP;
 	}
+	/* Set wrap bit in the last bd */
+		bd->flags |= MCF_FEC_RX_BD_WRAP;
 
-	/* Initialize Rx buffer descriptors */
+	/* Initialize Tx buffer descriptors */
 	for (i = 0; i < FEC_TX_BUFFERS; i++)
 	{
 		bd = &ni->tx_bd_fec[i];
 		bd->length = 0;
 		bd->flags = 0;
-
-		if (i == (FEC_TX_BUFFERS - 1))
-			bd->flags |= MCF_FEC_TX_BD_WRAP;
 	}
+		bd->flags |= MCF_FEC_TX_BD_WRAP;
 
 	/*  Erase TX buffers (NETBUF) if present (required only when re-initializing) */
 	for (i = 0; i < FEC_TX_BUFFERS; i++)
@@ -476,17 +473,19 @@ static int FecBdInit(FECINFO *ni)
 	return 0;
 }
 
-/*! \brief Reset the Ethernet controller.
- *
- * \return 0 on success, -1 otherwise.
+/*! \brief Configure pins, wait for end of reset.
  */
-static int FecReset(IFNET *nif, int do_reset)
+static void FecPowerUp(void)
 {
-	int rc = 0;
-	int wait;
-	uint32_t regvalue;
-
-#if defined (MCU_MCF51CN)
+#if defined (MCU_MCF5225)
+	/* Configure MII port for MCF52259 GPIO: */
+//	GpioPortConfigSet(PORTTI, 0xFF, GPIO_CFG_PERIPHERAL0);	// primary function
+//	GpioPortConfigSet(PORTTJ, 0xFF, GPIO_CFG_PERIPHERAL0);	// primary function
+//	GpioPortConfigSet(PORTNQ, 0x28, GPIO_CFG_PERIPHERAL1);	// FEC_MDIO + FEC_MDC (alt 1)
+	MCF_GPIO_PTIPAR = 0xFF;
+	MCF_GPIO_PTJPAR = 0xFF;
+	MCF_GPIO_PNQPAR = (MCF_GPIO_PNQPAR & ~((3 << 6) | (3 << 10))) | (MCF_GPIO_PNQPAR_IRQ3_FEC_MDIO | MCF_GPIO_PNQPAR_IRQ5_FEC_MDC);
+#else // MCU_MCF51CN
 	/* Set Reset Phy pin to output */
 	GpioPinSetHigh(PORTC, 3);
 	GpioPinConfigSet(PORTC, 3, GPIO_CFG_ALT1 | GPIO_CFG_OUTPUT);
@@ -498,7 +497,46 @@ static int FecReset(IFNET *nif, int do_reset)
 	GpioPortConfigSet(PORTC, 0x07, GPIO_CFG_ALT1);
 	/* Configure MII port for MCF51CN */
 	GpioPortConfigSet(PORTA, 0xFF, GPIO_CFG_ALT1);
+
+	/* Waiting for charge condenser on PHY reset. It takes 50ms charge to 1,85V. See printscreen from oscilloscope */
+	NutSleep(50);
 #endif
+
+#if defined (MCU_MCF51CN)
+	/* If PHY does not respond, restart PHY. It can happen that PHY is not properly started (when power source is applied and voltage oscillates). */
+	if (PhyRead(PHY_REG_BMSR) == 0xFFFF)
+	{
+		DBG("PHY RESTART\n");
+		GpioPinSetLow(PORTC, 3);
+		NutSleep(10); 				// PHY reset time 10ms
+		GpioPinSetHigh(PORTC, 3);
+		for (wait = 25;; wait--)
+		{
+			// wait until PHY starts
+			NutSleep(100);
+			if (PhyRead(PHY_REG_BMSR) != 0xFFFF)
+			{
+				break;
+			}
+			if (wait == 0)
+			{
+				DBG("PHY NOT STARTED!\n");
+				return -1;
+			}
+		}
+	}
+#endif
+}
+
+/*! \brief Reset the Ethernet controller.
+ *
+ * \return 0 on success, -1 otherwise.
+ */
+static int FecConfigure(IFNET *nif, int do_reset)
+{
+	int rc = 0;
+	int wait;
+	uint32_t regvalue;
 
 	/* ECR[ETHER_EN] is cleared (initialization time) */
 	MCF_FEC_ECR = 0;
@@ -526,7 +564,8 @@ static int FecReset(IFNET *nif, int do_reset)
 	/* Enable receive on transmit */
 	MCF_FEC_RCR &= ~MCF_FEC_RCR_DRT;
 
-	if (nif->if_flags & IFF_LOOPBACK_MAC){
+	if (nif->if_flags & IFF_LOOPBACK_MAC)
+	{
 		/* Enable MAC loopback */
 		MCF_FEC_RCR |= MCF_FEC_RCR_LOOP;
 
@@ -536,49 +575,17 @@ static int FecReset(IFNET *nif, int do_reset)
 		DBG("FEC: loopback = ON\n");
 		return 0;
 	}
+
 	/* Disable loopback */
 	MCF_FEC_RCR &= ~MCF_FEC_RCR_LOOP;
 
-#if defined (MCU_MCF5225)
-	/* Configure MII port for MCF52259 GPIO: */
-//	GpioPortConfigSet(PORTTI, 0xFF, GPIO_CFG_PERIPHERAL0);	// primary function
-//	GpioPortConfigSet(PORTTJ, 0xFF, GPIO_CFG_PERIPHERAL0);	// primary function
-//	GpioPortConfigSet(PORTNQ, 0x28, GPIO_CFG_PERIPHERAL1);	// FEC_MDIO + FEC_MDC (alt 1)
-	MCF_GPIO_PTIPAR = 0xFF;
-	MCF_GPIO_PTJPAR = 0xFF;
-	MCF_GPIO_PNQPAR = (MCF_GPIO_PNQPAR & ~((3 << 6) | (3 << 10))) | (MCF_GPIO_PNQPAR_IRQ3_FEC_MDIO | MCF_GPIO_PNQPAR_IRQ5_FEC_MDC);
-#else // MCU_MCF51CN
-	/* Waiting for charge condenser on PHY reset. It takes 50ms charge to 1,85V. See printscreen from oscilloscope */
-	NutSleep(50);
-#endif
+	/* Register PHY */
+	NutRegisterPhy(1, PhyWrite, PhyRead);
 
 #ifdef PhyProbe
 	if(1)
 		PhyProbe();
 #endif
-	/* Register PHY */
-	NutRegisterPhy( 1, PhyWrite, PhyRead);
-
-#if defined (MCU_MCF51CN)
-	/* If PHY does not respond, restart PHY. It can happen that PHY is not properly started (when power source is applied and voltage oscillates). */
-	if (PhyRead(PHY_REG_BMSR) == 0xFFFF){
-		DBG("PHY RESTART\n");
-		GpioPinSetLow(PORTC, 3);
-		NutSleep(10); 				// PHY reset time 10ms
-		GpioPinSetHigh(PORTC, 3);
-		for (wait = 25;; wait--) { // wait until PHY starts
-			NutSleep(100);
-			if (PhyRead(PHY_REG_BMSR) != 0xFFFF) {
-				break;
-			}
-			if (wait == 0) {
-				DBG("PHY NOT STARTED!\n");
-				return -1;
-			}
-		}
-	}
-#endif
-
 	/* Activate reset, wait for completion. */
 	if (do_reset)
 	{
@@ -593,28 +600,31 @@ static int FecReset(IFNET *nif, int do_reset)
 	//TODO: "do phy.c"
 #define PHY_CTR2        0x1F    /* PHY Control 2 */
 #define PHY_BMCR_PSAV   0x0400  /* 1: Power Saving Enabled. */
-	uint16_t bmcr2 = phyr( PHY_CTR2);
+	uint16_t bmcr2 = phyr(PHY_CTR2);
 	bmcr2 |= PHY_BMCR_PSAV;
 	phyw( PHY_CTR2, bmcr2);
 #else
-  #define PHY_CTR2        0x1F    /* PHY Control 2 */
-  #define PHY_BMCR_PSAV   0x0400  /* 1: Power Saving Enabled. */
+#define PHY_CTR2        0x1F    /* PHY Control 2 */
+#define PHY_BMCR_PSAV   0x0400  /* 1: Power Saving Enabled. */
 	uint16_t bmcr2 = PhyRead(PHY_CTR2);
 	bmcr2 |= PHY_BMCR_PSAV;
 	PhyWrite(PHY_CTR2, bmcr2);
 #endif
 
 	/* disable Loopback if driver changed from loopback phy mode */
-	if (nif->if_flags & IFF_LOOPBACK_PHY){
+	if (nif->if_flags & IFF_LOOPBACK_PHY)
+	{
 		regvalue = 1;
 	}
-	else {
+	else
+	{
 		regvalue = 0;
 	}
 	NutPhyCtl(PHY_CTL_LOOPBACK, &regvalue);
 
 	/* if autonego enabled and loopback disabled, do autonego */
-	if((nif->if_flags & IFF_AUTONEGO_ENABLE) && !(nif->if_flags & IFF_LOOPBACK_PHY)) {
+	if ((nif->if_flags & IFF_AUTONEGO_ENABLE) && !(nif->if_flags & IFF_LOOPBACK_PHY))
+	{
 		regvalue = 1;
 		/* Enable autonego */
 		NutPhyCtl(PHY_CTL_AUTONEG, &regvalue);
@@ -623,12 +633,15 @@ static int FecReset(IFNET *nif, int do_reset)
 		rc = NutPhyCtl(PHY_CTL_AUTONEG_RE, &phy_addr); //PhyProbe();
 
 		/* Wait for auto negotiation completed and link established. */
-		for (wait = 25;; wait--) {
+		for (wait = 25;; wait--)
+		{
 			NutPhyCtl(PHY_GET_STATUS, &regvalue);
-			if (regvalue & PHY_STATUS_AUTONEG_OK) {
+			if (regvalue & PHY_STATUS_AUTONEG_OK)
+			{
 				break;
 			}
-			if (wait == 0) {
+			if (wait == 0)
+			{
 				DBG("NO AUTONEGO!\n");
 				return -1;
 			}
@@ -640,15 +653,16 @@ static int FecReset(IFNET *nif, int do_reset)
 			/* Enable full duplex & receive on transmit */
 			MCF_FEC_TCR |= MCF_FEC_TCR_FDEN;
 			//MCF_FEC_RCR &= ~MCF_FEC_RCR_DRT;
-		} else
+		}
+		else
 		{
 			/* Disable full duplex & receive on transmit */
 			MCF_FEC_TCR &= ~MCF_FEC_TCR_FDEN;
 			MCF_FEC_RCR |= MCF_FEC_RCR_DRT;
 		}
-
 	}
-	else {
+	else
+	{
 		regvalue = 0;
 		/* Disable autonego */
 		NutPhyCtl(PHY_CTL_AUTONEG, &regvalue);
@@ -659,29 +673,33 @@ static int FecReset(IFNET *nif, int do_reset)
 		NutPhyCtl(PHY_CTL_DUPLEX, &regvalue);
 
 		/* Set Phy speed */
-		if (nif->if_flags & IFF_SPEED_100){
+		if (nif->if_flags & IFF_SPEED_100)
+		{
 			regvalue = 100;
 		}
-		else { /* 10 megabit */
+		else
+		{ /* 10 megabit */
 			regvalue = 10;
 		}
 		NutPhyCtl(PHY_CTL_SPEED, &regvalue);
-
 	}
 
-    /* Wait for auto negotiation completed and link established. */
-    for (wait = 25;; wait--) {
-        NutPhyCtl(PHY_GET_STATUS, &regvalue);
-        if(regvalue & PHY_STATUS_HAS_LINK) {
-            break;
-        }
-        if (wait == 0) {
-        	DBG("NO LINK!\n");
-            return -1;
-        }
-        NutSleep(200);
-    }
-    return rc;
+	/* Wait for auto negotiation completed and link established. */
+	for (wait = 25;; wait--)
+	{
+		NutPhyCtl(PHY_GET_STATUS, &regvalue);
+		if (regvalue & PHY_STATUS_HAS_LINK)
+		{
+			break;
+		}
+		if (wait == 0)
+		{
+			DBG("NO LINK!\n");
+			return -1;
+		}
+		NutSleep(200);
+	}
+	return rc;
 }
 
 static int FecStart(FECINFO *ni, uint8_t *mac)
@@ -701,8 +719,9 @@ static int FecStart(FECINFO *ni, uint8_t *mac)
 	MCF_FEC_GAUR = 0;
 	MCF_FEC_GALR = 0;
 
+	//TODO - otestovat, toto pridano 17.2. do nut 5.0
 	/* Enable all packets receiving */
-	MCF_FEC_RCR |= MCF_FEC_RCR_PROM;
+//	MCF_FEC_RCR |= MCF_FEC_RCR_PROM;
 
 	/* Maximum size of frame */
 	MCF_FEC_RCR &= ~MCF_FEC_RCR_MAX_FL(0xFFFFFFFF);
@@ -738,9 +757,6 @@ static int FecStart(FECINFO *ni, uint8_t *mac)
 
 	/* Start/Enable transmitting */
 	NutEventPostAsync(&ni->tx_mutex);
-
-	/* FEC & PHY are initialized */
-	ni->initialized = 1;
 
 	//DBG("FEC: I'm UP\n");
     return 0;
@@ -983,6 +999,7 @@ static void FecPutPacketNetbuf(FECINFO * ni, NETBUF *nb)
     }
 }
 #endif
+
 /*!
  * \brief Send Ethernet packet.
  *
@@ -1116,44 +1133,54 @@ static void FecIntRxF(FECINFO * ni)
 //**********************************************************************
 // Detekce pripojeneho ethernetu
 //**********************************************************************
-int PHY_Test(NUTDEVICE *dev)
+/*!
+ * \brief Link detection.
+ *
+ * Polls PHY to get link state.
+ *
+ * \return	PHY status
+ */
+int PhyLinkTest(NUTDEVICE *dev)
 {
 	static uint32_t last_status = 0xffffffff;
-    IFNET *nif = (IFNET *) dev->dev_icb;
-    uint32_t status;
+	IFNET *nif = (IFNET *)dev->dev_icb;
+	uint32_t status;
 
-//	value = PhyRead(0x10) & 0x7;
+// 	value = PhyRead(0x10) & 0x7;
 
 	NutPhyCtl(PHY_GET_STATUS, &status);
 
-	if(status == last_status) {
-		// Zadna zmena stavu ethernetu
+	if (status == last_status)
+	{
+		// no state change
 		return last_status;
 	}
 	last_status = status;
 
-	if(status & PHY_STATUS_HAS_LINK) {
-		/* Link is on. */
-
-		if(status & PHY_STATUS_FULLDUPLEX) {
+	if (status & PHY_STATUS_HAS_LINK)
+	{
+		/* Link is now on. */
+		if (status & PHY_STATUS_FULLDUPLEX)
+		{
 			/* Enable full duplex & receive on transmit */
 			MCF_FEC_TCR |= MCF_FEC_TCR_FDEN;
 			MCF_FEC_RCR &= ~MCF_FEC_RCR_DRT;
 //			printf("\r\nFull duplex Set\r\n");
-		} else {
+		}
+		else
+		{
 			/* Disable full duplex & receive on transmit */
 			MCF_FEC_TCR &= ~MCF_FEC_TCR_FDEN;
 			MCF_FEC_RCR |= MCF_FEC_RCR_DRT;
 //			printf("\r\nHalf duplex Set\r\n");
-
 		}
 
-		// Nastaveni priznaku ze je Link
+		// reflect state into flags
 		nif->if_flags |= IFF_LINK0;
-
-	} else {
-		/* Link is off. */
-		// Nastaveni priznaku ze neni Link
+	}
+	else
+	{
+		/* Link is now off. */
 		nif->if_flags &= ~IFF_LINK0;
 	}
 
@@ -1168,7 +1195,7 @@ int PHY_Test(NUTDEVICE *dev)
 
 
 /*! \fn FecRxThread(void *arg)
- * \brief NIC receiver thread.
+ * \brief FEC receiver thread.
  *
  */
 THREAD(FecRxThread, arg)
@@ -1181,10 +1208,11 @@ THREAD(FecRxThread, arg)
 	/* Run at high priority. */
     NutThreadSetPriority(9);
 
-	while(1)
-	{
-		int	do_reset = 0;
+    /* Configure pins, wait for end of reset */
+    FecPowerUp();
 
+	while (1)
+	{
 		/* Disable Watchdog */
 		if (EthMWDTSetVariableFN != NULL)
 			EthMWDTSetVariableFN(0); //stop time guarding (prepare for wait state)
@@ -1192,25 +1220,39 @@ THREAD(FecRxThread, arg)
 		/*
 		 * Wait for Link (Auto-nego) & Initialize FEC
 		 */
-        while(!ni->initialized)
+        while (!ni->initialized)
         {
-        	//if 1st call fails, successive calls do PHY sw reset
-        	do_reset = FecReset(ifn, do_reset);
-        	if (do_reset == 0)
-        		FecStart(ni, ifn->if_mac);		//will set ni->initialized
+        	if (ifn->if_flags & IFF_UP)
+        	{
+				int	do_reset = 0;			//1st try w/o reset, if fails, reset is done in next cycle
+
+				//if 1st call fails, successive calls do PHY sw reset
+				do_reset = FecConfigure(ifn, do_reset);
+				if (do_reset == 0 && FecStart(ni, ifn->if_mac) == 0)
+				{
+					/* FEC & PHY are initialized */
+					ni->initialized = 1;
+				}
+        	}
+        	else
+        		NutSleep(50);
         }
 
 		/*
          * Wait for the arrival of new packets
          */
 //		NutEventWait(&ni->rx_rdy, NUT_WAIT_INFINITE);
-       if(NutEventWait(&ni->rx_rdy, 1000) < 0) {
+		if (NutEventWait(&ni->rx_rdy, 1000) < 0)
+		{
 			// Timeout, time for Link test
-        	PHY_Test(dev);
+			PhyLinkTest(dev);
 			continue;
-		} else {
-			if((ifn->if_flags & IFF_LINK0) == 0) {
-				PHY_Test(dev);
+		}
+		else
+		{
+			if ((ifn->if_flags & IFF_LINK0) == 0)
+			{
+				PhyLinkTest(dev);
 			}
 		}
 
@@ -1254,49 +1296,66 @@ static int FecIOCtl(NUTDEVICE * dev, int req, void *conf)
     uint32_t *lvp = (uint32_t *) conf;
     IFNET *nif = (IFNET *) dev->dev_icb;
     FECINFO *ni = (FECINFO *) dev->dev_dcb;
+    int	was_initialized = ni->initialized;
 
-    switch (req) {
-    case SIOCSIFFLAGS:
-        /* Set interface flags. */
-        if (*lvp & IFF_UP) {
-            if ((nif->if_flags & IFF_UP) == 0) {
-                /* Start interface. Release Rx thread to start initialize */
-            	NutEventPost(&ni->rx_rdy);
-            }
-        } else if (nif->if_flags & IFF_UP) {
-            /* Stop interface. */
-        	ni->initialized = 0;
-        }
-        nif->if_flags = *lvp;
+	switch (req)
+	{
+		case SIOCSIFFLAGS:
+			/* Set interface flags. */
+			if (*lvp & IFF_UP)
+			{
+//				if ((nif->if_flags & IFF_UP) == 0)
+//				{
+//				}
+			}
+			else
+			{
+//				if (nif->if_flags & IFF_UP)
+//				{
+					/* Stop interface. */
+					ni->initialized = 0;
+//				}
+			}
 
-        if (*lvp & IFF_PROMISC) {
-            /* Receive all packets enable. */
-        	MCF_FEC_RCR |= MCF_FEC_RCR_PROM;
-        } else {
-            /* Receive all packets disable. */
-        	MCF_FEC_RCR &= ~MCF_FEC_RCR_PROM;
-        }
+			nif->if_flags = *lvp;
 
-        break;
+			if (*lvp & IFF_PROMISC)
+			{
+				/* Receive all packets enable. */
+				MCF_FEC_RCR |= MCF_FEC_RCR_PROM;
+			}
+			else
+			{
+				/* Receive all packets disable. */
+				MCF_FEC_RCR &= ~MCF_FEC_RCR_PROM;
+			}
 
-    case SIOCGIFFLAGS:
-        /* Get interface flags. */
+			/* Release Rx thread to proceed with initialization */
+			if (was_initialized)
+				NutEventPost(&ni->rx_rdy);
 
-    	if(MCF_FEC_RCR & MCF_FEC_RCR_PROM) {
-    		nif->if_flags |= IFF_PROMISC;
-    	} else {
-    		nif->if_flags &= ~IFF_PROMISC;
-    	}
+			break;
 
+		case SIOCGIFFLAGS:
+			/* Get interface flags. */
 
-        *lvp = nif->if_flags;
-        break;
+			if (MCF_FEC_RCR & MCF_FEC_RCR_PROM)
+			{
+				nif->if_flags |= IFF_PROMISC;
+			}
+			else
+			{
+				nif->if_flags &= ~IFF_PROMISC;
+			}
 
-    case SIOCSIFADDR:
-        /* Set interface hardware address. */
-        memcpy(nif->if_mac, conf, sizeof(nif->if_mac));
+			*lvp = nif->if_flags;
+			break;
 
-		/* Set the Ethernet MAC Address registers */
+		case SIOCSIFADDR:
+			/* Set interface hardware address. */
+			memcpy(nif->if_mac, conf, sizeof(nif->if_mac));
+
+			/* Set the Ethernet MAC Address registers */
 		MCF_FEC_PALR =	(((unsigned long)nif->if_mac[0]) << 24) |
 		  				(((unsigned long)nif->if_mac[1]) << 16) |
 						(((unsigned long)nif->if_mac[2]) << 8) |
@@ -1304,15 +1363,16 @@ static int FecIOCtl(NUTDEVICE * dev, int req, void *conf)
 		MCF_FEC_PAUR = 	(((unsigned long)nif->if_mac[4]) << 24) |
 		  				(((unsigned long)nif->if_mac[5]) << 16);
 
-        break;
+			break;
 
-    case SIOCGIFADDR:
-        /* Get interface hardware address. */
-        memcpy(conf, nif->if_mac, sizeof(nif->if_mac));
-        break;
-    default:
-        rc = -1;
-        break;
+		case SIOCGIFADDR:
+			/* Get interface hardware address. */
+			memcpy(conf, nif->if_mac, sizeof(nif->if_mac));
+			break;
+
+		default:
+			rc = -1;
+			break;
     }
     return rc;
 }
@@ -1343,11 +1403,11 @@ static int FecInit(NUTDEVICE * dev)
 	/*
 	 * Wait for Link (Auto-nego) & Initialize FEC.
 	 * If the initialization fails (e.g. due to link down), then
-	 * the the FEC will wait for link inside FecRxThread.
+	 * the FEC will wait for link inside FecRxThread.
 	 */
 	while (1)
 	{
-		if (!FecReset(ifn))
+		if (!FecConfigure(ifn))
 		{
 			if (FecStart(ni, ifn->if_mac))
 				return -1;
@@ -1378,16 +1438,18 @@ static int FecInit(NUTDEVICE * dev)
 	return 0;
 }
 
-int Mcf5FecIsInitialized(NUTDEVICE * dev){
+int Mcf5FecIsInitialized(NUTDEVICE * dev)
+{
 	FECINFO *ni = (FECINFO *) dev->dev_dcb;
 	return ni->initialized;
 }
 
-int Mcf5FecLinkedUp(void){
+int Mcf5FecLinkedUp(void)
+{
 	uint16_t reg_val;
 	reg_val = PhyRead(PHY_REG_BMSR);
 	if (reg_val == 0xFFFF)
-		return 0; /* Phy doesnt respond, no link */
+		return 0; /* PHY does not respond, no link */
 	else
 		return reg_val & PHY_REG_BMSR_LINK_STATUS;
 }

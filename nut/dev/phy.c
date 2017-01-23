@@ -410,7 +410,7 @@ int NutRegisterPhy( uint8_t mda, void(*mdiow)(uint8_t, uint16_t), uint16_t(*mdio
 
     if (phydcb != NULL)
     {
-        /* Phy is just registered */
+        /* PHY is already registered */
         return 0;
     }
 
