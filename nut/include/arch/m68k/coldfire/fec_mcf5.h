@@ -36,8 +36,10 @@
 #include <sys/device.h>
 #include <sys/types.h>
 
-int Mcf5FecIsInitialized(NUTDEVICE * dev);
-int Mcf5FecLinkedUp(void);
+#if defined (MCU_MCF51CN)
+int Mcf5FecIsLinkedUp(void);
+#endif
+
 void Mcf5FecEthMWDTSetVariableFN(TMWDTSetVariableFN VariableFN);
 
 #endif  /* FEC_MCF51CN_H_ */

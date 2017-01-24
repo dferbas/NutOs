@@ -213,10 +213,10 @@ int NutPhyCtl( uint16_t ctl, uint32_t *par)
                 int wait = 100;
 
                 /* Set Reset bit in BMCR register */
-                phyw( PHY_BMCR, PHY_BMCR_RES);
+                phyw(PHY_BMCR, PHY_BMCR_RES);
 
                 /* Wait till reset bit flips back to 0 */
-                while( (phyr( PHY_BMCR) & PHY_BMCR_RES) && wait > 0) {
+                while( (phyr(PHY_BMCR) & PHY_BMCR_RES) && wait > 0) {
                 	NutSleep(1);  // TODO: test NutSleep, for ETH_mod sleep not used, PHY_BMCR_RES is zeroed promtly
 //                	NutMicroDelay(10000/*100000*/);		//wait 10 (formerly 100) ms
                     wait--;
@@ -233,17 +233,17 @@ int NutPhyCtl( uint16_t ctl, uint32_t *par)
             } else {
                 bmcr &= ~PHY_BMCR_LOOP;
             }
-            phyw( PHY_BMCR, bmcr);
+            phyw(PHY_BMCR, bmcr);
             break;
 
         case PHY_CTL_SPEED:
             if (p16 == 100) {
                 bmcr |= PHY_BMCR_SPEED;
-                phyw( PHY_BMCR, bmcr);
+                phyw(PHY_BMCR, bmcr);
             } else
             if (p16==10) {
                 bmcr &= ~PHY_BMCR_SPEED;
-                phyw( PHY_BMCR, bmcr);
+                phyw(PHY_BMCR, bmcr);
             } else {
                 rc = -1;
             }
@@ -255,7 +255,7 @@ int NutPhyCtl( uint16_t ctl, uint32_t *par)
             } else {
                 bmcr &= ~PHY_BMCR_ANEG;
             }
-            phyw( PHY_BMCR, bmcr);
+            phyw(PHY_BMCR, bmcr);
             break;
 
         case PHY_CTL_POWERDOWN:
@@ -264,7 +264,7 @@ int NutPhyCtl( uint16_t ctl, uint32_t *par)
             } else {
                 bmcr &= ~PHY_BMCR_PDWN;
             }
-            phyw( PHY_BMCR, bmcr);
+            phyw(PHY_BMCR, bmcr);
             break;
 
         case PHY_CTL_ISOLATE:
@@ -273,7 +273,7 @@ int NutPhyCtl( uint16_t ctl, uint32_t *par)
             } else {
                 bmcr &= ~PHY_BMCR_ISO;
             }
-            phyw( PHY_BMCR, bmcr);
+            phyw(PHY_BMCR, bmcr);
             break;
 
         case PHY_CTL_DUPLEX:
@@ -282,18 +282,18 @@ int NutPhyCtl( uint16_t ctl, uint32_t *par)
             } else {
                 bmcr &= ~PHY_BMCR_DUPX;
             }
-            phyw( PHY_BMCR, bmcr);
+            phyw(PHY_BMCR, bmcr);
             break;
 
         case PHY_CTL_AUTONEG_RE:
             if (p16) {
                 bmcr |= PHY_BMCR_ANST;
-                phyw (PHY_BMCR, bmcr);
+                phyw(PHY_BMCR, bmcr);
             }
             break;
 
         case PHY_GET_LINK:
-            *par = (uint32_t)(phyr(PHY_BMSR)&PHY_BMSR_LNK);
+            *par = (uint32_t)(phyr(PHY_BMSR) & PHY_BMSR_LNK);
             break;
 
         case PHY_GET_STATUS:

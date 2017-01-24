@@ -197,6 +197,7 @@
  */
 
 #include <cfg/os.h>
+#include <cfg/peripherals.h>		//FEC
 #include <sys/thread.h>
 #include <sys/event.h>
 #include <sys/timer.h>
@@ -213,6 +214,7 @@
 #include <netinet/if_ether.h>
 #include <netdb.h>
 #include <net/route.h>
+#include <net/if.h>
 #include <sys/socket.h>
 #include <pro/dhcp.h>
 
@@ -2082,12 +2084,22 @@ int NutDhcpIfConfig(const char *name, uint8_t * mac, uint32_t timeout)
         return -1;
     }
 
+#ifndef FEC
     /*
      * Copy the MAC address to the interface structure. This will
      * magically enable the brain dead interface.
      */
     memcpy(nif->if_mac, confnet.cdn_mac, 6);
     NutSleep(500);
+#else
+    /* we do not have magic, we need to do a manual wakeup (transition from idle state) */
+    uint32_t flags;
+	dev->dev_ioctl(dev, SIOCGIFFLAGS, &flags);
+	dev->dev_ioctl(dev, SIOCSIFADDR, confnet.cdn_mac);
+	flags |= IFF_UP;
+    dev->dev_ioctl(dev, SIOCSIFFLAGS, &flags);
+#endif
+
 
     /*
      * Zero out the ip address and mask. This allows to switch between
