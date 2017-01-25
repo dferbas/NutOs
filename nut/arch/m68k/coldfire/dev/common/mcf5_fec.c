@@ -78,8 +78,8 @@
 #define MAX_FL						(ETHER_MAX_LEN)	// maximum frame length
 #define PHY_RESET_TIMEOUT			200				// e.g. Power Up Stabilization of DP83848C takes 176ms
 #define PHY_AUTONEGO_TIMEOUT		6000			// Parallel detection and Auto-Negotiation take approximately 2-3 seconds to complete. In addition, Auto-Negotiation with next page should take approximately 2-3 seconds to complete, depending on the number of next pages sent. Refer to Clause 28 of the IEEE 802.3u standard for a full description of the individual timers related to Auto-Negotiation.
-#define PHY_LINK_TIMEOUT			2000			// e.g. using DP83848C takes 200ms after autonego "fails"
-													// DP83848C: 1000 too small
+#define PHY_LINK_TIMEOUT			3000			// e.g. using DP83848C takes 200ms after autonego "fails"
+													// DP83848C: 1000 too small, 2000 sometimes does not work for 10 Mb
 //#if defined (MCU_MCF5225)
 //# define FEC_WAIT_FOR_LINK_TIMEOUT	10000		// if this macro is defined, the FEC will wait for link after startup
 //#endif
@@ -338,7 +338,7 @@ static void ConfigureDuplex(int duplex)
 static int FecConfigure(IFNET *nif, int do_reset)
 {
 	int rc = 0;
-	int /*wait, */do_linktest;
+	int do_linktest = 0;
 	uint32_t regvalue;
 
 	/* ECR[ETHER_EN] is cleared (initialization time) */
@@ -396,11 +396,6 @@ static int FecConfigure(IFNET *nif, int do_reset)
 	/* Register PHY - this must be called after FEC is reset (does not work if called from FecPowerUp) */
 	NutRegisterPhy(1, PhyWrite, PhyRead);
 
-#ifdef PhyProbe
-	if(1)
-		PhyProbe();
-#endif
-
 	/* Activate reset, wait for completion. */
 	if (do_reset)
 	{
@@ -442,24 +437,6 @@ static int FecConfigure(IFNET *nif, int do_reset)
 		rc = NutPhyCtl(PHY_CTL_AUTONEG_RE, &phy_addr); //PhyProbe();
 
 		/* Wait for auto negotiation completed and link established. */
-#if 0
-		for (wait = 25; wait > 0; wait--)
-		{
-			(void)NutPhyCtl(PHY_GET_STATUS, &regvalue);
-			if (regvalue & PHY_STATUS_AUTONEG_OK)
-			{
-				do_linktest = !(regvalue & PHY_STATUS_HAS_LINK);
-				break;
-			}
-			//TODO: smaller interval?
-			NutSleep(200);
-		}
-		if (wait == 0)
-		{
-			DBG("NO AUTONEGO!\n");
-			return -1;
-		}
-#else
 		uint32_t timeout = NutGetMillis() + PHY_AUTONEGO_TIMEOUT;
 		while (1)
 		{
@@ -478,7 +455,6 @@ static int FecConfigure(IFNET *nif, int do_reset)
 			}
 			NutThreadYield();
 		}
-#endif
 
 		ConfigureDuplex(regvalue & PHY_STATUS_FULLDUPLEX);
 	}
@@ -507,36 +483,12 @@ static int FecConfigure(IFNET *nif, int do_reset)
 	if (do_linktest)
 	{
 		/* Wait for link established. */
-#if 0
-		//TODO: zkusit stary zpusob s NutGetMillis - viz PhyProbe
-		for (wait = 25; wait > 0; wait--)
-		{
-			(void)NutPhyCtl(PHY_GET_STATUS, &regvalue);
-			if (regvalue & PHY_STATUS_HAS_LINK)
-			{
-				break;
-			}
-			//TODO: smaller interval?
-			NutSleep(200);
-		}
-		if (wait == 0)
-		{
-			DBG("NO LINK!\n");
-			return -1;
-		}
-#else
 		uint32_t timeout = NutGetMillis() + PHY_LINK_TIMEOUT;
 		while (1)
 		{
 			(void)NutPhyCtl(PHY_GET_STATUS, &regvalue);
 			if (regvalue & PHY_STATUS_HAS_LINK)
 			{
-				/* For no autonego, 10 Mb, link established, 1st answer to ping was lost
-				 * 100 - failed even w BDM, 200,300 - ok w BDM, fails wo
-				 */
-				if (regvalue & PHY_STATUS_10M)
-					NutSleep(500);
-
 				break;
 			}
 
@@ -548,7 +500,6 @@ static int FecConfigure(IFNET *nif, int do_reset)
 			}
 			NutThreadYield();
 		}
-#endif
 	}
 
 	/* Now in all cases regvalue contains Phy status */
@@ -1207,7 +1158,7 @@ THREAD(FecRxThread, arg)
 		 */
 	    while (FecGetPacket(ni, &nb) == 0)
 	    {
-	     	/* Discard short packets. */
+			/* Discard short packets. */
 	        if (nb->nb_dl.sz < 60)
 	        {
 	        	NutNetBufFree(nb);

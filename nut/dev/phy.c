@@ -161,7 +161,8 @@ phy_status_descr_t phy_status_descr[] = {
     { KSZ8721,   { {31, 0x0004}, {31, 0x0008}, {0, 0}, {31, 0x0010}, {0, 0} } },*/
 
 	/* National Semiconductor PHY tranceiver */
-	{ DP83848,   { { 5, 0x0060}, { 1, 0x0180}, {0, 0}, { 1, 0x0140}, {0, 0} } }, // read link partner ability
+	/* bit 1 of extended register 10h is 1 for 10 Mb, 0 for 100 Mb if link is valid  */
+	{ DP83848,   { {16, 0x0002}, { 0, 0},      {0, 0}, {16, 0x0004}, {0, 0} } },
 
     /* Micrel KSZ8051 */
     { KSZ8051,   { {30, 0x0001}, {30, 0x0002}, {0, 0}, {30, 0x0004}, {0, 0} } },
