@@ -1688,10 +1688,10 @@ THREAD(NutDhcpClient, arg)
                 }
                 /* Change to REQUESTING state if we got a valid offer.
                    Otherwise we stay in SELECTING state. */
-                else if (dhcpConfig) {
-                    /* Wait for at least one period for other DHCP servers to offer */
-                    retries = MAX_DCHP_RETRIES+1;
-//                    dhcpState = DHCPST_REQUESTING;
+                else if (dhcpConfig)
+                {
+                    retries = 0;
+                    dhcpState = DHCPST_REQUESTING;
 #ifdef NUTDEBUG
                     if (__tcp_trf & NET_DBG_DHCP) fprintf(__tcp_trs, "[SEL-WAIT]");
 #endif
