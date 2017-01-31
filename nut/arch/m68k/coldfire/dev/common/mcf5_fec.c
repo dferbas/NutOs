@@ -339,7 +339,7 @@ static int FecConfigure(IFNET *nif, int do_reset)
 {
 	int rc = 0;
 	int do_linktest = 0;
-	uint32_t regvalue;
+	uint32_t regvalue, regvalue_lpbck;
 
 	/* ECR[ETHER_EN] is cleared (initialization time) */
 	MCF_FEC_ECR = 0;
@@ -379,7 +379,7 @@ static int FecConfigure(IFNET *nif, int do_reset)
 	/* Set FEC loopback */
 	if (nif->if_flags & IFF_LOOPBACK_MAC)
 	{
-		DBG("FEC: loopback = ON\n");
+		//DBG("FEC: loopback = ON\n");
 
 		/* Enable MAC loopback */
 		MCF_FEC_RCR |= MCF_FEC_RCR_LOOP;				//default after FEC reset
@@ -423,11 +423,11 @@ static int FecConfigure(IFNET *nif, int do_reset)
 #endif
 
 	/* Disable Loopback if driver changed from loopback phy mode */
-	regvalue = (nif->if_flags & IFF_LOOPBACK_PHY) != 0;
-	(void)NutPhyCtl(PHY_CTL_LOOPBACK, &regvalue);
+	regvalue_lpbck = (nif->if_flags & IFF_LOOPBACK_PHY) != 0;
+	(void)NutPhyCtl(PHY_CTL_LOOPBACK, &regvalue_lpbck);
 
 	/* Set autonego */
-	regvalue = (nif->if_flags & IFF_AUTONEGO_ENABLE) != 0 && !regvalue;
+	regvalue = (nif->if_flags & IFF_AUTONEGO_ENABLE) != 0 && !regvalue_lpbck;
 	(void)NutPhyCtl(PHY_CTL_AUTONEG, &regvalue);
 
 	/* if autonego enabled and loopback disabled, do autonego */
@@ -460,6 +460,8 @@ static int FecConfigure(IFNET *nif, int do_reset)
 	}
 	else
 	{
+		/* No autonego or PHY loopback */
+
 		/* Set duplex */
 		regvalue = (nif->if_flags & IFF_FULL_DUPLEX) != 0;
 		(void)NutPhyCtl(PHY_CTL_DUPLEX, &regvalue);
@@ -477,7 +479,8 @@ static int FecConfigure(IFNET *nif, int do_reset)
 		}
 		(void)NutPhyCtl(PHY_CTL_SPEED, &regvalue);
 
-		do_linktest = 1;
+		/* Do link test only for non loopback configurations. */
+		do_linktest = !regvalue_lpbck;
 	}
 
 	if (do_linktest)
@@ -1120,6 +1123,16 @@ THREAD(FecRxThread, arg)
 					ni->initialized = 1;
 					/* wakeup application thread - reached init state */
 					NutEventPostAsync(&ni->ioctl_rdy);
+				}
+				else
+				{
+#if 0
+					if(runningThread->td_next)
+						NutThreadSetPriority(((NUTTHREADINFO*)(runningThread->td_next))->td_priority);
+					NutThreadYield();
+#else
+					NutSleep(500);
+#endif
 				}
         	}
         	else
