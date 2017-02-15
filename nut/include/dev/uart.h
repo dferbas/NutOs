@@ -531,6 +531,13 @@
  */
 #define UART_GETHDPXMODE        0x0131
 
+/*! \brief UART _ioctl() command code to query the halfduplex mode.
+ *
+ *
+ * See also \ref HDLC_GETSTATE.
+ */
+#define HDLC_GETSTATE			0x0132
+
 /*!
  * \addtogroup xgUARTStatus
  * \brief UART device status flags,

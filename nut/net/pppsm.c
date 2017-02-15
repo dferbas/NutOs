@@ -206,6 +206,8 @@ void LcpOpen(NUTDEVICE * dev)
          * layer comes up.
          */
         dcb->dcb_lcp_state = PPPS_STARTING;
+
+    case PPPS_STARTING:
         dcb->dcb_reqid = dcb->dcb_rejid = dcb->dcb_rejects = dcb->dcb_auth_state = 0;
         break;
 

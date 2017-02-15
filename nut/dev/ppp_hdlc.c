@@ -75,6 +75,14 @@
  */
 #define IN_ACC_MAP(c, m) (( ((uint8_t) (c)) < 0x20)  && ((m) & (1UL << (c))) != 0)
 
+
+/* Message NO CARRIER detection - definition */
+#define NO_CARRIER_START '\r'
+static const char nc[] = "\r\nNO CARRIER";
+static const int NO_CARRIER_LEN = sizeof(nc);
+static int hdlc_state_flag = 0;
+
+
 /*
  * FCS lookup table.
  */
@@ -269,6 +277,13 @@ THREAD(PppHdlcReceive, arg)
     uint_fast8_t escaped = 0;
     uint32_t tmo = 1000;
 
+    /* Message NO CARRIER detection - declaration */
+    int nc_flag = 0, nc_len = NO_CARRIER_LEN;
+    uint8_t *nc_read,*nc_write;
+    nc_read = malloc(nc_len);
+    nc_write = nc_read;
+    hdlc_state_flag = 0;
+
     rd_buf = malloc(rd_siz);
     rd_ptr = rd_buf;
 
@@ -299,6 +314,26 @@ THREAD(PppHdlcReceive, arg)
         }
         ch = *rd_ptr++;
         rd_len--;
+
+		// Message NO CARRIER detection - implementation
+		if (ch == NO_CARRIER_START /*&& inframe == 0*/)
+			nc_flag = 1;
+		if(nc_flag)
+		{
+			*nc_write++ = ch;
+			nc_len--;
+
+			if (nc_len == 0)
+			{
+				nc_flag = 0;
+				nc_len = NO_CARRIER_LEN;
+
+				if(memcmp(nc_read,nc,NO_CARRIER_LEN) == 0)
+				{
+					hdlc_state_flag = 1;
+				};
+			}
+		}
 
         if (inframe) {
             if (ch != AHDLC_FLAG) {
@@ -340,12 +375,17 @@ THREAD(PppHdlcReceive, arg)
                 if (nb) {
                     memcpy(nb->nb_dl.vp, rx_buf, rx_cnt);
                     (*ifn->if_recv) (netdev, nb);
+
+                     // df proposal, not yet verified, temporary commented
+                     //inframe = 0;
+                     //continue;
                 }
             }
         }
 
         /* If frame flag is received, re-sync frame processing. */
-        if (ch == AHDLC_FLAG) {
+        if (ch == AHDLC_FLAG)
+        {
             inframe = 1;
             escaped = 0;
             rx_ptr = rx_buf;
@@ -357,7 +397,6 @@ THREAD(PppHdlcReceive, arg)
     netdev->dev_ioctl(netdev, LCP_LOWERDOWN, 0);
     dev->dev_type = IFTYP_CHAR;
     NutEventPostAsync(&dcb->dcb_mode_evt);
-
     NutThreadExit();
     for (;;);
 }
@@ -420,13 +459,17 @@ static int PppHdlcIoCtl(NUTDEVICE *dev, int req, void *conf)
         break;
     case HDLC_GETIFNET:
         *(NUTDEVICE **)conf = (NUTDEVICE *) dev->dev_icb;
-        break;
+    	break;
 
     case HDLC_SETTXACCM:
         dcb->dcb_tx_accm = *((uint32_t *) conf);
         break;
     case HDLC_GETTXACCM:
         *((uint32_t *) conf) = dcb->dcb_tx_accm;
+        break;
+
+    case HDLC_GETSTATE:
+        *((int *)conf) = hdlc_state_flag;
         break;
 
     default:
