@@ -160,6 +160,7 @@ typedef struct __attribute__ ((packed)) {
 } XCPOPT;
 
 
+
 extern void LcpOpen(NUTDEVICE * dev);
 extern void LcpClose(NUTDEVICE *dev);
 extern void LcpLowerUp(NUTDEVICE *dev);
@@ -177,6 +178,8 @@ extern void PppOpen(NUTDEVICE *dev);
 extern void PppClose(NUTDEVICE *dev);
 
 extern int NutPppInitStateMachine(NUTDEVICE * dev);
+extern void SetLcpEchoState(int state);
+extern int GetLcpEchoState(void);
 
 #endif
 

@@ -45,6 +45,7 @@
 #include <net/if_var.h>
 #include <dev/ppp.h>
 #include <sys/types.h>
+#include <sys/event.h>
 #include <netinet/if_ppp.h>
 #include <netinet/ppp_fsm.h>
 #include <netinet/in.h>
@@ -615,6 +616,8 @@ void NutLcpInput(NUTDEVICE * dev, NETBUF * nb)
         break;
 
     case LCP_ERP:
+    	NutEventPost(&dcb->dcb_echo_reply);
+
     case LCP_DRQ:
         /* Silently ignore echo responses and discard requests. */
         NutNetBufFree(nb);

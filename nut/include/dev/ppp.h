@@ -152,6 +152,8 @@ struct _PPPDCB {
      */
     HANDLE dcb_state_chg;
 
+    HANDLE dcb_echo_reply;
+
     /*! \brief Current state of the link layer.
      */
     uint8_t dcb_lcp_state;
@@ -269,10 +271,12 @@ struct _PPPDCB {
  */
 extern NUTDEVICE devPpp;
 
-#define LCP_OPEN        1
-#define LCP_CLOSE       2
-#define LCP_LOWERUP     3
-#define LCP_LOWERDOWN   4
+#define LCP_OPEN	        1
+#define LCP_CLOSE   	    2
+#define LCP_LOWERUP     	3
+#define LCP_LOWERDOWN   	4
+#define LCP_SETECHOSTATE  	5
+#define LCP_GETECHOSTATE  	6
 
 /*@}*/
 

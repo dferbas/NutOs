@@ -70,6 +70,66 @@
 #define NUT_THREAD_PPPSMSTACK   512
 #endif
 
+/*
+ * Echo request/reply declarations
+ */
+static int echo_enable = 0;
+static int echo_timeout = 0;
+
+/*!
+ * \brief set enable/disable LCP echo sending.
+ *
+ */
+void SetLcpEchoState(int state)
+{
+	echo_enable = state;
+}
+
+/*!
+ * \brief get LCP echo timeout state.
+ *
+ */
+int GetLcpEchoState(void)
+{
+	return echo_timeout;
+}
+
+/*!
+ * \brief Trigger LCP echo request event.
+ *
+ * Enable the link to come up. Typically triggered by the upper layer,
+ * when it is enabled.
+ *
+ * \param dev Pointer to the NUTDEVICE structure of the PPP device.
+ *
+ */
+void LcpEchoRq(NUTDEVICE * dev)
+{
+    PPPDCB *dcb = dev->dev_dcb;
+    NETBUF *nb;
+    int nb_len;
+    uint8_t id;
+
+#ifdef NUTDEBUG
+    if (__ppp_trf) {
+        fputs("\n[LCP-ERQ]", __ppp_trs);
+    }
+#endif
+
+    if (dcb->dcb_lcp_state == PPPS_OPENED)
+    {
+    	/* id,nb init */
+    	id = 255;
+    	nb_len = sizeof(uint32_t);
+    	nb = NutNetBufAlloc(NULL, NBAF_APPLICATION, nb_len);
+    	/* Use local magic number. */
+        memcpy(nb->nb_ap.vp, &dcb->dcb_neg_magic, nb_len);
+        NutLcpOutput(dev, LCP_ERQ, id, nb);
+
+        NutNetBufFree(nb);
+    }
+}
+
 /*!
  * \addtogroup xgPPP
  */
@@ -120,6 +180,21 @@ THREAD(NutPppSm, arg)
             } else
                 dcb->dcb_lcp_state = PPPS_STOPPED;
             break;
+
+        case PPPS_OPENED:
+        	if (echo_enable && ++retries > echo_enable)
+        	{
+        		LcpEchoRq(dev);
+        		dcb->dcb_retries = 0;
+
+        		if (NutEventWait(&dcb->dcb_echo_reply, 500))
+        			echo_timeout = 1; // timeout occurred
+        		else
+        			echo_timeout = 0; // echo reply received
+        	}
+        	else
+                dcb->dcb_retries = retries + 1;
+        	break;
         }
 
         /*
