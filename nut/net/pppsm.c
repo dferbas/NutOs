@@ -152,7 +152,7 @@ THREAD(NutPppSm, arg)
 {
     NUTDEVICE *dev = arg;
     PPPDCB *dcb = dev->dev_dcb;
-    uint_fast8_t retries;
+    uint_fast8_t retries, lcp_echo_counter = 0;
 
     for (;;) {
         NutSleep(5000);
@@ -223,18 +223,16 @@ THREAD(NutPppSm, arg)
             break;
 
         case PPPS_OPENED:
-        	if (echo_enable && ++retries > echo_enable)
+        	if (echo_enable && ++lcp_echo_counter >= echo_enable)
         	{
+        		lcp_echo_counter = 0;
         		LcpEchoRq(dev);
-        		dcb->dcb_retries = 0;
 
         		if (NutEventWaitNext(&dcb->dcb_echo_reply, 20))
         			echo_timeout = 1; // timeout occurred
         		else
         			echo_timeout = 0; // echo reply received
         	}
-        	else
-                dcb->dcb_retries = retries + 1;
         	break;
          }
     }
