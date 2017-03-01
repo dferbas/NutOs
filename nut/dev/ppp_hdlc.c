@@ -77,9 +77,9 @@
 
 
 /* Message NO CARRIER detection - definition */
-#define NO_CARRIER_START '\r'
-static const char nc[] = "\r\nNO CARRIER";
-static const int NO_CARRIER_LEN = sizeof(nc);
+#define NO_CARRIER_START 'N'
+static const char nc[] = "NO CARRIER";
+static const int NO_CARRIER_LEN = sizeof(nc) - 1;
 static int hdlc_state_flag = 0;
 
 
@@ -315,26 +315,6 @@ THREAD(PppHdlcReceive, arg)
         ch = *rd_ptr++;
         rd_len--;
 
-		// Message NO CARRIER detection - implementation
-		if (ch == NO_CARRIER_START /*&& inframe == 0*/)
-			nc_flag = 1;
-		if(nc_flag)
-		{
-			*nc_write++ = ch;
-			nc_len--;
-
-			if (nc_len == 0)
-			{
-				nc_flag = 0;
-				nc_len = NO_CARRIER_LEN;
-
-				if(memcmp(nc_read,nc,NO_CARRIER_LEN) == 0)
-				{
-					hdlc_state_flag = 1;
-				};
-			}
-		}
-
         if (inframe) {
             if (ch != AHDLC_FLAG) {
                 if (ch == AHDLC_ESCAPE) {
@@ -377,8 +357,8 @@ THREAD(PppHdlcReceive, arg)
                     (*ifn->if_recv) (netdev, nb);
 
                      // df proposal, not yet verified, temporary commented
-                     //inframe = 0;
-                     //continue;
+                     inframe = 0;
+                     continue;
                 }
             }
         }
@@ -391,12 +371,47 @@ THREAD(PppHdlcReceive, arg)
             rx_ptr = rx_buf;
             rx_cnt = 0;
             rx_fcs = AHDLC_INITFCS;
+
+            nc_flag = 0;	//df
+        }
+        else
+        {
+			// Message NO CARRIER detection - implementation
+			if (ch == NO_CARRIER_START)
+			{
+				nc_flag = 1;
+				nc_write = nc_read;
+				nc_len = NO_CARRIER_LEN;
+			}
+
+			if (nc_flag)
+			{
+				*nc_write++ = ch;
+				nc_len--;
+
+				if (nc_len == 0)
+				{
+					nc_flag = 0;
+					if(memcmp(nc_read,nc,NO_CARRIER_LEN) == 0)
+					{
+						dev->dev_icb = NULL;	//df action: hdlc thread exit
+						break;
+					}
+				}
+			}
         }
     }
     /* Signal the link driver that we are down. */
     netdev->dev_ioctl(netdev, LCP_LOWERDOWN, 0);
     dev->dev_type = IFTYP_CHAR;
     NutEventPostAsync(&dcb->dcb_mode_evt);
+
+    free(nc_read);	//df
+    free(rd_buf);	//df
+    free(rx_buf);	//df
+
+    hdlc_state_flag = 1;
+
     NutThreadExit();
     for (;;);
 }

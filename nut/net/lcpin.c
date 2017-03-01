@@ -434,6 +434,7 @@ static INLINE void LcpRxTermReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         dcb->dcb_lcp_state = PPPS_STOPPING;
         break;
     }
+    dcb->dcb_retries = 9;
     NutLcpOutput(dev, XCP_TERMACK, id, 0);
 }
 
@@ -457,13 +458,13 @@ static INLINE void LcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         dcb->dcb_lcp_state = PPPS_STOPPED;
         break;
 
-    case PPPS_ACKRCVD:
-        dcb->dcb_lcp_state = PPPS_REQSENT;
-        break;
-
     case PPPS_OPENED:
         IpcpLowerDown(dev);
-//        LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
+        LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
+//df        break;
+
+    case PPPS_ACKRCVD:
+        dcb->dcb_lcp_state = PPPS_REQSENT;
         break;
     }
 }

@@ -80,7 +80,7 @@ static int echo_timeout = 0;
  * \brief set enable/disable LCP echo sending.
  *
  */
-void SetLcpEchoState(int state)
+void SetLcpEchoEnable(int state)
 {
 	echo_enable = state;
 }
@@ -91,8 +91,12 @@ void SetLcpEchoState(int state)
  */
 int GetLcpEchoState(void)
 {
-	return echo_timeout;
+	int rc = echo_timeout;
+	echo_timeout = 0;
+
+	return rc;
 }
+
 
 /*!
  * \brief Trigger LCP echo request event.
@@ -180,22 +184,7 @@ THREAD(NutPppSm, arg)
             } else
                 dcb->dcb_lcp_state = PPPS_STOPPED;
             break;
-
-        case PPPS_OPENED:
-        	if (echo_enable && ++retries > echo_enable)
-        	{
-        		LcpEchoRq(dev);
-        		dcb->dcb_retries = 0;
-
-        		if (NutEventWait(&dcb->dcb_echo_reply, 500))
-        			echo_timeout = 1; // timeout occurred
-        		else
-        			echo_timeout = 0; // echo reply received
-        	}
-        	else
-                dcb->dcb_retries = retries + 1;
-        	break;
-        }
+       }
 
         /*
          * Authentication timeouts.
@@ -232,7 +221,22 @@ THREAD(NutPppSm, arg)
             } else
                 dcb->dcb_ipcp_state = PPPS_STOPPED;
             break;
-        }
+
+        case PPPS_OPENED:
+        	if (echo_enable && ++retries > echo_enable)
+        	{
+        		LcpEchoRq(dev);
+        		dcb->dcb_retries = 0;
+
+        		if (NutEventWaitNext(&dcb->dcb_echo_reply, 20))
+        			echo_timeout = 1; // timeout occurred
+        		else
+        			echo_timeout = 0; // echo reply received
+        	}
+        	else
+                dcb->dcb_retries = retries + 1;
+        	break;
+         }
     }
 }
 
@@ -355,7 +359,7 @@ void LcpClose(NUTDEVICE * dev)
         /*
          * Wait until termination action ends.
          */
-        NutEventWait(&dcb->dcb_state_chg, 5000);
+        NutEventWait(&dcb->dcb_state_chg, 5000); // df proposal: 10s instead of 5s - verify
 
     	/*
     	 * Signal hdlc thread its termination and wait up to 2 sec for its exit.
@@ -364,7 +368,7 @@ void LcpClose(NUTDEVICE * dev)
         /*
          * Wait until hdlc thread exits.
          */
-//        NutEventWait(&dcb->dcb_state_chg, 5000);
+//***   NutEventWait(&dcb->dcb_state_chg, 5000);
 
         dcb->dcb_lcp_state = PPPS_INITIAL;
         break;
@@ -426,7 +430,7 @@ void LcpLowerDown(NUTDEVICE * dev)
 		/*
 		 * Here we comes (hdlc thread context) when TERM ACK was received to a TERM REQ, issued from LcpClose (application context).
 		 */
-    	dcb->dcb_lcp_state = PPPS_STOPPING;
+//df    	dcb->dcb_lcp_state = PPPS_STOPPING;
 
         /*
          * Wake up the LCP_CLOSE ioctl (application thread) and return back to hdlc thread.
@@ -445,14 +449,17 @@ void LcpLowerDown(NUTDEVICE * dev)
     case PPPS_STOPPING:
 		/*
 		 * We will arrive here when hdlc thread is exiting (hdlc thread context).
+		 * This happens when we actively close PPP via ioctl(LCP_CLOSE) from application
+		 *  or when NO CARRIER was detected and hdlc is now terminating itself.
 		 */
-        dcb->dcb_lcp_state = PPPS_STOPPED;
+//df        dcb->dcb_lcp_state = PPPS_STOPPED; // df proposal: comment on
 
         /*
          * Wake up the LCP_CLOSE ioctl (application thread) and proceed with hdlc thread exit.
+         * (see above)
          */
-//        NutEventPostAsync(&dcb->dcb_state_chg);
-        break;
+        NutEventPostAsync(&dcb->dcb_state_chg); // flk: the event is expected; it has to stay uncommented df proposal: comment on
+//df        break; // df proposal: comment on
 
     case PPPS_REQSENT:
     case PPPS_ACKRCVD:

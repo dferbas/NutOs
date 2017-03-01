@@ -178,7 +178,7 @@ extern void PppOpen(NUTDEVICE *dev);
 extern void PppClose(NUTDEVICE *dev);
 
 extern int NutPppInitStateMachine(NUTDEVICE * dev);
-extern void SetLcpEchoState(int state);
+extern void SetLcpEchoEnable(int state);
 extern int GetLcpEchoState(void);
 
 #endif

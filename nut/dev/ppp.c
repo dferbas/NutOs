@@ -207,7 +207,7 @@ static int NutPppIOCtl(NUTDEVICE * dev, int req, void *conf)
         break;
 
     case LCP_SETECHOSTATE:
-    	SetLcpEchoState(*((int *)conf));
+    	SetLcpEchoEnable(*((int *)conf));
         break;
 
     case LCP_GETECHOSTATE:
