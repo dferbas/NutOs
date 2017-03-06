@@ -150,6 +150,7 @@ static HANDLE pppThread;
  */
 THREAD(NutPppSm, arg)
 {
+	NUTDEVICE *dev_null = NULL;
     NUTDEVICE *dev = arg;
     PPPDCB *dcb = dev->dev_dcb;
     uint_fast8_t retries, lcp_echo_counter = 0;
@@ -172,7 +173,11 @@ THREAD(NutPppSm, arg)
                 }
                 dcb->dcb_retries = retries + 1;
             } else
+            {
+            	//Signal hdlc thread its termination and wait up to 2 sec for its exit.
+            	_ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
                 dcb->dcb_lcp_state = (dcb->dcb_lcp_state == PPPS_CLOSING) ? PPPS_CLOSED : PPPS_STOPPED;
+            }
             break;
 
         case PPPS_REQSENT:
@@ -182,7 +187,11 @@ THREAD(NutPppSm, arg)
                     LcpTxConfReq(dev, dcb->dcb_reqid, 0);
                 dcb->dcb_retries = retries + 1;
             } else
+            {
+            	//Signal hdlc thread its termination and wait up to 2 sec for its exit.
+            	_ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
                 dcb->dcb_lcp_state = PPPS_STOPPED;
+            }
             break;
        }
 
@@ -357,7 +366,7 @@ void LcpClose(NUTDEVICE * dev)
         /*
          * Wait until termination action ends.
          */
-        NutEventWait(&dcb->dcb_state_chg, 5000); // df proposal: 10s instead of 5s - verify
+        NutEventWait(&dcb->dcb_state_chg, 10000); // df proposal: 10s instead of 5s - verify
 
     	/*
     	 * Signal hdlc thread its termination and wait up to 2 sec for its exit.
@@ -368,6 +377,7 @@ void LcpClose(NUTDEVICE * dev)
          */
 //***   NutEventWait(&dcb->dcb_state_chg, 5000);
 
+        dcb->dcb_retries = 0;
         dcb->dcb_lcp_state = PPPS_INITIAL;
         break;
     }

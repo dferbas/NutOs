@@ -333,6 +333,7 @@ static INLINE void LcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
             PapTxAuthReq(dev, ++dcb->dcb_reqid);
         else
             IpcpLowerUp(dev);
+        dcb->dcb_retries = 0;
         break;
 
     case PPPS_OPENED:
@@ -489,6 +490,11 @@ void LcpRxProtRej(NUTDEVICE * dev)
     case PPPS_ACKRCVD:
     case PPPS_ACKSENT:
     case PPPS_STOPPED:
+
+    	//Signal hdlc thread its termination.
+        if (dev->dev_icb)
+        	dev->dev_icb = NULL;
+        //
         dcb->dcb_lcp_state = PPPS_STOPPED;
         break;
 
@@ -612,6 +618,10 @@ void NutLcpInput(NUTDEVICE * dev, NETBUF * nb)
         LcpRxCodeRej(dev, lcp->xch_id, nb);
         break;
 
+    case LCP_PROTREJ:
+        LcpRxProtRej(dev);
+        break;
+
     case LCP_ERQ:
         LcpRxEchoReq(dev, lcp->xch_id, nb);
         break;
@@ -628,7 +638,7 @@ void NutLcpInput(NUTDEVICE * dev, NETBUF * nb)
         /*
          * TODO: Send code reject.
          */
-        NutNetBufFree(nb);
+    	NutNetBufFree(nb);
         break;
     }
 }
