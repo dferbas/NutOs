@@ -501,13 +501,67 @@ int _putf(int _putb(int, const void *, size_t), int fd, const char *fmt, va_list
         case 'f':
             if (prec == -1)
                 prec = DEFPREC;
+#if 0
             _double = va_arg(ap, double);
             if (ch == 'f')
-                dtostrf(_double, 1, prec, buf);
+            	sprintf(buf, "%f", _double);//dtostrf(_double, 1, prec, buf);
             else
-                dtostre(_double, buf, prec, 1);
+            	sprintf(buf, "%e", _double);//dtostre(_double, buf, prec, 1);
             cp = buf;
             size = strlen(buf);
+#else
+            int decpt;
+			int _sign;
+            char *rve = buf;
+            char *bp = buf;
+
+            //realsz = dprec > size ? dprec : size;
+            _double = va_arg(ap, double);
+            cp = dtoa(_double, 3, prec, &decpt, &_sign, &rve);
+            //memcpy(&cp[realsz - decpt], cp[realsz - decpt + 1], decpt);
+            //cp[realsz - decpt] = '.';
+            /* TODO: kod nize je prevzat z kodu pro arm nahore, je treba to nejak procistit a odstranit duplicitu...
+             	 	 nebo vymyslet jiny zpusob
+             */
+            if (_sign)
+            	sign = '-';
+            if (decpt == 9999) {
+				/* Infinite or invalid. */
+				strcpy(bp, cp);
+			} else {
+				/* Left of decimal dot. */
+				if (decpt > 0) {
+					while (*cp && decpt > 0) {
+						*bp++ = *cp++;
+						decpt--;
+					}
+					while (decpt > 0) {
+						*bp++ = '0';
+						decpt--;
+					}
+				} else {
+					*bp++ = '0';
+				}
+				*bp++ = '.';
+				/* Right of decimal dot. */
+				while (decpt < 0 && prec > 0) {
+					*bp++ = '0';
+					decpt++;
+					prec--;
+				}
+				while (*cp && prec > 0) {
+					*bp++ = *cp++;
+					prec--;
+				}
+				while (prec > 0) {
+					*bp++ = '0';
+					prec--;
+				}
+				*bp = 0;
+			}
+			cp = buf;
+			size = strlen(cp);
+#endif
             break;
 #endif
 #else
