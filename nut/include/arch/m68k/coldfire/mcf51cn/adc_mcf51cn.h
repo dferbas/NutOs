@@ -65,6 +65,23 @@ typedef enum adc_mode_type
 
 typedef enum adc_channel_type
 {
+	/* original nut version  */
+#if 0
+ 	ADC0=0,
+    ADC1=1,
+    ADC2=2,
+    ADC3=3,
+    ADC4=4,
+    ADC5=5,
+    ADC6=6,
+    ADC7=7,
+    ADC8=8,
+    ADC9=9,
+    ADC10=10,
+    ADC11=11,
+    ADC_MAX_CHANNEL=12
+#else
+	/* powernet_mod tester board extension */
     ADC0=0,
     ADC1=1,
     ADC2=2,
@@ -77,7 +94,10 @@ typedef enum adc_channel_type
     ADC9=9,
     ADC10=10,
     ADC11=11,
-    ADC_MAX_CHANNEL = 12
+    ADCVrefH=29,
+    ADCVrefL=30,
+    ADC_MAX_CHANNEL=31
+#endif
 } TADCChannel;
 
 /* Function prototypes */
