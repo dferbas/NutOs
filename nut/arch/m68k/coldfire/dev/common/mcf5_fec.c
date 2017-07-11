@@ -284,31 +284,6 @@ static inline void FecPowerUp(void)
 	/* Waiting for charge condenser on PHY reset. It takes 50ms charge to 1,85V. See printscreen from oscilloscope */
 	NutSleep(50);
 #endif
-
-#if defined (MCU_MCF51CN)
-	/* If PHY does not respond, restart PHY. It can happen that PHY is not properly started (when power source is applied and voltage oscillates). */
-	if (PhyRead(PHY_REG_BMSR) == 0xFFFF)
-	{
-		DBG("PHY RESTART\n");
-		GpioPinSetLow(PORTC, 3);
-		NutSleep(10); 				// PHY reset time 10ms
-		GpioPinSetHigh(PORTC, 3);
-		for (wait = 25;; wait--)
-		{
-			// wait until PHY starts
-			NutSleep(100);
-			if (PhyRead(PHY_REG_BMSR) != 0xFFFF)
-			{
-				break;
-			}
-			if (wait == 0)
-			{
-				DBG("PHY NOT STARTED!\n");
-				return -1;
-			}
-		}
-	}
-#endif
 }
 
 static void ConfigureDuplex(int duplex)
@@ -1291,6 +1266,34 @@ static int FecInit(NUTDEVICE * dev)
 
     /* Configure pins, wait for end of reset */
     FecPowerUp();
+
+#if defined (MCU_MCF51CN)
+	/* If PHY does not respond, restart PHY. It can happen that PHY is not properly started (when power source is applied and voltage oscillates). */
+	if (PhyRead(PHY_REG_BMSR) == 0xFFFF)
+	{
+		int	wait;
+
+		DBG("PHY RESTART\n");
+		GpioPinSetLow(PORTC, 3);
+		NutSleep(10); 				// PHY reset time 10ms
+		GpioPinSetHigh(PORTC, 3);
+
+		for (wait = 25;; wait--)
+		{
+			// wait until PHY starts
+			NutSleep(100);
+			if (PhyRead(PHY_REG_BMSR) != 0xFFFF)
+			{
+				break;
+			}
+			if (wait == 0)
+			{
+				DBG("PHY NOT STARTED!\n");
+				return -1;
+			}
+		}
+	}
+#endif
 
 #ifdef FEC_WAIT_FOR_LINK_TIMEOUT
 	/*
