@@ -371,6 +371,34 @@ static int FecConfigure(IFNET *nif, int do_reset)
 	/* Register PHY - this must be called after FEC is reset (does not work if called from FecPowerUp) */
 	NutRegisterPhy(1, PhyWrite, PhyRead);
 
+#if defined (MCU_MCF51CN)
+	/* If PHY does not respond, restart PHY. It can happen that PHY is not properly started (when power source is applied and voltage oscillates). */
+	if (PhyRead(PHY_REG_BMSR) == 0xFFFF)
+	{
+		int wait;
+
+		DBG("PHY RESTART\n");
+		GpioPinSetLow(PORTC, 3);
+		NutSleep(10); 				// PHY reset time 10ms
+		GpioPinSetHigh(PORTC, 3);
+
+		for (wait = 25;; wait--)
+		{
+			// wait until PHY starts
+			NutSleep(100);
+			if (PhyRead(PHY_REG_BMSR) != 0xFFFF)
+			{
+				break;
+			}
+			if (wait == 0)
+			{
+				DBG("PHY NOT STARTED!\n");
+				return -1;
+			}
+		}
+	}
+#endif
+
 	/* Activate reset, wait for completion. */
 	if (do_reset)
 	{
@@ -1128,13 +1156,16 @@ THREAD(FecRxThread, arg)
 		{
 			//TODO: announce link lost event -> alarm?
 			// Timeout, time for Link test
-			PhyLinkTest(dev);
+			(void)PhyLinkTest(dev);
 			continue;
 		}
 		else
 		{
 			//packet arrived, does it make sense to check the link state :-)?
-//			PhyLinkTest(dev);
+//			(void)PhyLinkTest(dev);
+			//check if we were woken up by ioctl API fn, which disabled us
+			if (!ni->initialized)
+				continue;
 		}
 
 		/* Enable watchdog, wait for receive and pass the received packet to the upper layer. */
@@ -1266,34 +1297,6 @@ static int FecInit(NUTDEVICE * dev)
 
     /* Configure pins, wait for end of reset */
     FecPowerUp();
-
-#if defined (MCU_MCF51CN)
-	/* If PHY does not respond, restart PHY. It can happen that PHY is not properly started (when power source is applied and voltage oscillates). */
-	if (PhyRead(PHY_REG_BMSR) == 0xFFFF)
-	{
-		int	wait;
-
-		DBG("PHY RESTART\n");
-		GpioPinSetLow(PORTC, 3);
-		NutSleep(10); 				// PHY reset time 10ms
-		GpioPinSetHigh(PORTC, 3);
-
-		for (wait = 25;; wait--)
-		{
-			// wait until PHY starts
-			NutSleep(100);
-			if (PhyRead(PHY_REG_BMSR) != 0xFFFF)
-			{
-				break;
-			}
-			if (wait == 0)
-			{
-				DBG("PHY NOT STARTED!\n");
-				return -1;
-			}
-		}
-	}
-#endif
 
 #ifdef FEC_WAIT_FOR_LINK_TIMEOUT
 	/*
