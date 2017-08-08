@@ -59,8 +59,9 @@
 #define _adc_buf_head MCF51_ADC_BUF_SIZE
 #define _adc_buf_tail MCF51_ADC_BUF_SIZE+1
 
-uint16_t **ADC_Buffer = NULL;
-uint32_t adcEnableChannels;
+
+static uint16_t **ADC_Buffer = NULL;
+static uint32_t adcEnableChannels;
 
 static HANDLE readHandle;
 
@@ -185,7 +186,10 @@ void Mcf51cnAdcEnableChannel(TADCChannel channel)
 			pinGpio = 4;
 			break;
 	}
-	GpioPinConfigSet(portGpio, pinGpio, GPIO_CFG_ALT3);
+
+	if (portGpio != 0)		/* handle channels without GPIO (VrefH, VrefL - internal) */
+		GpioPinConfigSet(portGpio, pinGpio, GPIO_CFG_ALT3);
+
 	adcEnableChannels |= 1 << channel;
 }
 
@@ -211,7 +215,8 @@ void Mcf51cnAdcSetPrescale(uint32_t prescale)
 	if (prescale >= 8)
 		prescale = 7;
 
-	cfg_reg = 0 | MCF_ADC_CFG_MODE_12BIT | MCF_ADC_CFG_ADICLK_ASYNC;
+    //long sample time, 12/bit conversion
+    cfg_reg = MCF_ADC_CFG_ADLSMP | MCF_ADC_CFG_MODE_12BIT | /*MCF_ADC_CFG_ADICLK_BUS_DIV2 | */ /*MCF_ADC_CFG_ADICLK_BUS | */ MCF_ADC_CFG_ADICLK_ASYNC;
 
 	/*
 	 * ADIV  prescale Ratio Clock Rate
@@ -228,20 +233,21 @@ void Mcf51cnAdcSetPrescale(uint32_t prescale)
 /*!
  * \brief do conversion
  */
-void Mcf51cnAdcStartConversion(void)
+void Mcf51cnAdcConvertChannels(void)
 {
 	uint32_t detectChannel = adcEnableChannels;
 	uint16_t adcReadChannel = 0;
+	int i;
 
 	while (detectChannel != 0)
 	{
 		if (detectChannel & 0x00000001)
 		{
-
-			MCF_ADC_SC1 = MCF_ADC_SC1_AIEN | (adcReadChannel & MCF_ADC_SC1_ADCH);
-			if (NutEventWait(&readHandle, 1000))
+			for (i = 0; i < 3; i++)
 			{
-				return;
+				MCF_ADC_SC1 = MCF_ADC_SC1_AIEN | (adcReadChannel & MCF_ADC_SC1_ADCH);
+				if (NutEventWait(&readHandle, 1000))
+					return;
 			}
 		}
 		detectChannel >>= 1;

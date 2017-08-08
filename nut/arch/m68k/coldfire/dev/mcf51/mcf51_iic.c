@@ -66,7 +66,7 @@ typedef struct
 	uint32_t tw_mr_cnt; /* Number of received bytes */
 	uint8_t *DataPtrM; /* Pointer to data buffer for Master mode */
 	uint8_t *AddrPtrM; /* Pointer to output buffer for Master mode */
-	volatile uint8_t tw_if_bsy; /* Bus busy flag */
+	volatile uint8_t tw_if_bsy; /* Bus busy flag */			// TODO: no more used?
 	uint8_t tw_rptst_rqst; /* Request for repeated start */
 	uint8_t tw_mm_sla; /* Destination slave address. */
 } TWIDCB;
@@ -96,6 +96,9 @@ static void TwInterrupt(void *arg)
 				dev->OutLenM = 0U; /* No character for sending */
 				dev->InpLenM = 0U; /* No character for reception */
 				dev->tw_if_bsy = 0;
+				dev->tw_mm_err = TWERR_SLA_NACK;		//TODO: if st already sent, set TWERR_DATA_NACK
+
+				NutEventPostFromIrq(&dev->tw_mm_que);
 			}
 			else
 			{
@@ -170,12 +173,15 @@ static void TwInterrupt(void *arg)
 	{
 		if (Status & MCF_IIC_SR_ARBL)
 		{ /* Arbitration lost? */
+			MCF_IIC_SR(dev->dcb_base) = MCF_IIC_SR_ARBL; /* clear ARBL */
 			dev->AddrLenM = 0U; /* No address character for sending */
 			dev->OutLenM = 0U; /* No character for sending */
 			dev->InpLenM = 0U; /* No character for reception */
-			dev->tw_if_bsy = 0; /* No character for sending or reception*/
-			MCF_IIC_CR(dev->dcb_base) &= ~MCF_IIC_CR_TX; /* Switch to Rx mode */
+			dev->tw_if_bsy = 0; /* No character for sending or reception */
+//			MCF_IIC_CR(dev->dcb_base) &= ~MCF_IIC_CR_TX; /* Switch to Rx mode */
 			dev->tw_mm_err = TWERR_BUS;
+
+			NutEventPostFromIrq(&dev->tw_mm_que);
 		}
 	}
 }
@@ -333,6 +339,7 @@ int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, 
 
 	return rc; /* Dummy number of really received chars */
 }
+
 int TwMasterTransact(uint8_t sla, const void *txdata, uint16_t txlen, void *rxdata, uint16_t rxsiz,
 		uint32_t tmo)
 {
@@ -397,10 +404,10 @@ int TwIOCtl(int req, void *p_conf)
 	uint8_t rc = 0, ic = IC_SIZE - 1, i;
 
 	uint16_t dividerTable[IC_SIZE] =
-	{ 20, 22, 24, 26, 28, 30, 34, 40, 28, 32, 36, 40, 44, 48, 56, 68, 48, 56, 64, 72, 80, 88, 104,
-			128, 80, 96, 112, 128, 144, 160, 192, 240, 160, 192, 224, 256, 288, 320, 384, 480, 320,
-			384, 448, 512, 576, 640, 768, 960, 640, 768, 896, 1024, 1152, 1280, 1536, 1920, 1280,
-			1536, 1792, 2048, 2304, 2560, 3072, 3840 };
+	{20, 22, 24, 26, 28, 30, 34, 40, 28, 32, 36, 40, 44, 48, 56,
+			68, 48, 56, 64, 72, 80, 88, 104, 128, 80, 96, 112, 128, 144, 160, 192, 240, 160, 192,
+			224, 256, 288, 320, 384, 480, 320, 384, 448, 512, 576, 640, 768, 960, 640, 768, 896,
+			1024, 1152, 1280, 1536, 1920, 1280, 1536, 1792, 2048, 2304, 2560, 3072, 3840};
 
 	uint32_t *speedHz = (uint32_t *) p_conf;
 	uint16_t selectedDivider = dividerTable[ic];		//maximal divider

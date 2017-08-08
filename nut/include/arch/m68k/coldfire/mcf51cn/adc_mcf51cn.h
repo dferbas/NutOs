@@ -65,9 +65,8 @@ typedef enum adc_mode_type
 
 typedef enum adc_channel_type
 {
-	/* original nut version  */
-#if 0
- 	ADC0=0,
+	/*  original  */
+/*  ADC0=0,
     ADC1=1,
     ADC2=2,
     ADC3=3,
@@ -79,9 +78,9 @@ typedef enum adc_channel_type
     ADC9=9,
     ADC10=10,
     ADC11=11,
-    ADC_MAX_CHANNEL=12
-#else
-	/* powernet_mod tester board extension */
+    ADC_MAX_CHANNEL=12*/
+
+
     ADC0=0,
     ADC1=1,
     ADC2=2,
@@ -97,7 +96,6 @@ typedef enum adc_channel_type
     ADCVrefH=29,
     ADCVrefL=30,
     ADC_MAX_CHANNEL=31
-#endif
 } TADCChannel;
 
 /* Function prototypes */
@@ -118,7 +116,7 @@ void Mcf51cnAdcInit(void);
 // post: The ADC has started conversion. Completion of
 //       any conversions is not guaranteed.
 
-void Mcf51cnAdcStartConversion(void);
+void Mcf51cnAdcConvertChannels(void);
 
 
 // AdcSetPrescale
