@@ -75,6 +75,14 @@ SECTIONS
 
         PROVIDE (__regions_end = .);
 
+        PROVIDE (__regions_code_ram_start = .) ;
+
+        LONG (__code_ram_start)
+        LONG (__code_ram_size)
+        LONG (__code_ram_load_start)
+
+        PROVIDE (__regions_code_ram_end = .);
+
         /* Set MAC info */
         . = 0x380;
         LONG (0xbeaf0001)
@@ -120,19 +128,9 @@ SECTIONS
     PROVIDE (__dataint_size = SIZEOF(.dataint));
     PROVIDE (__dataint_load_start = LOADADDR(.dataint));
     
-    .bssint : ALIGN (4)
-    {
-        PROVIDE (__bssint_start = .) ;
-        *(.bssint)
-        *(.bssint.*)
-        PROVIDE (__bssint_end = .) ;
-    } > REGION_BSS_INT AT > REGION_LOAD
-    PROVIDE (__bssint_size = SIZEOF(.bssint));
-
     .data : ALIGN(4)
     {
         PROVIDE (__data_start = .) ;
-        *(.ram_code)
         *(.data)
         *(.data.*)
         *(.gnu.linkonce.d.*)
@@ -141,6 +139,15 @@ SECTIONS
     }  > REGION_DATA AT > REGION_LOAD
     PROVIDE (__data_size = SIZEOF(.data));
     PROVIDE (__data_load_start = LOADADDR(.data));
+
+    .bssint : ALIGN (4)
+    {
+        PROVIDE (__bssint_start = .) ;
+        *(.bssint)
+        *(.bssint.*)
+        PROVIDE (__bssint_end = .) ;
+    } > REGION_BSS_INT AT > REGION_LOAD
+    PROVIDE (__bssint_size = SIZEOF(.bssint));
 
     .bss : ALIGN (4)
     {
@@ -152,4 +159,15 @@ SECTIONS
         PROVIDE (__bss_end = .) ;
     } > REGION_BSS AT > REGION_LOAD
     PROVIDE (__bss_size = SIZEOF(.bss));
+
+    .code_ram	  : ALIGN(4)
+    {
+	. = 0;
+        PROVIDE (__code_ram_start = .) ;
+        *(.code_ram)
+        . = ALIGN(4);
+        PROVIDE (__code_ram_end = .) ;
+    }  > REGION_DATA AT > REGION_LOAD
+	PROVIDE (__code_ram_size = SIZEOF(.code_ram));
+	PROVIDE (__code_ram_load_start = LOADADDR(.code_ram));
 }

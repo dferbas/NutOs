@@ -39,31 +39,24 @@
 /*@{*/
 
 //------------------------------------------------------------------------------
-void InitRegions(void)
+struct __region
 {
-	struct __region
-	{
-		unsigned *p_region_start;	// start address of region
-		unsigned region_size;
-		unsigned *p_region_data;// initial contents of this region (p_region_data == p_region_start means "clear the region only")
-	};
+	unsigned *p_region_start;	// start address of region
+	unsigned region_size;
+	unsigned *p_region_data;// initial contents of this region (p_region_data == p_region_start means "clear the region only")
+};
 
-	extern const struct __region __regions_start[];
-	extern const struct __region __regions_end[];
+extern const struct __region __regions_start[];
+extern const struct __region __regions_end[];
 
-	const struct __region *p_reg;
-	const struct __region *p_reg_end;
-
-	/* get regions pointer and count (they was defined in linker file) */
-	p_reg = __regions_start;
-	p_reg_end = __regions_end;
-
+void InitRegionsDetail(const struct __region *p_reg, const struct __region *p_reg_end)
+{
 	/* initialize all regions */
 	for (; p_reg < p_reg_end; p_reg++)
 	{
-		unsigned *p_src = p_reg->p_region_data;
-		unsigned *p_dst = p_reg->p_region_start;
-		unsigned count = p_reg->region_size;
+		register unsigned *p_src = p_reg->p_region_data;
+		register unsigned *p_dst = p_reg->p_region_start;
+		register unsigned count = p_reg->region_size;
 
 		if (p_src != p_dst)
 		{
@@ -83,4 +76,10 @@ void InitRegions(void)
 				*pdst_char++ = 0;
 		}
 	}
+}
+
+void InitRegions(void)
+{
+	/* get regions pointers (they were defined in linker file) */
+	InitRegionsDetail(__regions_start, __regions_end);
 }
