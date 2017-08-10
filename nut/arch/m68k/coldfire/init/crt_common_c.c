@@ -43,7 +43,7 @@ struct __region
 {
 	unsigned *p_region_start;	// start address of region
 	unsigned region_size;
-	unsigned *p_region_data;// initial contents of this region (p_region_data == p_region_start means "clear the region only")
+	unsigned *p_region_data;	// initial contents of this region (p_region_data == p_region_start means "clear the region only")
 };
 
 extern const struct __region __regions_start[];

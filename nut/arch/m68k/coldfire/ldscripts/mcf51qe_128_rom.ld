@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
+ * Copyright 2012-2017 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -92,4 +92,19 @@ REGION_ALIAS("REGION_LOAD",     rom);
 /*
  * Sections description
  */
-INCLUDE sections.ld
+SECTIONS
+{
+    .text :
+    {
+INCLUDE sections_begin.ld
+
+INCLUDE mcf51qe_128_production_data.ld
+
+        *(.text)
+        *(.text.*)
+        *(.gnu.linkonce.t.* .gcc_except_table .gcc_except_table.*)
+
+    } > REGION_TEXT AT > REGION_LOAD =0xFF
+
+INCLUDE sections_end.ld
+}

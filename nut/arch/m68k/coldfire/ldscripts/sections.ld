@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2016 by Embedded Technologies s.r.o. All rights reserved.
+ * Copyright 2012-2017 by Embedded Technologies s.r.o. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -88,7 +88,7 @@ SECTIONS
         LONG (0xbeaf0001)
         LONG (0x00010080)
         LONG (0x70B59911)	/* MAC */
-	LONG (0x00020000)	/* MAC */
+        LONG (0x00020000)	/* MAC */
         LONG (0x31303034)	/* SN */
         LONG (0x35303030)	/* SN */
         LONG (0x30320000)	/* SN */

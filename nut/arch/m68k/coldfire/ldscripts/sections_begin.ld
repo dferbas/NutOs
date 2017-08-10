@@ -30,15 +30,9 @@
  * For additional information see http://www.ethernut.de/
  */
 
-SECTIONS
-{
-    .text.boot :
-    {
-        LONG(__stack_init)/* Initial SP */
-        LONG(_start)      /* Initial PC */
-        LONG(0)           /* Placeholder for custom data */
-        LONG(0)           /* Placeholder for custom data */
-
+	    PROVIDE (__vectors_start = .) ;
+        KEEP(*(.vectors))
+        
         KEEP(*(.init0))   /* Basic CPU initialization (family dependant code, _start is here). */
         KEEP(*(.init1))
         KEEP(*(.init2))   /* Set up stack pointer.  */
@@ -75,89 +69,4 @@ SECTIONS
         LONG (__bss_size)
         LONG (__bss_start)       /* No init data */
 
-        PROVIDE (__regions_end = .);
-
-        /* test production data */
-        /*
-	. = 0x380;
-        LONG (0xbeaf0001)
-        LONG (0x00010003)
-        LONG (0x70b59900)
-        LONG (0x0004000A)
-        LONG (0x31303034)
-        LONG (0x34303030)
-        LONG (0x30340000)
-        LONG (0x00000000)
-         */
-
-        /* cfm konfig */
-        . = 0x400;
-        LONG (0xce7c8dff) /* Backdoor Key */
-        LONG (0xfaac9e44) /* Backdoor Key */
-        LONG (0xffffffff) /* Sector Protection */
-        LONG (0x00000000) /* Supervisor Access */
-        LONG (0x00000000) /* Data Access */
-        /* Set 0x80004AC8 to protect */
-        LONG (0xffffffff) /* Security Word */
-    } > bootloader AT > bootloader =0xFF
-
-    .text :
-    {
-        *(.text)
-        *(.text.*)
-        *(.gnu.linkonce.t.* .gcc_except_table .gcc_except_table.*)
-
-    } > REGION_TEXT AT > REGION_LOAD =0xFF
-
-    .rodata : ALIGN (4)
-    {
-        *(.rodata)
-        *(.rodata.*)
-        *(.gnu.linkonce.r.*)
-    } > REGION_RODATA AT > REGION_LOAD
-
-    .dataint : ALIGN(4)
-    {
-        PROVIDE (__dataint_start = .) ;
-        PROVIDE (__vectors_start = .) ;
-        KEEP(*(.vectors))
-        *(.dataint)
-        *(.dataint.*)
-        . = ALIGN(4);
-        PROVIDE (__dataint_end = .) ;
-    } > REGION_DATA_INT AT > REGION_LOAD
-    PROVIDE (__dataint_size = SIZEOF(.dataint));
-    PROVIDE (__dataint_load_start = LOADADDR(.dataint));
-    
-    .bssint : ALIGN (4)
-    {
-        PROVIDE (__bssint_start = .) ;
-        *(.bssint)
-        *(.bssint.*)
-        PROVIDE (__bssint_end = .) ;
-    } > REGION_BSS_INT AT > REGION_LOAD
-    PROVIDE (__bssint_size = SIZEOF(.bssint));
-
-    .data : ALIGN(4)
-    {
-        PROVIDE (__data_start = .) ;
-        *(.data)
-        *(.data.*)
-        *(.gnu.linkonce.d.*)
-        . = ALIGN(4);
-        PROVIDE (__data_end = .) ;
-    }  > REGION_DATA AT > REGION_LOAD
-    PROVIDE (__data_size = SIZEOF(.data));
-    PROVIDE (__data_load_start = LOADADDR(.data));
-
-    .bss : ALIGN (4)
-    {
-        PROVIDE (__bss_start = .) ;
-        *(.bss)
-        *(.bss.*)
-        *(.gnu.linkonce.b.*)
-        *(COMMON)
-        PROVIDE (__bss_end = .) ;
-    } > REGION_BSS AT > REGION_LOAD
-    PROVIDE (__bss_size = SIZEOF(.bss));
-}
+        PROVIDE (__regions_end = .) ;
