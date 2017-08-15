@@ -41,7 +41,7 @@
 #define BM_FLASH_ERR_MASK 0x30
 
 
-__attribute__ ((section (".data.flash_ram"))) volatile int Mcf51IntFlashRamCMD(uint8_t cmd)
+__attribute__ ((section (".data.flash_ram"))) int Mcf51IntFlashRamCMD(uint8_t cmd)
 {
 	MCF_FCMD = cmd;
 	MCF_FSTAT = 0x80U;
