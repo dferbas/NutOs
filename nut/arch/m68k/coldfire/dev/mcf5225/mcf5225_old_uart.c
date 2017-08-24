@@ -48,6 +48,8 @@
 /* IOCtrl Halfduplex flag, ktery urci komunkaci pres porty AB, XY */
 #define USART_MF_HALFDUPLEX_YZ	0x2000
 #define USART_MF_FULLDUPLEX_232	0x4000
+#define USART_MF_LOOPBACK_AB	0x8000
+#define USART_MF_LOOPBACK_YZ	0x4000		/* same as for 232 if piggy back board present */
 
 /* Priznak, ktery urci jaky z portu AB, XY je vybran. */
 #define HDX_CONTROL_YZ			0x10
@@ -1008,23 +1010,42 @@ static int McfUsartSetFlowControl(uint32_t flags)
 
 #ifdef UART_HDB_FDX_BIT
 
+#if (PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)
 	/* Set RS232 mode - Komunikace pres porty YZ */
 	if (flags & USART_MF_FULLDUPLEX_232)
 	{
-		//disable RS485 on AB, enable RS232 on YZ
+		//Disable RS485 on AB, enable RS232 on YZ (same as Disable AB, configure loopback on YZ)
 		// Disable first chip
 		MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_RE1;	/* RE1 = 1 Disable Receiver */
 		MCF_GPIO_PORT_CHIP1 &= ~MCF_GPIO_PORT_DE1;	/* DE1 = 0 Disable Transmitter */
-		hdx_control = 0;
 
 		// Configure RS232 on second chip (Intersil ICL3221)
 		MCF_GPIO_PORT_CHIP2 &= ~MCF_GPIO_PORT_RE2;	/* RE2 = 0 Enable Receiver, in this case EN_IN (enable input)*/
 		MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_DE2;	/* DE2 = 1 Enable Transmitter, in this case F_OFF (force off)*/
+
+		//no switching Tx / Rx on transceiver chip
+		hdx_control = 0;
+	}
+	/* Set loopback mode on AB transceiver - data Tx are echoed as Rx */
+	else if (flags & USART_MF_LOOPBACK_AB)
+	{
+		//Configure loopback on AB, disable YZ
+		// Enable both Tx, Rx on first chip
+		MCF_GPIO_PORT_CHIP1 &= ~MCF_GPIO_PORT_RE1;	/* RE1 = 0 Enable Receiver */
+		MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_DE1;	/* DE1 = 1 Enable Transmitter */
+
+		// Disable second chip
+		MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_RE2;	/* RE2 = 1 Disable Receiver */
+		MCF_GPIO_PORT_CHIP2 &= ~MCF_GPIO_PORT_DE2;	/* DE2 = 0 Disable Transmitter */
+
+		hdx_control = 0;
 	}
 	/*
 	 * Set half duplex mode.
 	 */
-	else if (flags & USART_MF_HALFDUPLEX)
+	else
+#endif
+		 if (flags & USART_MF_HALFDUPLEX)
 	{
 		/* Half duplex, komunikace pres porty YZ */
 		if (flags & USART_MF_HALFDUPLEX_YZ)
@@ -1278,9 +1299,9 @@ static int McfUsartInit(void)
 	/* Set as an output */
 	MCF_GPIO_DDR_CHIP2 |= MCF_GPIO_DDR_RE2 | MCF_GPIO_DDR_DE2;
 
-	/* Enable Transmitter */
-	/* RE2 = 1 Disable Receiver, DE2 = 1 Enable Transmitter */
-	MCF_GPIO_PORT_CHIP2 |= MCF_GPIO_PORT_RE2 | MCF_GPIO_PORT_DE2;
+	/* Enable Receiver / Half duplex */
+	/* RE2 = 0 Enable Receiver, DE2 = 0 Disable Transmitter */
+	MCF_GPIO_PORT_CHIP2 &= ~(MCF_GPIO_PORT_RE2 | MCF_GPIO_PORT_DE2);
 #endif
 #endif
 
