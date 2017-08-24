@@ -1008,11 +1008,28 @@ static int McfUsartSetFlowControl(uint32_t flags)
 	}
 #endif
 
-#ifdef UART_HDB_FDX_BIT
+#ifndef UART_HDB_FDX_BIT
+#ifdef UART_HDX_BIT
+	/* Set loopback mode on AB transceiver - data Tx are echoed as Rx */
+	if (flags & USART_MF_LOOPBACK_AB)
+	{
+		//Configure loopback on AB, disable YZ
+		// Enable both Tx, Rx on first chip
+		MCF_GPIO_PORT_CHIP1 &= ~MCF_GPIO_PORT_RE1;	/* RE1 = 0 Enable Receiver */
+		MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_DE1;	/* DE1 = 1 Enable Transmitter */
+
+		hdx_control = 0;
+	}
+	else
+	{
+		hdx_control = 1;
+	}
+#endif
+#else	/* UART_HDB_FDX_BIT */
 
 #if (PLATFORM_SUB == REV_D) || (PLATFORM_SUB == REV_F)
 	/* Set RS232 mode - Komunikace pres porty YZ */
-	if (flags & USART_MF_FULLDUPLEX_232)
+	if (flags & USART_MF_FULLDUPLEX_232)	/* also USART_MF_LOOPBACK_YZ */
 	{
 		//Disable RS485 on AB, enable RS232 on YZ (same as Disable AB, configure loopback on YZ)
 		// Disable first chip
@@ -1120,7 +1137,7 @@ static int McfUsartSetFlowControl(uint32_t flags)
 #endif
 	}
 
-#endif
+#endif	/* UART_HDB_FDX_BIT */
 
 	/*
 	 * Verify the result.
@@ -1281,7 +1298,7 @@ static int McfUsartInit(void)
 
 #if PLATFORM_SUB == REV_C
 	/* Enable Transmitter = 1 */
-	MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_DE1;
+/*	MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_DE1; */	/* stay with enabled Rx */
 
 	/* Set GPIO function for RE - reset enable PUA2 and for DE - data enable PUA3 */
 	MCF_GPIO_PANPAR &= ~MCF_GPIO_PANPAR_PANPAR5;

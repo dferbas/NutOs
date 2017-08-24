@@ -211,10 +211,6 @@ NUTDEVICE devUartOldMcf5_2 = {
 #define UART_NO_SW_FLOWCONTROL
 #endif
 
-#ifdef UART_HDX_BIT
-#define UART_HDX_BIT
-#endif
-
 /* defined variables and macros for this include */
 #include "mcf5225_old_uart.c"
 
