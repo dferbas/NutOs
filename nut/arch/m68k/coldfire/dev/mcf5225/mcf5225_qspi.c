@@ -43,6 +43,9 @@
 
 #include <sys/atom.h>
 
+#define SD_TEST
+#define SD_TEST_2
+
 /*!
  * \addtogroup xgMcf5225
  */
@@ -124,8 +127,12 @@ t_spi_ret qspi_tx1(uint8_t uid, uint8_t val)
 
 //    MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);
 
-	// release mutex 'start transmit'
+	// release mutex 'start transmit'¨
+#ifdef SD_TEST
+	NutEventPostAsync(&mutex_tran_start);
+#else
 	NutEventPost(&mutex_tran_start);
+#endif
 
 	return QSPI_SUCCESS;
 }
@@ -189,7 +196,11 @@ t_spi_ret qspi_tx(uint8_t uid, uint8_t * p_src, uint32_t len)
 //        MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);
 	}
 	// release mutex 'start transmit'
+#ifdef SD_TEST
+	NutEventPostAsync(&mutex_tran_start);
+#else
 	NutEventPost(&mutex_tran_start);
+#endif
 
 	return QSPI_SUCCESS;
 }
@@ -260,7 +271,11 @@ t_spi_ret qspi_rx(uint8_t uid, uint8_t * p_dst, uint32_t len)
 		MCF_QSPI_QIR |= (MCF_QSPI_QIR_SPIF | MCF_QSPI_QIR_SPIFE);
 	}
 	// release mutex 'start transmit'
+#ifdef SD_TEST
+	NutEventPostAsync(&mutex_tran_start);
+#else
 	NutEventPost(&mutex_tran_start);
+#endif
 
 	return QSPI_SUCCESS;
 }
@@ -272,7 +287,11 @@ t_spi_ret qspi_rx(uint8_t uid, uint8_t * p_dst, uint32_t len)
  */
 void qspi_cs_lo(uint8_t uid)
 {
+#ifdef SD_TEST_2
+	MCF_GPIO_CLRQS = ~MCF_GPIO_PORTQS_PORTQS3;
+#else
 	MCF_GPIO_PORTQS &= ~(MCF_GPIO_PORTQS_PORTQS3);
+#endif
 }
 
 /*!
@@ -282,7 +301,11 @@ void qspi_cs_lo(uint8_t uid)
  */
 void qspi_cs_hi(uint8_t uid)
 {
+#ifdef SD_TEST_2
+	MCF_GPIO_SETQS = MCF_GPIO_PORTQS_PORTQS3;
+#else
 	MCF_GPIO_PORTQS |= MCF_GPIO_PORTQS_PORTQS3;
+#endif
 }
 
 /*!
@@ -395,7 +418,11 @@ t_spi_ret qspi_init(uint8_t uid)
 	NutIrqEnable(&sig_QSPI_TF);
 
 	// put mutex 'start transmit' into signaled state
+#ifdef SD_TEST
+	NutEventPostAsync(&mutex_tran_start);
+#else
 	NutEventPost(&mutex_tran_start);
+#endif
 
 	return ret;
 }
