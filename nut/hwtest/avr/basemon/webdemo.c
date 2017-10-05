@@ -164,6 +164,7 @@ static int ShowSockets(FILE * stream, REQUEST * req)
 
     fputs_P(head_P, stream);
 
+    NutUseCritical();
     NutEnterCritical();
     for (ts = tcpSocketList; ts; ts = ts->so_next) {
         fprintf_P(stream, fmt1_P, (unsigned int)ts, inet_ntoa(ts->so_local_addr), ntohs(ts->so_local_port));

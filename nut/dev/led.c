@@ -304,6 +304,7 @@ int NutRegisterLed( HANDLE * ledh, int bank, int pin)
     led->state = LED_SET_OFF;
 
     /* Assign the led to the chain */
+	NutUseCritical();
     NutEnterCritical();
     if( first_led == NULL) {
         /* it is the first led */

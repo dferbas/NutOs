@@ -64,6 +64,7 @@ void NUTPANIC(const char *fmt, ...)
 {
     va_list ap;
 
+    NutUseCritical();
     NutEnterCritical();
     va_start(ap, fmt);
     vfprintf(stdout, fmt, ap);

@@ -157,6 +157,7 @@ int NutMsgQBroadcast(uint8_t id, int param, void *data)
 int NutMsgQPost(NUTMSGQ * que, uint8_t id, int param, void *data)
 {
     NUTMSG *cur;
+    NutUseCritical();
     NutEnterCritical();
 
     if (NutMsgQFull(que)) {
@@ -311,6 +312,7 @@ void NutMsgQStopTimer(HANDLE timer)
      * We need to remove any message in the que from this timer
      * If you stop it you don't want a message from it
      */
+    NutUseCritical();
     NutEnterCritical();
     {
         uint8_t pos = que->mq_read;
@@ -344,6 +346,7 @@ void NutMsgQStopTimer(HANDLE timer)
 
 int NutMsgQGetMessage(NUTMSGQ * que, NUTMSG * msg, uint32_t timeout)
 {
+	NutUseCritical();
     NutEnterCritical();
 
     if (NutEventWait(&que->mq_wait, timeout)) {
@@ -382,6 +385,7 @@ int NutMsgQGetMessage(NUTMSGQ * que, NUTMSG * msg, uint32_t timeout)
  */
 void NutMsgQFlush(NUTMSGQ * que)
 {
+	NutUseCritical();
     NutEnterCritical();
 
     que->mq_read = que->mq_write;

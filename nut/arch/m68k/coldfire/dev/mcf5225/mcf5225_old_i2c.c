@@ -299,6 +299,7 @@ int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, 
 		dev->tw_mm_que = 0;
 	}
 
+	NutUseCritical();
 	NutEnterCriticalLevel(IH_I2C_LEVEL); /* Enter the critical section */
 
 	MCF_I2C_I2CR(dev->dcb_base) |= MCF_I2C_I2CR_MTX; /* Set TX mode */

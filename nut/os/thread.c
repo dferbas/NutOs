@@ -119,6 +119,7 @@ void NutThreadAddPriQueue(NUTTHREADINFO * td, NUTTHREADINFO * volatile *tqpp)
      * context, which may change a queue from empty to signaled state. Many
      * thanks to Michael Jones, who detected and corrected this bug.
      */
+    NutUseCritical();
     NutEnterCritical();
     tqp = *tqpp;
 
@@ -153,6 +154,7 @@ void NutThreadRemoveQueue(NUTTHREADINFO * td, NUTTHREADINFO * volatile *tqpp)
 {
     NUTTHREADINFO *tqp;
 
+    NutUseCritical();
     NutEnterCritical();
     tqp = *tqpp;
     NutExitCritical();
@@ -186,6 +188,8 @@ void NutThreadResume(void)
     NUTTHREADINFO **qhp;
     NUTTHREADINFO *tqp;
     unsigned int cnt;
+
+    NutUseCritical();
 
     /*
      * Process events that have been posted from interrupt context.
@@ -245,6 +249,7 @@ void NutThreadYield(void)
 {
 
 #ifdef __NUT_EMULATION__
+	NutUseCritical();
     NutEnterCritical();
     NutUnixThreadYieldHook();
     NutExitCritical();
@@ -293,6 +298,7 @@ uint8_t NutThreadSetPriority(uint8_t level)
         TRACE_ADD_ITEM(TRACE_TAG_THREAD_SETPRIO,(int)runningThread);
 #endif
 
+        NutUseCritical();
         NutEnterCritical();
         NutThreadSwitch();
         NutExitCritical();

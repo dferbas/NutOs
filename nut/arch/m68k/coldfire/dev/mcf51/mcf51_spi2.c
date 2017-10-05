@@ -156,6 +156,7 @@ int Mcf51SpiBus2Transfer(NUTSPINODE * node, const void *txbuf, void *rxbuf, int 
 			data = 0xff;
 		}
 		/* Enable and kick interrupts. */
+		NutUseCritical();
 		NutEnterCritical();
 
 		(void) MCF_SPI_S(SPI_CHANNEL); // read status register to clear flags

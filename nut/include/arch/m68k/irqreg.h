@@ -60,4 +60,4 @@
  * the IMR or module interrupt mask registers to disable level 7 interrupts is
  * not recommended.
  */
-#define PREVENT_SPURIOUS_INTERRUPT(code) {NutEnterCritical();{code;} NutExitCritical();}
+#define PREVENT_SPURIOUS_INTERRUPT(code) {NutUseCritical();NutEnterCritical();{code;} NutExitCritical();}

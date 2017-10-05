@@ -54,9 +54,10 @@
  * compilator knows that register d0 is used, because "d0" is listed in clobbered regs
 
  */
+#define NutUseCritical() \
+	uint16_t register _savpri;
+
 #define NutEnterCritical() \
-{ \
-	uint16_t register _savpri; \
 	asm volatile ( \
 		"move.w	%%sr, %%d0\n" \
 		"move.w	%%d0,%[savpri]\n" \
@@ -64,8 +65,6 @@
 		"move.w %%d0, %%sr\n" : [savpri] "=d" (_savpri) :: "d0");
 
 #define NutEnterCriticalLevel(level) \
-{ \
-	uint16_t register _savpri; \
 	asm volatile ( \
 		"move.w	%%sr, %%d0\n" \
 		"move.w	%%d0,%[savpri]\n" \
@@ -74,9 +73,8 @@
 		"move.w %%d0, %%sr\n" : [savpri] "=d" (_savpri) : [lvl] "i" (level * 0x100) : "d0");
 
 #define NutJumpOutCritical() \
- \
 	asm volatile ( \
-		"move.w %[savpri], %%sr\n" :: [savpri] "d" (_savpri)); \
+		"move.w %[savpri], %%sr\n" :: [savpri] "d" (_savpri));
 
-#define NutExitCritical() NutJumpOutCritical() }
+#define NutExitCritical() NutJumpOutCritical()
 

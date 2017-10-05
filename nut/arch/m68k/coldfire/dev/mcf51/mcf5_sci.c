@@ -509,6 +509,7 @@ static int Mcf5SciSetStatus(uint32_t flags)
 	 */
 	if (flow_control)
 	{
+		NutUseCritical();
 
 		/* Access to the flow control status must be atomic. */
 		NutEnterCritical();
@@ -599,6 +600,8 @@ static uint32_t Mcf5SciGetFlowControl(void)
  */
 static int Mcf5SciSetFlowControl(uint32_t flags)
 {
+	NutUseCritical();
+
 	/*
 	 * Set software handshake mode.
 	 */
@@ -690,6 +693,8 @@ static void Mcf5SciRxStart(void)
 	 */
 	if (flow_control && (flow_control & XOFF_SENT) != 0)
 	{
+		NutUseCritical();
+
 		NutEnterCritical();
 		if (MCF_SCI_C2(BASE) & MCF_SCI_C2_TIE)
 		{

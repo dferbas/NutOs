@@ -111,6 +111,7 @@ int Mcf51IntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size)
 {
 	int i;
 	uint32_t *flash = (uint32_t *) dst;
+
 	if ((dst > 0x0001FFFFUL) || (((dst + size) - 1U) > 0x0001FFFFUL))
 	{
 		return -1; /* Address is out of FLASH memory */
@@ -119,7 +120,10 @@ int Mcf51IntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size)
 	{ /* Is previous command completed ? */
 		return -1;
 	}
+
+	NutUseCritical();
 	NutEnterCritical();
+
 	MCF_FSTAT = 0x00U; /* Init. flash engine */
 	if ((MCF_FSTAT & BM_FLASH_ERR_MASK) != 0U)
 	{
@@ -144,7 +148,9 @@ int Mcf51IntFlashWrite(uint32_t dst, uint32_t *data, uint32_t size)
 		if (Mcf51IntFlashRamCMD(0x25) != 0)
 			break;
 	}
+
 	NutExitCritical();
+
 	if ((MCF_FSTAT & BM_FLASH_ERR_MASK) != 0U)
 	{
 		if ((MCF_FSTAT & MCF_FSTAT_FPVIOL) != 0U)
@@ -176,7 +182,10 @@ int Mcf51IntFlashSectorErase(uint32_t addr)
 	{
 		return -1; //ERR_BUSY;
 	}
+
+	NutUseCritical();
 	NutEnterCritical();
+
 	MCF_FSTAT = 0x00U;
 	if ((MCF_FSTAT & BM_FLASH_ERR_MASK) != 0U)
 	{ /* Protection violation or access error? */
@@ -184,7 +193,9 @@ int Mcf51IntFlashSectorErase(uint32_t addr)
 	}
 	*(volatile uint32_t *) (addr) = 0x0; /* Write data to the flash memory */
 	Mcf51IntFlashRamCMD(0x40);
+
 	NutExitCritical();
+
 	if ((MCF_FSTAT & BM_FLASH_ERR_MASK) != 0U)
 	{
 		if ((MCF_FSTAT & MCF_FSTAT_FPVIOL) != 0U)
@@ -211,7 +222,10 @@ int Mcf51IntFlashMassErase(void)
 	{
 		return -1; //ERR_BUSY;
 	}
+
+	NutUseCritical();
 	NutEnterCritical();
+
 	MCF_FSTAT = 0x00U;
 	if ((MCF_FSTAT & BM_FLASH_ERR_MASK) != 0U)
 	{ /* Protection violation or access error? */
@@ -219,7 +233,9 @@ int Mcf51IntFlashMassErase(void)
 	}
 	*(volatile uint32_t *) (0x0) = 0x0; /* Write data to the flash memory */
 	Mcf51IntFlashRamCMD(0x41);
+
 	NutExitCritical();
+
 	if ((MCF_FSTAT & BM_FLASH_ERR_MASK) != 0U)
 	{
 		if ((MCF_FSTAT & MCF_FSTAT_FPVIOL) != 0U)

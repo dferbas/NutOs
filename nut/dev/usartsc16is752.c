@@ -426,6 +426,7 @@ void Sc16is752UsartEnable(uint8_t dev, uint8_t ch)
 #if defined(__linux__)
     printf("%s\n", __func__);
 #endif
+//     NutUseCritical();
 //     NutEnterCritical();
 //
 //     /* Enable UART receiver and transmitter. */
@@ -447,6 +448,7 @@ void Sc16is752UsartDisable(uint8_t dev, uint8_t ch)
 #if defined(__linux__)
     printf("%s\n", __func__);
 #endif
+//     NutUseCritical();
 //     /*
 //      * Disable USART interrupts.
 //      */
@@ -828,6 +830,7 @@ int Sc16is752UsartSetStatus(uint32_t flags, uint8_t dev, uint8_t ch)
 //     if (flow_control) {
 //
 //         /* Access to the flow control status must be atomic. */
+//		   NutUseCritical();
 //         NutEnterCritical();
 //
 //         /*
@@ -1027,6 +1030,7 @@ void Sc16is752UsartRxStart(uint8_t dev, uint8_t ch)
      * Do any required software flow control.
      */
 //     if (flow_control && (flow_control & XOFF_SENT) != 0) {
+//    	   NutUseCritical();
 //         NutEnterCritical();
 //         if ((inr(USARTn_BASE + US_CSR_OFF) & US_TXRDY)) {
 //             outr(USARTn_BASE + US_THR_OFF, ASCII_XON);

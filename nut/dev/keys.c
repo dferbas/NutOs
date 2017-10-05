@@ -361,6 +361,7 @@ int NutRegisterKey( HANDLE *keyhp, int bank, int pin, int fx, uint32_t fxt)
     InitKEY( key);
 
     /* Assign the key to the key chain */
+	NutUseCritical();
     NutEnterCritical();
     if( first_key == NULL) {
         /* it is the first key */

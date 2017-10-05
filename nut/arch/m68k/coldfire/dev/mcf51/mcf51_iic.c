@@ -300,6 +300,7 @@ int TwMasterCommon(uint8_t sla, const void *addr, uint16_t addrsiz, void *data, 
 		dev->tw_mm_que = 0;
 	}
 
+	NutUseCritical();
 	NutEnterCritical(); /* Enter the critical section */
 
 	MCF_IIC_CR(dev->dcb_base) |= MCF_IIC_CR_TX; /* Set TX mode */

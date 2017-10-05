@@ -107,6 +107,7 @@ int IrqCtlCommon(IRQ_HANDLER *sig_handler, int cmd, void *param, volatile void *
 	volatile uint32_t *reg32_imr = (volatile uint32_t *) reg_imr;
 	uint32_t enabled = 0;
 
+	NutUseCritical();
 	NutEnterCritical(); /* Prevent spurious interrupts */
 
 	/*

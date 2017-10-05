@@ -201,6 +201,7 @@ void NutEventTimeout(HANDLE timer, void *arg)
     NUTASSERT(tqpp != NULL);
 
     /* Get the queue's root atomically. */
+    NutUseCritical();
     NutEnterCritical();
     tqp = *tqpp;
     NutExitCritical();
@@ -275,6 +276,7 @@ int NutEventWait(volatile HANDLE * qhp, uint32_t ms)
     NUTASSERT(qhp != NULL);
 
     /* Get the queue's root atomically. */
+    NutUseCritical();
     NutEnterCritical();
     tdp = *qhp;
     NutExitCritical();
@@ -354,6 +356,7 @@ int NutEventWaitNext(volatile HANDLE * qhp, uint32_t ms)
     /*
      * Check for posts on a previously empty queue.
      */
+    NutUseCritical();
     NutEnterCritical();
     if (*qhp == SIGNALED)
         *qhp = 0;
@@ -387,6 +390,7 @@ int NutEventPostAsync(volatile HANDLE * qhp)
 
     NUTASSERT(qhp != NULL);
 
+    NutUseCritical();
     NutEnterCritical();
     td = *qhp;
     NutExitCritical();
@@ -491,6 +495,7 @@ int NutEventBroadcastAsync(volatile HANDLE * qhp)
     NUTASSERT(qhp != NULL);
 
     /* Get the queue's root atomically. */
+    NutUseCritical();
     NutEnterCritical();
     tdp = *qhp;
     NutExitCritical();

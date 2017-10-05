@@ -230,6 +230,7 @@ static int TwiInitTransfer(NUTTWIBUS *bus, uint32_t tmo)
 
 	// TODO: I'm not sure this critical section is really required
 	// try to use NutSleep() here to simulate interrupt
+	//NutUseCritical();
 	//NutEnterCritical();
 
 	/* Generate "start" or "repeat start" */

@@ -265,7 +265,9 @@ HANDLE NutThreadCreate(char * name, void (*fn)(void *), void *arg, size_t stackS
 	td->td_timer = 0;
 	td->td_queue = 0;
 
+	NutUseCritical();
 	NutEnterCritical();
+
 	td->td_next = nutThreadList;
 	nutThreadList = td;
 	NutThreadAddPriQueue(td, (NUTTHREADINFO **) &runQueue);
@@ -288,6 +290,7 @@ HANDLE NutThreadCreate(char * name, void (*fn)(void *), void *arg, size_t stackS
 		runningThread->td_state = TDS_READY;
 		NutThreadSwitch();
 	}
+
 	NutExitCritical();
 
 	return td;

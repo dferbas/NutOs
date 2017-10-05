@@ -43,7 +43,7 @@
 /*@{*/
 
 
-#define PREVENT_SPURIOUS_INTERRUPT(code) {NutEnterCritical();{code;} NutExitCritical();}
+#define PREVENT_SPURIOUS_INTERRUPT(code) {NutUseCritical();NutEnterCritical();{code;} NutExitCritical();}
 
 /* Enable Transmit Ready Interrupt. */
 #define SET_TXRDY_INTERRUPT() \
@@ -485,6 +485,8 @@ static void Mcf5UsartInterrupts(void *arg)
  */
 static void Mcf5UsartEnable(void)
 {
+	NutUseCritical();
+
 	NutEnterCritical();
 
 	MCF_UART_UCR (BASE) = MCF_UART_UCR_TX_ENABLED;
@@ -876,6 +878,7 @@ static int Mcf5UsartSetStatus(uint32_t flags)
 	 */
 	if (flow_control)
 	{
+		NutUseCritical();
 
 		/* Access to the flow control status must be atomic. */
 		NutEnterCritical();
@@ -998,6 +1001,8 @@ static uint32_t Mcf5UsartGetFlowControl(void)
 static int Mcf5UsartSetFlowControl(uint32_t flags)
 {
 #ifdef XONXOFF
+	NutUseCritical();
+
 	/*
 	 * Set software handshake mode.
 	 */
@@ -1122,6 +1127,8 @@ static void Mcf5UsartTxStart(void)
 static void Mcf5UsartRxStart(void)
 {
 #ifdef XONXOFF
+	NutUseCritical();
+
 	/*
 	 * Do any required software flow control.
 	 */

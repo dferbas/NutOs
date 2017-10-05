@@ -237,8 +237,8 @@ static void McfUsartTxReady(void *arg)
 		 * If XOFF has been received, we disable the transmit interrupts
 		 * and return without sending anything.
 		 */
-		CLR_TXRDY_INTERRUPT()
-		;
+		CLR_TXRDY_INTERRUPT();
+
 #ifdef NUTTRACER
 		TRACE_ADD_ITEM(TRACE_TAG_INTERRUPT_EXIT,TRACE_INT_UART_TXEMPTY);
 #endif
@@ -279,8 +279,7 @@ static void McfUsartTxReady(void *arg)
 #endif
 		{
 			/* Disable USART transmit interrupt. Send last byte in shift register. */
-			CLR_TXRDY_INTERRUPT()
-			;
+			CLR_TXRDY_INTERRUPT();
 		}
 
 		postEvent = 1;
@@ -331,8 +330,7 @@ static void McfUsartRxComplete(void *arg)
 			/* XOFF character disables transmit interrupts. */
 			if (ch == ASCII_XOFF)
 			{
-				CLR_TXRDY_INTERRUPT()
-				;
+				CLR_TXRDY_INTERRUPT();
 				flow_control |= XOFF_RCVD;
 #ifdef NUTTRACER
 				TRACE_ADD_ITEM(TRACE_TAG_INTERRUPT_EXIT,TRACE_INT_UART_RXCOMPL);
@@ -342,8 +340,7 @@ static void McfUsartRxComplete(void *arg)
 			/* XON enables transmit interrupts. */
 			else if (ch == ASCII_XON)
 			{
-				SET_TXRDY_INTERRUPT()
-				;
+				SET_TXRDY_INTERRUPT();
 				flow_control &= ~XOFF_RCVD;
 #ifdef NUTTRACER
 				TRACE_ADD_ITEM(TRACE_TAG_INTERRUPT_EXIT,TRACE_INT_UART_RXCOMPL);
@@ -466,6 +463,8 @@ static void McfUsartInterrupts(void *arg)
  */
 static void McfUsartEnable(void)
 {
+	NutUseCritical();
+
 	NutEnterCriticalLevel(IH_USART_LEVEL);
 
 	MCF_UARTn_UCR = MCF_UART_UCR_TX_ENABLED;
@@ -484,8 +483,7 @@ static void McfUsartEnable(void)
  */
 static void McfUsartDisable(void)
 {
-	CLR_ALL_INTERRUPT()
-	;
+	CLR_ALL_INTERRUPT();
 	/*
 	 * Allow incoming or outgoing character to finish.
 	 */
@@ -805,6 +803,7 @@ static int McfUsartSetStatus(uint32_t flags)
 	 */
 	if (flow_control)
 	{
+		NutUseCritical();
 
 		/* Access to the flow control status must be atomic. */
 		NutEnterCriticalLevel(IH_USART_LEVEL);
@@ -941,6 +940,8 @@ static uint32_t McfUsartGetFlowControl(void)
  */
 static int McfUsartSetFlowControl(uint32_t flags)
 {
+	NutUseCritical();
+
 	/*
 	 * Set software handshake mode.
 	 */
@@ -955,7 +956,6 @@ static int McfUsartSetFlowControl(uint32_t flags)
 	}
 	else
 	{
-
 		NutEnterCriticalLevel(IH_USART_LEVEL);
 		flow_control = 0;
 		NutExitCritical();
@@ -1177,8 +1177,7 @@ static void McfUsartTxStart(void)
 	}
 #endif
 	/* Enable Transmitter Ready Interrupt */
-	SET_TXRDY_INTERRUPT()
-	;
+	SET_TXRDY_INTERRUPT();
 }
 
 /*!
@@ -1192,15 +1191,16 @@ static void McfUsartTxStart(void)
 static void McfUsartRxStart(void)
 {
 	/* Enable Receive Ready Interrupt */
-	SET_RXRDY_INTERRUPT()
-	;
+	SET_RXRDY_INTERRUPT();
 
 	/*
 	 * Do any required software flow control.
 	 */
 	if (flow_control && (flow_control & XOFF_SENT) != 0)
 	{
+		NutUseCritical();
 		NutEnterCriticalLevel(IH_USART_LEVEL);
+
 		if (MCF_UARTn_USR & MCF_UART_USR_TXRDY)
 		{
 			MCF_UARTn_UTB = ASCII_XON;
@@ -1211,6 +1211,7 @@ static void McfUsartRxStart(void)
 			flow_control |= XON_PENDING;
 		}
 		flow_control &= ~(XOFF_SENT | XOFF_PENDING);
+
 		NutExitCritical();
 	}
 #ifdef UART_RTS_BIT
@@ -1268,8 +1269,7 @@ static int McfUsartInit(void)
 	MCF_UARTn_UCSR = MCF_UART_UCSR_RCS_SYS_CLK | MCF_UART_UCSR_TCS_SYS_CLK;
 
 	/* Disable all interrupts */
-	CLR_ALL_INTERRUPT()
-	;
+	CLR_ALL_INTERRUPT();
 
 	if (NutRegisterIrqHandler(&sig_UART, McfUsartInterrupts, &dcb_usart))
 		return -1;

@@ -170,6 +170,7 @@ HEAPNODE   * volatile * fpp         =   0;
 u_short                 block_size;
 
 #ifdef DO_CRITICAL
+	NutUseCritical();
     NutEnterCritical( );
 #endif
 
@@ -338,6 +339,7 @@ HEAPNODE   * volatile * npp;
 HEAPNODE              * fnode;
 
 #ifdef DO_CRITICAL
+	NutUseCritical();
     NutEnterCritical( );
 #endif
 
@@ -473,6 +475,7 @@ HEAPNODE      * p_node;
     p_node = (HEAPNODE *)addr;
 
 #ifdef DO_CRITICAL
+    NutUseCritical();
     NutEnterCritical( );
 #endif
 

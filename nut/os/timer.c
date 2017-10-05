@@ -731,6 +731,7 @@ uint32_t NutGetTickCount(void)
     rc += (timeNow.tv_usec - timeStart.tv_usec) / 1000;
 #else
 #ifndef __CORTEX__
+    NutUseCritical();
     NutEnterCritical();
     rc = nut_ticks;
     NutExitCritical();
