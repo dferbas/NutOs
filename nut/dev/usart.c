@@ -112,6 +112,7 @@ static int UsartResetBuffer(RINGBUF * rbf, size_t size, size_t lowm, size_t hiwm
 {
     uint8_t *xbp = rbf->rbf_start;
     size_t xsz = rbf->rbf_siz;
+	NutUseCritical();
 
     /* Disable further buffer usage. */
     NutEnterCritical();
@@ -186,6 +187,7 @@ int UsartRead(NUTFILE * fp, void *buffer, int size)
     NUTDEVICE *dev;
     USARTDCB *dcb;
     RINGBUF *rbf;
+	NutUseCritical();
 
     NUTASSERT(fp != NULL && fp != NUTFILE_EOF);
     dev = fp->nf_dev;
@@ -316,6 +318,7 @@ static size_t UsartFlushOutput(USARTDCB *dcb, size_t added, size_t left)
 {
     size_t rc;
     RINGBUF *rbf = &dcb->dcb_tx_rbf;
+	NutUseCritical();
 
     /*
      * Add the new characters to the buffer count.
@@ -362,6 +365,7 @@ static int UsartPut(NUTDEVICE * dev, const void *buffer, int len, int pflg)
     size_t added;
     USARTDCB *dcb = dev->dev_dcb;
     RINGBUF *rbf = &dcb->dcb_tx_rbf;
+	NutUseCritical();
 
     if (dcb->dcb_modeflags & USART_MF_BLOCKWRITE) {
 
@@ -711,6 +715,7 @@ int UsartIOCtl(NUTDEVICE * dev, int req, void *conf)
     uint32_t *lvp = (uint32_t *) conf;
     uint32_t lv = *lvp;
     uint8_t bv = (uint8_t) lv;
+	NutUseCritical();
 
     dcb = dev->dev_dcb;
 
@@ -974,6 +979,7 @@ long UsartSize (NUTFILE *fp)
     NUTDEVICE *dev;
     USARTDCB *dcb;
     RINGBUF *rbf;
+	NutUseCritical();
 
     NUTASSERT(fp != NULL && fp != NUTFILE_EOF);
     dev = fp->nf_dev;
