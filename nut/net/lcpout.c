@@ -55,6 +55,12 @@
 #include <dev/usart.h>
 #include <io.h>
 
+//#define NUTDEBUG
+
+#ifdef NUTDEBUG
+#include <net/netdebug.h>
+#endif
+
 /*!
  * \addtogroup xgLCP
  */
@@ -115,6 +121,43 @@ static INLINE void LcpResetOptions(NUTDEVICE * dev)
     _ioctl(dcb->dcb_fd, HDLC_SETTXACCM, &dcb->dcb_accm );
 }
 
+/*!
+ * \brief Trigger LCP echo request event.
+ *
+ * Enable the link to come up. Typically triggered by the upper layer,
+ * when it is enabled.
+ *
+ * \param dev Pointer to the NUTDEVICE structure of the PPP device.
+ *
+ */
+void LcpTxEchoReq(NUTDEVICE * dev)
+{
+    PPPDCB *dcb = dev->dev_dcb;
+    NETBUF *nb;
+    int nb_len;
+
+#ifdef NUTDEBUG
+    if (__ppp_trf) {
+        fputs("\n[LCP-ERQ]", __ppp_trs);
+    }
+#endif
+
+    if (dcb->dcb_lcp_state == PPPS_OPENED)
+    {
+    	nb_len = sizeof(uint32_t);
+    	nb = NutNetBufAlloc(NULL, NBAF_APPLICATION, nb_len);
+
+    	/* Use local magic number. */
+    	uint32_t *p_data = (uint32_t *)nb->nb_ap.vp;
+    	*p_data = htonl(dcb->dcb_neg_magic);
+        //memcpy(nb->nb_ap.vp, &dcb->dcb_neg_magic, nb_len);
+    	NutLcpOutput(dev, LCP_ERQ, ++dcb->dcb_reqid, nb);
+
+        /* flag will be set to 0 when echo reply is received */
+    	dcb->dcb_echo = 1;
+    }
+}
+
 /*
  * Send a Configure-Request.
  */
@@ -132,7 +175,7 @@ void LcpTxConfReq(NUTDEVICE * dev, uint8_t id, uint8_t rejected)
         dcb->dcb_lcp_naks = 0;
     }
     dcb->dcb_acked = 0;
-    dcb->dcb_retries = 0;
+//    dcb->dcb_retries = 0;
 
     /*
      * Create the request.

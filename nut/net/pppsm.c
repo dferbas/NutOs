@@ -59,6 +59,7 @@
 #include <net/if_var.h>
 #include <dev/ppp.h>
 
+//#define NUTDEBUG
 #include <netinet/if_ppp.h>
 #include <netinet/ppp_fsm.h>
 
@@ -70,69 +71,10 @@
 #define NUT_THREAD_PPPSMSTACK   512
 #endif
 
-/*
- * Echo request/reply declarations
- */
-static int echo_enable = 0;
-static int echo_timeout = 0;
+#define	DCB_RETRIES_INIT	9
+#define	DCB_RETRIES_LIMIT	0
+#define PPP_SM_PERIOD		2000	//3000 unreliable, 5000 often unable to connect with O2 operator
 
-/*!
- * \brief set enable/disable LCP echo sending.
- *
- */
-void SetLcpEchoEnable(int state)
-{
-	echo_enable = state;
-}
-
-/*!
- * \brief get LCP echo timeout state.
- *
- */
-int GetLcpEchoState(void)
-{
-	int rc = echo_timeout;
-	echo_timeout = 0;
-
-	return rc;
-}
-
-
-/*!
- * \brief Trigger LCP echo request event.
- *
- * Enable the link to come up. Typically triggered by the upper layer,
- * when it is enabled.
- *
- * \param dev Pointer to the NUTDEVICE structure of the PPP device.
- *
- */
-void LcpEchoRq(NUTDEVICE * dev)
-{
-    PPPDCB *dcb = dev->dev_dcb;
-    NETBUF *nb;
-    int nb_len;
-    uint8_t id;
-
-#ifdef NUTDEBUG
-    if (__ppp_trf) {
-        fputs("\n[LCP-ERQ]", __ppp_trs);
-    }
-#endif
-
-    if (dcb->dcb_lcp_state == PPPS_OPENED)
-    {
-    	/* id,nb init */
-    	id = 255;
-    	nb_len = sizeof(uint32_t);
-    	nb = NutNetBufAlloc(NULL, NBAF_APPLICATION, nb_len);
-    	/* Use local magic number. */
-        memcpy(nb->nb_ap.vp, &dcb->dcb_neg_magic, nb_len);
-        NutLcpOutput(dev, LCP_ERQ, id, nb);
-
-        NutNetBufFree(nb);
-    }
-}
 
 /*!
  * \addtogroup xgPPP
@@ -142,6 +84,30 @@ void LcpEchoRq(NUTDEVICE * dev)
 uint32_t new_magic = 0x12345678;
 static HANDLE pppThread;
 
+/*
+ * Message handling (from other threads)
+ * (currently only 1 message pending, static variable used instead of a queue)
+ */
+#include "d:/eclipse_etech/workspace/sim2/queue/queue.h"
+
+typedef enum {
+	pscSynchronize,
+	pscHdlcExit
+} EPppSmEvent;
+typedef struct {
+//	q		queue;
+	EPppSmEvent	event;				// requested event
+} TPppSmEvent;
+//static TQueue		PppSmEventQueue;
+static TPppSmEvent	PppSmEvent;
+
+/*
+ * Echo request/reply declarations
+ */
+static int echo_enable = 0;
+static int echo_timeout = 0;
+static int echo_test = 0;
+
 
 /*! \fn NutPppSm(void *arg)
  * \brief PPP state machine timeout thread.
@@ -150,13 +116,30 @@ static HANDLE pppThread;
  */
 THREAD(NutPppSm, arg)
 {
-	NUTDEVICE *dev_null = NULL;
     NUTDEVICE *dev = arg;
     PPPDCB *dcb = dev->dev_dcb;
     uint_fast8_t retries, lcp_echo_counter = 0;
 
+//    Queue_Init(&PppSmEventQueue, 5);	// max 5 events pending
+
     for (;;) {
+#if 0
         NutSleep(5000);
+#else
+        if (!NutEventWait(&dcb->dcb_timer_event, PPP_SM_PERIOD))
+        {
+//        	TPppSmEvent	*event = Queue_RemoveItem(&PppSmEventQueue);
+        	if (PppSmEvent.event == pscSynchronize)
+        		continue;		//event occured, restart timer
+        	else /*if (PppSmEvent.event == pscHdlcExit)*/
+        	{
+        		NUTDEVICE *dev_null = NULL;
+
+        		//Signal hdlc thread its termination and wait up to 2 sec for its exit and LCP_LOWERDOWN
+        		_ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
+        	}
+        }
+#endif
         new_magic++;
 
         retries = dcb->dcb_retries;
@@ -167,30 +150,27 @@ THREAD(NutPppSm, arg)
         switch (dcb->dcb_lcp_state) {
         case PPPS_CLOSING:
         case PPPS_STOPPING:
-            if (retries < 9) {
-                if (retries) {
-                    NutLcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
-                }
-                dcb->dcb_retries = retries + 1;
+            if (retries > DCB_RETRIES_LIMIT) {
+                NutLcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
+                dcb->dcb_retries = retries - 1;
             } else
             {
-            	//Signal hdlc thread its termination and wait up to 2 sec for its exit.
-            	_ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
-                dcb->dcb_lcp_state = (dcb->dcb_lcp_state == PPPS_CLOSING) ? PPPS_CLOSED : PPPS_STOPPED;
+            	dcb->dcb_lcp_state = (dcb->dcb_lcp_state == PPPS_CLOSING) ? PPPS_CLOSED : PPPS_STOPPED;
+            	LcpTlf(dev);
             }
             break;
 
+        case PPPS_ACKRCVD:
+            dcb->dcb_lcp_state = PPPS_REQSENT;
         case PPPS_REQSENT:
         case PPPS_ACKSENT:
-            if (retries < 9) {
-                if (retries)
-                    LcpTxConfReq(dev, dcb->dcb_reqid, 0);
-                dcb->dcb_retries = retries + 1;
+            if (retries > DCB_RETRIES_LIMIT) {
+                LcpTxConfReq(dev, dcb->dcb_reqid, 0);
+                dcb->dcb_retries = retries - 1;
             } else
             {
-            	//Signal hdlc thread its termination and wait up to 2 sec for its exit.
-            	_ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
                 dcb->dcb_lcp_state = PPPS_STOPPED;
+            	LcpTlf(dev);
             }
             break;
        }
@@ -199,10 +179,9 @@ THREAD(NutPppSm, arg)
          * Authentication timeouts.
          */
         if (dcb->dcb_auth_state == PAPCS_AUTHREQ) {
-            if (retries < 9) {
-                if (retries)
-                    PapTxAuthReq(dev, dcb->dcb_reqid);
-                dcb->dcb_retries = retries + 1;
+            if (retries > DCB_RETRIES_LIMIT) {
+                PapTxAuthReq(dev, dcb->dcb_reqid);
+                dcb->dcb_retries = retries - 1;
             } else
                 dcb->dcb_lcp_state = PPPS_STOPPED;
         }
@@ -213,36 +192,58 @@ THREAD(NutPppSm, arg)
         switch (dcb->dcb_ipcp_state) {
         case PPPS_CLOSING:
         case PPPS_STOPPING:
-            if (retries < 9) {
-                if (retries)
-                    NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
-                dcb->dcb_retries = retries + 1;
-            } else
+            if (retries > DCB_RETRIES_LIMIT) {
+                NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
+                dcb->dcb_retries = retries - 1;
+            }
+            else
+            {
                 dcb->dcb_ipcp_state = (dcb->dcb_ipcp_state == PPPS_CLOSING) ? PPPS_CLOSED : PPPS_STOPPED;
+            	IpcpTlf(dev);
+            }
             break;
 
+        case PPPS_ACKRCVD:
+            dcb->dcb_ipcp_state = PPPS_REQSENT;
         case PPPS_REQSENT:
         case PPPS_ACKSENT:
-            if (retries < 9) {
-                if (retries)
-                    IpcpTxConfReq(dev, dcb->dcb_reqid);
-                dcb->dcb_retries = retries + 1;
-            } else
+            if (retries > DCB_RETRIES_LIMIT)
+            {
+            	IpcpTxConfReq(dev, dcb->dcb_reqid);
+            	dcb->dcb_retries = retries - 1;
+            }
+            else
+            {
                 dcb->dcb_ipcp_state = PPPS_STOPPED;
+            	IpcpTlf(dev);
+            }
             break;
 
         case PPPS_OPENED:
-        	if (echo_enable && ++lcp_echo_counter >= echo_enable)
-        	{
-        		lcp_echo_counter = 0;
-        		LcpEchoRq(dev);
+			if (echo_enable)
+			{
+				if (echo_test)
+				{
+					if (dcb->dcb_echo)
+					{
+						LcpClose(dev);		// close ppp connection
+						echo_timeout = 1;	// timeout occurred
+					}
+					else
+						echo_timeout = 0;	// echo reply received
 
-        		if (NutEventWaitNext(&dcb->dcb_echo_reply, 20))
-        			echo_timeout = 1; // timeout occurred
-        		else
-        			echo_timeout = 0; // echo reply received
-        	}
-        	break;
+					echo_test = 0;
+				}
+
+				if (++lcp_echo_counter >= echo_enable)
+				{
+					lcp_echo_counter = 0;
+					LcpTxEchoReq(dev);
+
+					echo_test = 1;
+				}
+			}
+			break;
          }
     }
 }
@@ -266,6 +267,258 @@ int NutPppInitStateMachine(NUTDEVICE * dev)
 }
 
 /*!
+ * \brief request hdlc exit (works also from other thread)
+ */
+static inline void PppRequestHdlcExit(PPPDCB * dcb)
+{
+	PppSmEvent.event = pscHdlcExit;
+//	Queue_AddItem(&PppSmEventQueue, &PppSmEvent);
+	NutEventPostAsync(&dcb->dcb_timer_event);
+}
+
+static void PppRetriesTimerSet(PPPDCB * dcb, uint8_t retries)
+{
+	dcb->dcb_retries = retries;
+	PppSmEvent.event = pscSynchronize;
+//	Queue_AddItem(&PppSmEventQueue, &PppSmEvent);
+	NutEventPost(&dcb->dcb_timer_event);
+}
+
+/*!
+ * \brief irc - as per RFC1661
+ */
+void PppRetriesTimerReset(PPPDCB * dcb)
+{
+	PppRetriesTimerSet(dcb, DCB_RETRIES_INIT);
+}
+
+/*!
+ * \brief zrc - as per RFC1661
+ */
+void PppRetriesTimerStop(PPPDCB * dcb)
+{
+	PppRetriesTimerSet(dcb, DCB_RETRIES_LIMIT);
+}
+
+/*!
+ * \brief enable/disable LCP echo sending.
+ *
+ */
+void SetLcpEchoEnable(int period)
+{
+	echo_enable = period / (PPP_SM_PERIOD / 1000);
+}
+
+/*!
+ * \brief get LCP echo timeout state.
+ *
+ */
+int GetLcpEchoState(void)
+{
+#if 0
+	int rc = echo_timeout;
+	echo_timeout = 0;
+
+	return rc;
+#else
+	return echo_timeout;
+#endif
+}
+
+/*!
+ * \brief LCP This-Layer-Started
+ * Sets LCP parameters for next PPP session.
+ *
+ */
+static void LcpTls(NUTDEVICE *dev)
+{
+	PPPDCB *dcb = dev->dev_dcb;
+
+#ifdef NUTDEBUG
+    if (__ppp_trf) {
+    	fprintf(__ppp_trs, "\n[lcp-tls](%u)", dcb->dcb_lcp_state);
+    }
+#endif
+
+	dcb->dcb_reqid = dcb->dcb_rejid = dcb->dcb_rejects = dcb->dcb_auth_state = 0;
+}
+
+/*!
+ * \brief LCP This-Layer-Finished
+ *
+ */
+void LcpTlf(NUTDEVICE *dev)
+{
+	PPPDCB *dcb = dev->dev_dcb;
+
+#ifdef NUTDEBUG
+    if (__ppp_trf) {
+    	fprintf(__ppp_trs, "\n[lcp-tlf](%u)", dcb->dcb_lcp_state);
+    }
+#endif
+
+	PppRequestHdlcExit(dcb);
+}
+
+/*
+ * Common functions
+ */
+
+static void NcpUp(NUTDEVICE * dev)
+{
+	IpcpOpen(dev);
+	IpcpLowerUp(dev);
+}
+
+static void NcpDown(NUTDEVICE * dev)
+{
+	IpcpLowerDown(dev);
+    IpcpClose(dev);
+}
+
+/*!
+ * \brief LCP This-Layer-Up.
+ *
+ */
+void LcpTlu(NUTDEVICE * dev)
+{
+	PPPDCB *dcb = dev->dev_dcb;
+
+#ifdef NUTDEBUG
+    if (__ppp_trf) {
+    	fprintf(__ppp_trs, "\n[lcp-tlu](%u)", dcb->dcb_lcp_state);
+    }
+#endif
+
+    //use negotiated character map
+    _ioctl(dcb->dcb_fd, HDLC_SETTXACCM, &(dcb->dcb_accm) );
+
+    if (dcb->dcb_auth == PPP_PAP)
+        PapTxAuthReq(dev, ++dcb->dcb_reqid);
+    else
+    	NcpUp(dev);
+}
+
+/*!
+ * \brief LCP This-Layer-Down.
+ *
+ */
+void LcpTld(NUTDEVICE * dev)
+{
+#ifdef NUTDEBUG
+    if (__ppp_trf) {
+    	fprintf(__ppp_trs, "\n[lcp-tld](%u)", ((PPPDCB *)dev->dev_dcb)->dcb_lcp_state);
+    }
+#endif
+
+    NcpDown(dev);
+}
+
+/*!
+ * \brief PAP This-Layer-Up.
+ *
+ */
+void PapTlu(NUTDEVICE * dev)
+{
+#ifdef NUTDEBUG
+    if (__ppp_trf) {
+    	fprintf(__ppp_trs, "\n[pap-tlu](%u)", ((PPPDCB *)dev->dev_dcb)->dcb_auth_state);
+    }
+#endif
+
+	NcpUp(dev);
+}
+
+/*!
+ * \brief PAP This-Layer-Down.
+ *
+ */
+void PapTld(NUTDEVICE * dev)
+{
+#ifdef NUTDEBUG
+    if (__ppp_trf) {
+    	fprintf(__ppp_trs, "\n[pap-tld](%u)", ((PPPDCB *)dev->dev_dcb)->dcb_auth_state);
+    }
+#endif
+
+    NcpDown(dev);
+}
+
+/*!
+ * \brief IPCP This-Layer-Up.
+ *
+ *	Signal to upper layer (application) we are up.
+ */
+void IpcpTlu(NUTDEVICE * dev)
+{
+	PPPDCB *dcb = dev->dev_dcb;
+
+#ifdef NUTDEBUG
+    if (__ppp_trf) {
+    	fprintf(__ppp_trs, "\n[ipcp-tlu](%u)", dcb->dcb_ipcp_state);
+    }
+#endif
+
+	NutEventPost(&dcb->dcb_state_chg);
+
+	if (dcb->dcb_callback)
+		(*dcb->dcb_callback)(dcb, 1);
+}
+
+/*!
+ * \brief IPCP This-Layer-Down.
+ *
+ *	Signal to upper layer (application) we are down.
+ */
+void IpcpTld(NUTDEVICE * dev)
+{
+	PPPDCB *dcb = dev->dev_dcb;
+
+#ifdef NUTDEBUG
+    if (__ppp_trf) {
+    	fprintf(__ppp_trs, "\n[ipcp-tld](%u)", dcb->dcb_ipcp_state);
+    }
+#endif
+
+	if (dcb->dcb_callback)
+		(void)(*dcb->dcb_callback)(dcb, 0);
+}
+
+#ifdef NUTDEBUG
+/*!
+ * \brief IPCP This-Layer-Finish.
+ *
+ *	IPCP layer signalizuje dolu LCP, ze ma hotovo a az budou vsechny sitove protokoly finish, tak se LCP muze take zavrit
+ */
+
+void IpcpTlf(NUTDEVICE * dev)
+{
+	PPPDCB *dcb = dev->dev_dcb;
+
+#ifdef NUTDEBUG
+    if (__ppp_trf)
+    	fprintf(__ppp_trs, "\n[ipcp-tlf](%u)", dcb->dcb_ipcp_state);
+#endif
+}
+
+/*!
+ * \brief IPCP This-Layer-Started.
+ *
+ *	IPCP layer signalizuje dolu LCP
+ */
+
+void IpcpTls(NUTDEVICE * dev)
+{
+	PPPDCB *dcb = dev->dev_dcb;
+
+#ifdef NUTDEBUG
+    if (__ppp_trf)
+    	fprintf(__ppp_trs, "\n[ipcp-tls](%u)", dcb->dcb_ipcp_state);
+#endif
+}
+#endif
+
+/*!
  * \brief Trigger LCP open event.
  *
  * Enable the link to come up. Typically triggered by the upper layer,
@@ -277,10 +530,10 @@ int NutPppInitStateMachine(NUTDEVICE * dev)
 void LcpOpen(NUTDEVICE * dev)
 {
     PPPDCB *dcb = dev->dev_dcb;
-
 #ifdef NUTDEBUG
     if (__ppp_trf) {
-        fputs("\n[LCP-OPEN]", __ppp_trs);
+//        fputs("\n[LCP-OPEN]", __ppp_trs);
+    	fprintf(__ppp_trs, "\n[LCP-UP](%u)", dcb->dcb_lcp_state);
     }
 #endif
 
@@ -292,9 +545,7 @@ void LcpOpen(NUTDEVICE * dev)
          * layer comes up.
          */
         dcb->dcb_lcp_state = PPPS_STARTING;
-
-    case PPPS_STARTING:
-        dcb->dcb_reqid = dcb->dcb_rejid = dcb->dcb_rejects = dcb->dcb_auth_state = 0;
+        LcpTls(dev);
         break;
 
     case PPPS_CLOSED:
@@ -302,6 +553,7 @@ void LcpOpen(NUTDEVICE * dev)
          * The LCP layer is down and the lower layer is up. Start
          * link negotiation by sending out a request.
          */
+    	PppRetriesTimerReset(dcb);
         LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
         dcb->dcb_lcp_state = PPPS_REQSENT;
         break;
@@ -329,7 +581,8 @@ void LcpClose(NUTDEVICE * dev)
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
-        fputs("\n[LCP-CLOSE]", __ppp_trs);
+//        fputs("\n[LCP-CLOSE]", __ppp_trs);
+    	fprintf(__ppp_trs, "\n[LCP-CLOSE](%u)", dcb->dcb_lcp_state);
     }
 #endif
 
@@ -340,6 +593,7 @@ void LcpClose(NUTDEVICE * dev)
          * down. Disable the link layer.
          */
         dcb->dcb_lcp_state = PPPS_INITIAL;
+    	LcpTlf(dev);
         break;
 
     case PPPS_STOPPED:
@@ -353,6 +607,11 @@ void LcpClose(NUTDEVICE * dev)
     case PPPS_REQSENT:
     case PPPS_ACKRCVD:
     case PPPS_ACKSENT:
+    	PppRetriesTimerReset(dcb);
+    	NutLcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
+    	dcb->dcb_lcp_state = PPPS_CLOSING;
+    	break;
+
     case PPPS_OPENED:
         /*
          * The LCP layer and the lower layer are up. Inform the upper
@@ -360,13 +619,14 @@ void LcpClose(NUTDEVICE * dev)
          * request.
          */
         dcb->dcb_lcp_state = PPPS_CLOSING;
-        IpcpLowerDown(dev);
+        LcpTld(dev);
+        PppRetriesTimerReset(dcb);
         NutLcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
 
         /*
          * Wait until termination action ends.
          */
-        NutEventWait(&dcb->dcb_state_chg, 10000); // df proposal: 10s instead of 5s - verify
+        NutEventWait(&dcb->dcb_state_chg, 5000); // df proposal: 10s instead of 5s - verify, 19.9.2017 - changed back to 5s (sufficient)
 
     	/*
     	 * Signal hdlc thread its termination and wait up to 2 sec for its exit.
@@ -377,8 +637,7 @@ void LcpClose(NUTDEVICE * dev)
          */
 //***   NutEventWait(&dcb->dcb_state_chg, 5000);
 
-        dcb->dcb_retries = 0;
-        dcb->dcb_lcp_state = PPPS_INITIAL;
+//        dcb->dcb_lcp_state = PPPS_INITIAL;
         break;
     }
 }
@@ -395,7 +654,8 @@ void LcpLowerUp(NUTDEVICE * dev)
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
-        fputs("\n[LCP-LOWERUP]", __ppp_trs);
+//        fputs("\n[LCP-LOWERUP]", __ppp_trs);
+    	fprintf(__ppp_trs, "\n[LCP-LOWERUP](%u)", dcb->dcb_lcp_state);
     }
 #endif
 
@@ -411,6 +671,7 @@ void LcpLowerUp(NUTDEVICE * dev)
         /*
          * The LCP layer is enabled. Send a configuration request.
          */
+    	PppRetriesTimerReset(dcb);
         LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
         dcb->dcb_lcp_state = PPPS_REQSENT;
         break;
@@ -429,7 +690,8 @@ void LcpLowerDown(NUTDEVICE * dev)
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
-        fputs("\n[LCP-LOWERDOWN]", __ppp_trs);
+//        fputs("\n[LCP-LOWERDOWN]", __ppp_trs);
+    	fprintf(__ppp_trs, "\n[LCP-LOWERDOWN](%u)", dcb->dcb_lcp_state);
     }
 #endif
 
@@ -438,16 +700,17 @@ void LcpLowerDown(NUTDEVICE * dev)
 		/*
 		 * Here we comes (hdlc thread context) when TERM ACK was received to a TERM REQ, issued from LcpClose (application context).
 		 */
-//df    	dcb->dcb_lcp_state = PPPS_STOPPING;
 
         /*
          * Wake up the LCP_CLOSE ioctl (application thread) and return back to hdlc thread.
          */
+    	dcb->dcb_lcp_state = PPPS_INITIAL;
         NutEventPostAsync(&dcb->dcb_state_chg);
         break;
 
     case PPPS_STOPPED:
-        dcb->dcb_lcp_state = PPPS_STARTING;
+    	dcb->dcb_lcp_state = PPPS_STARTING;
+    	LcpTls(dev);
         break;
 
     case PPPS_CLOSING:
@@ -460,7 +723,6 @@ void LcpLowerDown(NUTDEVICE * dev)
 		 * This happens when we actively close PPP via ioctl(LCP_CLOSE) from application
 		 *  or when NO CARRIER was detected and hdlc is now terminating itself.
 		 */
-//df        dcb->dcb_lcp_state = PPPS_STOPPED; // df proposal: comment on
 
         /*
          * Wake up the LCP_CLOSE ioctl (application thread) and proceed with hdlc thread exit.
@@ -468,7 +730,6 @@ void LcpLowerDown(NUTDEVICE * dev)
          */
         NutEventPostAsync(&dcb->dcb_state_chg); // flk: the event is expected; it has to stay uncommented df proposal: comment on
 //df        break; // df proposal: comment on
-
     case PPPS_REQSENT:
     case PPPS_ACKRCVD:
     case PPPS_ACKSENT:
@@ -476,8 +737,8 @@ void LcpLowerDown(NUTDEVICE * dev)
         break;
 
     case PPPS_OPENED:
-        IpcpLowerDown(dev);
         dcb->dcb_lcp_state = PPPS_STARTING;
+    	LcpTld(dev);
         break;
     }
 }
@@ -495,7 +756,8 @@ void IpcpOpen(NUTDEVICE * dev)
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
-        fputs("\n[IPCP-OPEN]", __ppp_trs);
+//        fputs("\n[IPCP-OPEN]", __ppp_trs);
+    	fprintf(__ppp_trs, "\n[IPCP-OPEN](%u)", dcb->dcb_ipcp_state);
     }
 #endif
 
@@ -506,10 +768,12 @@ void IpcpOpen(NUTDEVICE * dev)
          * IPCP layer and the lower layer.
          */
         dcb->dcb_ipcp_state = PPPS_STARTING;
-        LcpOpen(dev);
+        IpcpTls(dev);
+//        LcpOpen(dev);
         break;
 
     case PPPS_CLOSED:
+    	PppRetriesTimerReset(dcb);
         IpcpTxConfReq(dev, ++dcb->dcb_reqid);
         dcb->dcb_ipcp_state = PPPS_REQSENT;
         break;
@@ -536,7 +800,8 @@ void IpcpClose(NUTDEVICE * dev)
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
-        fputs("\n[IPCP-CLOSE]", __ppp_trs);
+//        fputs("\n[IPCP-CLOSE]", __ppp_trs);
+    	fprintf(__ppp_trs, "\n[IPCP-CLOSE](%u)", dcb->dcb_ipcp_state);
     }
 #endif
 
@@ -547,6 +812,7 @@ void IpcpClose(NUTDEVICE * dev)
          * down. Disable the network layer.
          */
         dcb->dcb_ipcp_state = PPPS_INITIAL;
+    	IpcpTlf(dev);
         break;
 
     case PPPS_STOPPED:
@@ -560,14 +826,20 @@ void IpcpClose(NUTDEVICE * dev)
     case PPPS_REQSENT:
     case PPPS_ACKRCVD:
     case PPPS_ACKSENT:
+    	PppRetriesTimerReset(dcb);
+        NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
+        dcb->dcb_ipcp_state = PPPS_CLOSING;
+        break;
     case PPPS_OPENED:
         /*
          * The IPCP layer and the lower layer are up. Inform the upper
          * layer that we are going down and send out a termination
          * request.
          */
-        NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
         dcb->dcb_ipcp_state = PPPS_CLOSING;
+        IpcpTld(dev);
+    	PppRetriesTimerReset(dcb);
+        NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
 //        NutEventPost(&dcb->dcb_state_chg);
         break;
     }
@@ -584,7 +856,8 @@ void IpcpLowerUp(NUTDEVICE * dev)
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
-        fputs("\n[IPCP-LOWERUP]", __ppp_trs);
+//        fputs("\n[IPCP-LOWERUP]", __ppp_trs);
+        fprintf(__ppp_trs, "\n[IPCP-LOWERUP](%u)", dcb->dcb_ipcp_state);
     }
 #endif
 
@@ -594,6 +867,7 @@ void IpcpLowerUp(NUTDEVICE * dev)
         break;
 
     case PPPS_STARTING:
+    	PppRetriesTimerReset(dcb);
         IpcpTxConfReq(dev, ++dcb->dcb_reqid);
         dcb->dcb_ipcp_state = PPPS_REQSENT;
         break;
@@ -614,7 +888,8 @@ void IpcpLowerDown(NUTDEVICE * dev)
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
-        fputs("\n[IPCP-LOWERDOWN]", __ppp_trs);
+//        fputs("\n[IPCP-LOWERDOWN]", __ppp_trs);
+        fprintf(__ppp_trs, "\n[IPCP-LOWERDOWN](%u)", dcb->dcb_ipcp_state);
     }
 #endif
 
@@ -626,6 +901,7 @@ void IpcpLowerDown(NUTDEVICE * dev)
 
     case PPPS_STOPPED:
         dcb->dcb_ipcp_state = PPPS_STARTING;
+        IpcpTls(dev);
         break;
 
     case PPPS_CLOSING:
@@ -641,6 +917,7 @@ void IpcpLowerDown(NUTDEVICE * dev)
 
     case PPPS_OPENED:
         dcb->dcb_ipcp_state = PPPS_STARTING;	//to be properly reopened (IPCP has no thread for reading, which should be terminated as HDLC)
+        IpcpTld(dev);
 //        NutEventPost(&dcb->dcb_state_chg);
         break;
     }

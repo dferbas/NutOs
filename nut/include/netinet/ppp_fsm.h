@@ -108,6 +108,9 @@
 
 #include <stdint.h>
 
+#include <sys/device.h>
+#include <dev/ppp.h>
+
 /*!
  * \file netinet/ppp_fsm.h
  * \brief PPP state machine definitions.
@@ -160,8 +163,23 @@ typedef struct __attribute__ ((packed)) {
 } XCPOPT;
 
 
+void LcpTlf(NUTDEVICE *dev);
+void LcpTlu(NUTDEVICE *dev);
+void LcpTld(NUTDEVICE *dev);
+void PapTlu(NUTDEVICE *dev);
+void PapTld(NUTDEVICE *dev);
+void IpcpTlu(NUTDEVICE *dev);
+void IpcpTld(NUTDEVICE *dev);
 
-extern void LcpOpen(NUTDEVICE * dev);
+#ifndef NUTDEBUG
+	#define IpcpTlf(dev)	LcpLowerDown(dev)
+	#define IpcpTls(dev)	//LcpLowerUp(dev)
+#else
+	void IpcpTlf(NUTDEVICE *dev);
+	void IpcpTls(NUTDEVICE *dev);
+#endif
+
+extern void LcpOpen(NUTDEVICE *dev);
 extern void LcpClose(NUTDEVICE *dev);
 extern void LcpLowerUp(NUTDEVICE *dev);
 extern void LcpLowerDown(NUTDEVICE *dev);
@@ -169,15 +187,18 @@ extern void LcpLowerDown(NUTDEVICE *dev);
 extern void PapLowerUp(NUTDEVICE *dev);
 extern void PapLowerDown(NUTDEVICE *dev);
 
-extern void IpcpOpen(NUTDEVICE * dev);
-extern void IpcpClose(NUTDEVICE * dev);
+extern void IpcpOpen(NUTDEVICE *dev);
+extern void IpcpClose(NUTDEVICE *dev);
 extern void IpcpLowerUp(NUTDEVICE *dev);
 extern void IpcpLowerDown(NUTDEVICE *dev);
 
 extern void PppOpen(NUTDEVICE *dev);
 extern void PppClose(NUTDEVICE *dev);
 
-extern int NutPppInitStateMachine(NUTDEVICE * dev);
+extern int NutPppInitStateMachine(NUTDEVICE *dev);
+extern void PppRetriesTimerReset(PPPDCB *dcb);
+extern void PppRetriesTimerStop(PPPDCB *dcb);
+
 extern void SetLcpEchoEnable(int state);
 extern int GetLcpEchoState(void);
 

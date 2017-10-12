@@ -55,6 +55,8 @@
 #include <sys/types.h>
 #include <sys/timer.h>
 
+//#define NUTDEBUG
+
 #ifdef NUTDEBUG
 #include <net/netdebug.h>
 #endif

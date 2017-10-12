@@ -206,6 +206,10 @@ static int NutPppIOCtl(NUTDEVICE * dev, int req, void *conf)
         LcpLowerDown(dev);
         break;
 
+    case PPP_SETCALLBACK:
+    	((PPPDCB *)(dev->dev_dcb))->dcb_callback = (int(*)(PPPDCB *, int))conf;
+		break;
+
     case LCP_SETECHOSTATE:
     	SetLcpEchoEnable(*((int *)conf));
         break;
@@ -249,7 +253,7 @@ static NUTFILE *NutPppOpen(NUTDEVICE * dev, const char *name, int mode, int acc)
     }
     pdn[i] = 0;
 
-    /* Open the pysical device. */
+    /* Open the physical device. */
     if ((dcb->dcb_fd = _open(pdn, _O_RDWR | _O_BINARY)) == -1) {
         return NUTFILE_EOF;
     }
@@ -287,8 +291,10 @@ static NUTFILE *NutPppOpen(NUTDEVICE * dev, const char *name, int mode, int acc)
         }
     }
 
-    /* Enable all layers to come up. */
-    IpcpOpen(dev);
+//    /* Enable all layers to come up. */
+//    IpcpOpen(dev);
+    /* Open LCP (lowest layer), network layers will be opened once LCP comes up. */
+    LcpOpen(dev);
 
     return fp;
 }

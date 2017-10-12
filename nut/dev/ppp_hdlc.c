@@ -80,7 +80,7 @@
 #define NO_CARRIER_START 'N'
 static const char nc[] = "NO CARRIER";
 static const int NO_CARRIER_LEN = sizeof(nc) - 1;
-static int hdlc_state_flag = 0;
+static uint32_t hdlc_state_flag = 0;
 
 
 /*
@@ -275,14 +275,14 @@ THREAD(PppHdlcReceive, arg)
     int rx_cnt = 0;
     uint_fast8_t inframe = 0;
     uint_fast8_t escaped = 0;
-    uint32_t tmo = 1000;
+    uint32_t tmo = 1000;				// 1[s]
 
     /* Message NO CARRIER detection - declaration */
     int nc_flag = 0, nc_len = NO_CARRIER_LEN;
     uint8_t *nc_read,*nc_write;
     nc_read = malloc(nc_len);
     nc_write = nc_read;
-    hdlc_state_flag = 0;
+    hdlc_state_flag = 1;
 
     rd_buf = malloc(rd_siz);
     rd_ptr = rd_buf;
@@ -309,7 +309,7 @@ THREAD(PppHdlcReceive, arg)
             }
         }
         if (rd_len < 0) {
-            /* Device error. */
+            /* Device error or termination request. */
             break;
         }
         ch = *rd_ptr++;
@@ -392,9 +392,13 @@ THREAD(PppHdlcReceive, arg)
 				if (nc_len == 0)
 				{
 					nc_flag = 0;
-					if(memcmp(nc_read,nc,NO_CARRIER_LEN) == 0)
+					if (memcmp(nc_read, nc, NO_CARRIER_LEN) == 0)
 					{
-						dev->dev_icb = NULL;	//df action: hdlc thread exit
+//						// dismiss input queue in driver
+//						uint32_t status = UART_RXBUFFEREMPTY /*| UART_TXBUFFEREMPTY*/;
+//						_ioctl(dcb->dcb_fd, UART_SETSTATUS, &status);
+
+						dev->dev_icb = NULL;	//force hdlc thread exit
 						break;
 					}
 				}
@@ -410,7 +414,7 @@ THREAD(PppHdlcReceive, arg)
     free(rd_buf);	//df
     free(rx_buf);	//df
 
-    hdlc_state_flag = 1;
+    hdlc_state_flag = 0;
 
     NutThreadExit();
     for (;;);
@@ -480,11 +484,11 @@ static int PppHdlcIoCtl(NUTDEVICE *dev, int req, void *conf)
         dcb->dcb_tx_accm = *((uint32_t *) conf);
         break;
     case HDLC_GETTXACCM:
-        *((uint32_t *) conf) = dcb->dcb_tx_accm;
+        *((uint32_t *)conf) = dcb->dcb_tx_accm;
         break;
 
     case HDLC_GETSTATE:
-        *((int *)conf) = hdlc_state_flag;
+        *((uint32_t *)conf) = hdlc_state_flag;
         break;
 
     default:

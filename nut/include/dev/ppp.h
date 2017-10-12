@@ -152,7 +152,20 @@ struct _PPPDCB {
      */
     HANDLE dcb_state_chg;
 
-    HANDLE dcb_echo_reply;
+    /*! \brief PPP Restart Timer event
+     * Used to synchronize running period to incoming events.
+     */
+    HANDLE dcb_timer_event;
+
+    /*! \brief PPP callback function
+     *
+     */
+    int (*dcb_callback) (PPPDCB *, int);
+
+    /*! \brief Echo flag
+     * Set when echo request is sent, cleared when reply is received and checked by PPP sm.
+     */
+    uint8_t dcb_echo;
 
     /*! \brief Current state of the link layer.
      */
@@ -275,8 +288,9 @@ extern NUTDEVICE devPpp;
 #define LCP_CLOSE   	    2
 #define LCP_LOWERUP     	3
 #define LCP_LOWERDOWN   	4
-#define LCP_SETECHOSTATE  	5
-#define LCP_GETECHOSTATE  	6
+#define PPP_SETCALLBACK  	5
+#define LCP_SETECHOSTATE  	6
+#define LCP_GETECHOSTATE  	7
 
 /*@}*/
 

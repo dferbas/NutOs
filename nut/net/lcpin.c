@@ -97,16 +97,17 @@ static INLINE void LcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         /*
          * Go down and restart negotiation.
          */
-        IpcpLowerDown(dev);
-        LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
+    	LcpTld(dev);
+    	LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
         break;
 
     case PPPS_STOPPED:
         /*
          * Negotiation started by our peer.
          */
+    	PppRetriesTimerReset(dcb);
         LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
-        dcb->dcb_lcp_state = PPPS_REQSENT;
+//        dcb->dcb_lcp_state = PPPS_REQSENT;
         break;
     }
 
@@ -230,11 +231,7 @@ static INLINE void LcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
     if (rc == XCP_CONFACK) {
         if (dcb->dcb_lcp_state == PPPS_ACKRCVD) {
             dcb->dcb_lcp_state = PPPS_OPENED;
-            _ioctl(dcb->dcb_fd, HDLC_SETTXACCM, &(dcb->dcb_accm) );
-            if (dcb->dcb_auth == PPP_PAP)
-                PapTxAuthReq(dev, ++dcb->dcb_reqid);
-            else
-                IpcpLowerUp(dev);
+            LcpTlu(dev);
         } else
             dcb->dcb_lcp_state = PPPS_ACKSENT;
         dcb->dcb_lcp_naks = 0;
@@ -302,7 +299,6 @@ static INLINE void LcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
      */
     if (dcb->dcb_acked == 0)
         return;
-
     switch (dcb->dcb_lcp_state) {
     case PPPS_CLOSED:
     case PPPS_STOPPED:
@@ -313,8 +309,8 @@ static INLINE void LcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         break;
 
     case PPPS_REQSENT:
-        dcb->dcb_lcp_state = PPPS_ACKRCVD;
-        dcb->dcb_retries = 0;
+    	PppRetriesTimerReset(dcb);
+    	dcb->dcb_lcp_state = PPPS_ACKRCVD;
         break;
 
     case PPPS_ACKRCVD:
@@ -327,22 +323,17 @@ static INLINE void LcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
          * ACK sent and ACK received.
          */
         dcb->dcb_lcp_state = PPPS_OPENED;
-        _ioctl(dcb->dcb_fd, HDLC_SETTXACCM, &(dcb->dcb_accm) );
-
-        if (dcb->dcb_auth == PPP_PAP)
-            PapTxAuthReq(dev, ++dcb->dcb_reqid);
-        else
-            IpcpLowerUp(dev);
-        dcb->dcb_retries = 0;
+        PppRetriesTimerReset(dcb);
+        LcpTlu(dev);
         break;
 
     case PPPS_OPENED:
         /*
          * Go down and restart negotiation.
          */
-        IpcpLowerDown(dev);
-        LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
         dcb->dcb_lcp_state = PPPS_REQSENT;
+    	LcpTld(dev);
+        LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
         break;
     }
 }
@@ -395,6 +386,7 @@ static INLINE void LcpRxConfNakRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb, uin
     case PPPS_REQSENT:
     case PPPS_ACKSENT:
         /* They didn't agree to what we wanted - try another request */
+    	PppRetriesTimerReset(dcb);
         LcpTxConfReq(dev, ++dcb->dcb_reqid, rejected);
         break;
 
@@ -408,9 +400,9 @@ static INLINE void LcpRxConfNakRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb, uin
         /*
          * Go down and restart negotiation.
          */
-        IpcpLowerDown(dev);
-        LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
         dcb->dcb_lcp_state = PPPS_REQSENT;
+    	LcpTld(dev);
+        LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
         break;
     }
 }
@@ -431,11 +423,12 @@ static INLINE void LcpRxTermReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         break;
 
     case PPPS_OPENED:
-        IpcpLowerDown(dev);
         dcb->dcb_lcp_state = PPPS_STOPPING;
+    	LcpTld(dev);
+        PppRetriesTimerStop(dcb);
         break;
     }
-    dcb->dcb_retries = 9;
+
     NutLcpOutput(dev, XCP_TERMACK, id, 0);
 }
 
@@ -453,16 +446,18 @@ static INLINE void LcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
     switch (dcb->dcb_lcp_state) {
     case PPPS_CLOSING:
         dcb->dcb_lcp_state = PPPS_CLOSED;
-        LcpLowerDown(dev);
+    	LcpTlf(dev);
         break;
     case PPPS_STOPPING:
         dcb->dcb_lcp_state = PPPS_STOPPED;
+    	LcpTlf(dev);
         break;
 
     case PPPS_OPENED:
-        IpcpLowerDown(dev);
+    	dcb->dcb_lcp_state = PPPS_REQSENT;
+    	LcpTld(dev);
         LcpTxConfReq(dev, ++dcb->dcb_reqid, 0);
-//df        break;
+        break;
 
     case PPPS_ACKRCVD:
         dcb->dcb_lcp_state = PPPS_REQSENT;
@@ -481,27 +476,30 @@ void LcpRxProtRej(NUTDEVICE * dev)
 
     switch (dcb->dcb_lcp_state) {
     case PPPS_CLOSING:
-    case PPPS_CLOSED:
         dcb->dcb_lcp_state = PPPS_CLOSED;
+    case PPPS_CLOSED:
+    	LcpTlf(dev);
         break;
 
     case PPPS_STOPPING:
     case PPPS_REQSENT:
     case PPPS_ACKRCVD:
     case PPPS_ACKSENT:
+        dcb->dcb_lcp_state = PPPS_STOPPED;
     case PPPS_STOPPED:
+    	LcpTlf(dev);
 
     	//Signal hdlc thread its termination.
         if (dev->dev_icb)
         	dev->dev_icb = NULL;
-        //
-        dcb->dcb_lcp_state = PPPS_STOPPED;
+
         break;
 
     case PPPS_OPENED:
-        IpcpLowerDown(dev);
-        NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
         dcb->dcb_lcp_state = PPPS_STOPPING;
+    	LcpTld(dev);
+        PppRetriesTimerReset(dcb);
+        NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
         break;
     }
 }
@@ -537,7 +535,18 @@ static INLINE void LcpRxEchoReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
     }
 }
 
+/*!
+ * \brief Received an Echo-Reply.
+ */
+static INLINE void LcpRxEchoReply(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
+{
+    PPPDCB *dcb = dev->dev_dcb;
 
+    NutNetBufFree(nb);
+
+    if (id == dcb->dcb_reqid)
+    	dcb->dcb_echo = 0;
+}
 
 /*!
  * \brief Handle incoming LCP packets.
@@ -627,10 +636,11 @@ void NutLcpInput(NUTDEVICE * dev, NETBUF * nb)
         break;
 
     case LCP_ERP:
-    	NutEventPost(&dcb->dcb_echo_reply);
+    	LcpRxEchoReply(dev, lcp->xch_id, nb);
+    	break;
 
     case LCP_DRQ:
-        /* Silently ignore echo responses and discard requests. */
+        /* Silently ignore discard requests. */
         NutNetBufFree(nb);
         break;
 

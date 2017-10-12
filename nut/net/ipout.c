@@ -53,6 +53,10 @@
 #include <netinet/ipcsum.h>
 #include <netinet/ip.h>
 #include <netinet/in.h>
+
+#include <dev/ppp.h>
+#include <netinet/ppp_fsm.h>
+
 /*!
  * \addtogroup xgIP
  */
@@ -215,8 +219,10 @@ int NutIpOutput(uint8_t proto, uint32_t dest, NETBUF * nb)
             return 0;
         }
         return (*nif->if_output) (dev, ETHERTYPE_IP, ha, nb);
-    } else if (nif->if_type == IFT_PPP)
-        return (*nif->if_output) (dev, PPP_IP, 0, nb);
+    } else if (nif->if_type == IFT_PPP) {
+    	if (((PPPDCB *) (dev->dev_dcb))->dcb_ipcp_state == PPPS_OPENED)	//do not xmit e.g. DHCP requests
+    		return (*nif->if_output) (dev, PPP_IP, 0, nb);
+    }
 
     NutNetBufFree(nb);
     return -1;

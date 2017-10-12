@@ -48,6 +48,7 @@
 #include <netinet/if_ppp.h>
 #include <netinet/ppp_fsm.h>
 #include <netinet/in.h>
+
 /*!
  * \addtogroup xgPAP
  *
@@ -75,7 +76,7 @@ void PapRxAuthAck(NUTDEVICE *dev, uint8_t id, NETBUF *nb)
          * Flag us open and start the network.
          */
         dcb->dcb_auth_state = PAPCS_OPEN;
-        IpcpLowerUp(dev);
+        PapTlu(dev);
     }
 }
 
@@ -88,7 +89,7 @@ void PapRxAuthNak(NUTDEVICE *dev, uint8_t id, NETBUF *nb)
 
     if(dcb->dcb_auth_state == PAPCS_AUTHREQ) {
         dcb->dcb_auth_state = PAPCS_BADAUTH;
-        IpcpLowerDown(dev);
+        PapTld(dev);
     }
 }
 

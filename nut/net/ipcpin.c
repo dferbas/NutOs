@@ -112,14 +112,14 @@ static void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         /*
          * Ignore if we are going down.
          */
-        NutNetBufFree(nb);
+    	NutNetBufFree(nb);
         return;
 
     case PPPS_OPENED:
         /*
          * Go down and restart negotiation.
          */
-        IpcpLowerDown(dev);
+    	IpcpTld(dev);
         IpcpTxConfReq(dev, ++dcb->dcb_reqid);
         break;
 
@@ -127,8 +127,8 @@ static void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         /*
          * Negotiation started by our peer.
          */
+    	PppRetriesTimerReset(dcb);
         IpcpTxConfReq(dev, ++dcb->dcb_reqid);
-        dcb->dcb_ipcp_state = PPPS_REQSENT;
         break;
     }
 
@@ -250,7 +250,7 @@ static void IpcpRxConfReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
     if (rc == XCP_CONFACK) {
         if (dcb->dcb_ipcp_state == PPPS_ACKRCVD) {
             dcb->dcb_ipcp_state = PPPS_OPENED;
-            NutEventPost(&dcb->dcb_state_chg);
+            IpcpTlu(dev);
         } else
             dcb->dcb_ipcp_state = PPPS_ACKSENT;
         dcb->dcb_ipcp_naks = 0;
@@ -266,6 +266,7 @@ static void IpcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
     PPPDCB *dcb = dev->dev_dcb;
     XCPOPT *xcpo;
     uint16_t xcpl;
+    uint8_t tlu = 0;
 
     /*
      * Ignore, if we are not expecting this id.
@@ -280,13 +281,13 @@ static void IpcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         /*
          * Go away, we're closed.
          */
-        NutNetBufFree(nb);
+    	NutNetBufFree(nb);
         NutIpcpOutput(dev, XCP_TERMACK, id, 0);
         return;
 
     case PPPS_REQSENT:
+        PppRetriesTimerReset(dcb);
         dcb->dcb_ipcp_state = PPPS_ACKRCVD;
-        dcb->dcb_retries = 0;
         break;
 
     case PPPS_ACKRCVD:
@@ -296,16 +297,17 @@ static void IpcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         break;
 
     case PPPS_ACKSENT:
+        PppRetriesTimerReset(dcb);
         dcb->dcb_ipcp_state = PPPS_OPENED;
-        dcb->dcb_retries = 0;
-        NutEventPost(&dcb->dcb_state_chg);
+//        IpcpTlu(dev);
+        tlu = 1;		//update dcb->dcb_local_ip, ... first, then post event
         break;
 
     case PPPS_OPENED:
         /* Go down and restart negotiation */
-        IpcpLowerDown(dev);
-        IpcpTxConfReq(dev, ++dcb->dcb_reqid);
         dcb->dcb_ipcp_state = PPPS_REQSENT;
+    	IpcpTld(dev);
+        IpcpTxConfReq(dev, ++dcb->dcb_reqid);
         break;
     }
 
@@ -336,6 +338,10 @@ static void IpcpRxConfAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 
     dcb->dcb_acked = 1;
     NutNetBufFree(nb);
+
+    //postpone this after dcb_local_ip is parsed from the received packet because awaken thread at NutNetIfConfig2() use this value
+    if (tlu)
+    	IpcpTlu(dev);
 }
 
 /*
@@ -366,8 +372,8 @@ static void IpcpRxConfNakRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb, uint8_t r
         return;
 
     case PPPS_REQSENT:
-    case PPPS_ACKSENT:
     case PPPS_ACKRCVD:
+    case PPPS_ACKSENT:
     case PPPS_OPENED:
         break;
 
@@ -407,10 +413,10 @@ static void IpcpRxConfNakRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb, uint8_t r
     NutNetBufFree(nb);
 
     switch (dcb->dcb_ipcp_state) {
-
     case PPPS_REQSENT:
     case PPPS_ACKSENT:
         /* They didn't agree to what we wanted - try another request */
+    	PppRetriesTimerReset(dcb);
         IpcpTxConfReq(dev, ++dcb->dcb_reqid);
         break;
 
@@ -422,9 +428,9 @@ static void IpcpRxConfNakRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb, uint8_t r
 
     case PPPS_OPENED:
         /* Go down and restart negotiation */
-        IpcpLowerDown(dev);
-        IpcpTxConfReq(dev, ++dcb->dcb_reqid);
         dcb->dcb_ipcp_state = PPPS_REQSENT;
+    	IpcpTld(dev);
+        IpcpTxConfReq(dev, ++dcb->dcb_reqid);
         break;
     }
 }
@@ -444,8 +450,9 @@ static void IpcpRxTermReq(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         break;
 
     case PPPS_OPENED:
-        IpcpLowerDown(dev);
         dcb->dcb_ipcp_state = PPPS_STOPPING;
+        IpcpTld(dev);
+        PppRetriesTimerStop(dcb);
         break;
     }
     NutIpcpOutput(dev, XCP_TERMACK, id, 0);
@@ -464,10 +471,11 @@ static void IpcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
     switch (dcb->dcb_ipcp_state) {
     case PPPS_CLOSING:
         dcb->dcb_ipcp_state = PPPS_CLOSED;
-        IpcpLowerDown(dev);
+        IpcpTlf(dev);
         break;
     case PPPS_STOPPING:
         dcb->dcb_ipcp_state = PPPS_STOPPED;
+        IpcpTlf(dev);
         break;
 
     case PPPS_ACKRCVD:
@@ -475,6 +483,8 @@ static void IpcpRxTermAck(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
         break;
 
     case PPPS_OPENED:
+        dcb->dcb_ipcp_state = PPPS_REQSENT;
+    	IpcpTld(dev);
         IpcpTxConfReq(dev, ++dcb->dcb_reqid);
         break;
     }
@@ -491,22 +501,25 @@ void IpcpRxProtRej(NUTDEVICE * dev)
 
     switch (dcb->dcb_ipcp_state) {
     case PPPS_CLOSING:
-    case PPPS_CLOSED:
         dcb->dcb_ipcp_state = PPPS_CLOSED;
+    case PPPS_CLOSED:
+    	IpcpTlf(dev);
         break;
 
     case PPPS_STOPPING:
     case PPPS_REQSENT:
     case PPPS_ACKRCVD:
     case PPPS_ACKSENT:
-    case PPPS_STOPPED:
         dcb->dcb_ipcp_state = PPPS_STOPPED;
+    case PPPS_STOPPED:
+    	IpcpTlf(dev);
         break;
 
     case PPPS_OPENED:
-        IpcpLowerDown(dev);
-        NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
         dcb->dcb_ipcp_state = PPPS_STOPPING;
+    	IpcpTld(dev);
+        PppRetriesTimerReset(dcb);
+        NutIpcpOutput(dev, XCP_TERMREQ, dcb->dcb_reqid, 0);
         break;
     }
 }
@@ -524,8 +537,6 @@ static void IpcpRxCodeRej(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
     if (dcb->dcb_ipcp_state == PPPS_ACKRCVD)
         dcb->dcb_ipcp_state = PPPS_REQSENT;
 }
-
-
 
 /*!
  * \brief Handle incoming IPCP packets.

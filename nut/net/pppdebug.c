@@ -45,11 +45,13 @@
 #include <net/netdebug.h>
 #include <sys/types.h>
 #include <dev/ahdlc.h>
+#include <dev/ppp.h>
 
 #include <arpa/inet.h>
 #include <netinet/ppp_fsm.h>
 #include <netinet/if_ppp.h>
 #include <netinet/in.h>
+
 FILE *__ppp_trs;                /*!< \brief PPP trace output stream. */
 uint_fast8_t __ppp_trf;               /*!< \brief PPP trace flags. */
 
@@ -420,5 +422,5 @@ void NutTracePPP(FILE * stream, uint8_t flags)
     if (__ppp_trs)
         __ppp_trf = flags;
     else
-        __ppp_trf = 0;
+    	__ppp_trf = 0;
 }

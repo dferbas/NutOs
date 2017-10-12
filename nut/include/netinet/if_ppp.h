@@ -192,6 +192,7 @@ extern void NutLcpInput(NUTDEVICE * dev, NETBUF * nb);
 extern int NutLcpOutput(NUTDEVICE * dev, uint8_t code, uint8_t id, NETBUF * nb);
 extern void LcpTxConfReq(NUTDEVICE *dev, uint8_t id, uint8_t rejected);
 extern void LcpTxProtRej(NUTDEVICE *dev, uint16_t protocol, NETBUF *nb);
+extern void LcpTxEchoReq(NUTDEVICE * dev);
 
 extern void NutPapInput(NUTDEVICE * dev, NETBUF * nb);
 extern int NutPapOutput(NUTDEVICE * dev, uint8_t code, uint8_t id, NETBUF * nb);
