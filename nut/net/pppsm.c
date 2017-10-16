@@ -88,7 +88,7 @@ static HANDLE pppThread;
  * Message handling (from other threads)
  * (currently only 1 message pending, static variable used instead of a queue)
  */
-#include "d:/eclipse_etech/workspace/sim2/queue/queue.h"
+//#include "d:/eclipse_etech/workspace/sim2/queue/queue.h"
 
 typedef enum {
 	pscSynchronize,
@@ -341,6 +341,10 @@ static void LcpTls(NUTDEVICE *dev)
 #endif
 
 	dcb->dcb_reqid = dcb->dcb_rejid = dcb->dcb_rejects = dcb->dcb_auth_state = 0;
+
+	/*
+	 * No need to signal HDLC we started.
+	 */
 }
 
 /*!
@@ -357,6 +361,10 @@ void LcpTlf(NUTDEVICE *dev)
     }
 #endif
 
+    /*
+     * If we requested LCP close, ioctl to exit HDLC is issued from LcpClose.
+     * If we get here because of STOPPING event from remote site, we need to request HDLC exit.
+     */
 	PppRequestHdlcExit(dcb);
 }
 
@@ -461,6 +469,9 @@ void IpcpTlu(NUTDEVICE * dev)
 
 	NutEventPost(&dcb->dcb_state_chg);
 
+	/*
+	 * Signal application, it can start using established PPP.
+	 */
 	if (dcb->dcb_callback)
 		(*dcb->dcb_callback)(dcb, 1);
 }
@@ -480,6 +491,9 @@ void IpcpTld(NUTDEVICE * dev)
     }
 #endif
 
+	/*
+	 * Signal application, PPP is no more available.
+	 */
 	if (dcb->dcb_callback)
 		(void)(*dcb->dcb_callback)(dcb, 0);
 }
@@ -495,10 +509,8 @@ void IpcpTlf(NUTDEVICE * dev)
 {
 	PPPDCB *dcb = dev->dev_dcb;
 
-#ifdef NUTDEBUG
     if (__ppp_trf)
     	fprintf(__ppp_trs, "\n[ipcp-tlf](%u)", dcb->dcb_ipcp_state);
-#endif
 }
 
 /*!
@@ -511,10 +523,8 @@ void IpcpTls(NUTDEVICE * dev)
 {
 	PPPDCB *dcb = dev->dev_dcb;
 
-#ifdef NUTDEBUG
     if (__ppp_trf)
     	fprintf(__ppp_trs, "\n[ipcp-tls](%u)", dcb->dcb_ipcp_state);
-#endif
 }
 #endif
 
