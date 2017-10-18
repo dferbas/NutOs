@@ -52,8 +52,8 @@
  */
 /*@{*/
 
-//#define DBG(...)
-#define DBG	printf
+#define DBG(...)
+//#define DBG	printf
 
 #if defined (MCU_MCF5225)
 # define TX_PACKET_ASSEMBLE		// SM2-MU defined
