@@ -172,7 +172,7 @@ void IpcpTlu(NUTDEVICE *dev);
 void IpcpTld(NUTDEVICE *dev);
 
 #ifndef NUTDEBUG
-	#define IpcpTlf(dev)	LcpLowerDown(dev)
+	#define IpcpTlf(dev)	//LcpLowerDown(dev)
 	#define IpcpTls(dev)	//LcpLowerUp(dev)
 #else
 	void IpcpTlf(NUTDEVICE *dev);
@@ -196,6 +196,7 @@ extern void PppOpen(NUTDEVICE *dev);
 extern void PppClose(NUTDEVICE *dev);
 
 extern int NutPppInitStateMachine(NUTDEVICE *dev);
+extern void PppSmProcessImmediately(PPPDCB *dcb);
 extern void PppRetriesTimerReset(PPPDCB *dcb);
 extern void PppRetriesTimerStop(PPPDCB *dcb);
 

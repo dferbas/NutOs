@@ -122,19 +122,19 @@ static INLINE void LcpResetOptions(NUTDEVICE * dev)
 }
 
 /*!
- * \brief Trigger LCP echo request event.
+ * \brief Send LCP echo request.
  *
- * Enable the link to come up. Typically triggered by the upper layer,
- * when it is enabled.
+ * Used to periodically check PPP connection even if theere is no NCP traffic.
  *
  * \param dev Pointer to the NUTDEVICE structure of the PPP device.
  *
  */
-void LcpTxEchoReq(NUTDEVICE * dev)
+int LcpTxEchoReq(NUTDEVICE * dev)
 {
     PPPDCB *dcb = dev->dev_dcb;
     NETBUF *nb;
     int nb_len;
+    int rslt = 0;
 
 #ifdef NUTDEBUG
     if (__ppp_trf) {
@@ -154,8 +154,12 @@ void LcpTxEchoReq(NUTDEVICE * dev)
     	NutLcpOutput(dev, LCP_ERQ, ++dcb->dcb_reqid, nb);
 
         /* flag will be set to 0 when echo reply is received */
-    	dcb->dcb_echo = 1;
+    	dcb->dcb_echo_req_pending = 1;
+
+    	rslt = 1;
     }
+
+    return rslt;
 }
 
 /*
@@ -175,7 +179,6 @@ void LcpTxConfReq(NUTDEVICE * dev, uint8_t id, uint8_t rejected)
         dcb->dcb_lcp_naks = 0;
     }
     dcb->dcb_acked = 0;
-//    dcb->dcb_retries = 0;
 
     /*
      * Create the request.

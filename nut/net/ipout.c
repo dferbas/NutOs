@@ -171,7 +171,7 @@ int NutIpOutput(uint8_t proto, uint32_t dest, NETBUF * nb)
                 if (nif->if_type == IFT_ETHER)
                     rc = (*nif->if_output) (dev, ETHERTYPE_IP, ha, nb_clone);
                 else if (nif->if_type == IFT_PPP)
-                    rc = (*nif->if_output) (dev, PPP_IP, 0, nb_clone);
+               		rc = (*nif->if_output) (dev, PPP_IP, 0, nb_clone);
                 if (rc == 0) {
                     NutNetBufFree(nb_clone);
                 }
@@ -220,8 +220,7 @@ int NutIpOutput(uint8_t proto, uint32_t dest, NETBUF * nb)
         }
         return (*nif->if_output) (dev, ETHERTYPE_IP, ha, nb);
     } else if (nif->if_type == IFT_PPP) {
-    	if (((PPPDCB *) (dev->dev_dcb))->dcb_ipcp_state == PPPS_OPENED)	//do not xmit e.g. DHCP requests
-    		return (*nif->if_output) (dev, PPP_IP, 0, nb);
+   		return (*nif->if_output) (dev, PPP_IP, 0, nb);
     }
 
     NutNetBufFree(nb);

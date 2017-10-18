@@ -262,8 +262,8 @@ THREAD(PppHdlcReceive, arg)
 {
     NUTDEVICE *dev = (NUTDEVICE *) arg;
     PPPHDLC_DCB *dcb = (PPPHDLC_DCB *) dev->dev_dcb;
-    NUTDEVICE *netdev = (NUTDEVICE *) dev->dev_icb;
-    IFNET *ifn = (IFNET *) netdev->dev_icb;
+    NUTDEVICE *netdev = (NUTDEVICE *) dev->dev_icb;			//here we have &devPpp
+    IFNET *ifn = (IFNET *) netdev->dev_icb;					//&ifn_ppp
     uint_fast8_t ch;
     uint8_t *rd_buf;
     uint8_t *rd_ptr;
@@ -289,14 +289,14 @@ THREAD(PppHdlcReceive, arg)
 
     _ioctl(dcb->dcb_fd, UART_SETREADTIMEOUT, &tmo);
 
-    dev->dev_type = IFTYP_NET;
+//    dev->dev_type = IFTYP_NET;							//do not include this device into ipout's broadcast cloning
     dcb->dcb_mru = ifn->if_mtu;
     rx_buf = malloc(dcb->dcb_mru + 2);
     rx_ptr = rx_buf;
-    /* Signal the link driver that we are up. */
     ifn->if_send = PppHdlcOutput;
+    /* Signal the link driver that we are up. */
     netdev->dev_ioctl(netdev, LCP_LOWERUP, 0);
-    NutEventPost(&dcb->dcb_mode_evt);
+    NutEventPost(&dcb->dcb_mode_evt);						//for ioctl
 
     for (;;) {
         /* Read next character from downlink. */
@@ -354,7 +354,7 @@ THREAD(PppHdlcReceive, arg)
                 nb = NutNetBufAlloc(NULL, NBAF_DATALINK, rx_cnt);
                 if (nb) {
                     memcpy(nb->nb_dl.vp, rx_buf, rx_cnt);
-                    (*ifn->if_recv) (netdev, nb);
+                    (*ifn->if_recv) (netdev, nb);							//i.e. NutPppInput
 
                      // df proposal, not yet verified, temporary commented
                      inframe = 0;

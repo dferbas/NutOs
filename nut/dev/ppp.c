@@ -207,7 +207,7 @@ static int NutPppIOCtl(NUTDEVICE * dev, int req, void *conf)
         break;
 
     case PPP_SETCALLBACK:
-    	((PPPDCB *)(dev->dev_dcb))->dcb_callback = (int(*)(PPPDCB *, int))conf;
+    	((PPPDCB *)(dev->dev_dcb))->dcb_callback = (PppCallbackT *)conf;
 		break;
 
     case LCP_SETECHOSTATE:

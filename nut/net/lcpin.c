@@ -544,8 +544,11 @@ static INLINE void LcpRxEchoReply(NUTDEVICE * dev, uint8_t id, NETBUF * nb)
 
     NutNetBufFree(nb);
 
-    if (id == dcb->dcb_reqid)
-    	dcb->dcb_echo = 0;
+    if (dcb->dcb_echo_req_pending && id == dcb->dcb_reqid)
+    {
+    	dcb->dcb_echo_req_pending = 0;
+    	PppSmProcessImmediately(dcb);		//invoke ppp_sm to immediately reflect reply
+    }
 }
 
 /*!

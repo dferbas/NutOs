@@ -48,6 +48,7 @@
 #include <dev/ahdlc.h>
 #include <netinet/in.h>
 #include <netinet/if_ppp.h>
+#include <netinet/ppp_fsm.h>
 #include <net/ppp.h>
 #include <sys/types.h>
 #include <sys/timer.h>
@@ -87,34 +88,38 @@ int NutPppOutput(NUTDEVICE * dev, uint16_t type, uint8_t * ha, NETBUF * nb)
 
     (void)ha;
 
-    /*
-     * Allocate and set the HDLC header.
-     */
-    if (NutNetBufAlloc(nb, NBAF_DATALINK, sizeof(PPPHDR)) == 0)
-        return -1;
+    //do not pass IP protocol (e.g. dhcp packets) until ppp is fully opened
+    if (type != PPP_IP || dcb->dcb_ipcp_state == PPPS_OPENED)
+    {
+		/*
+		 * Allocate and set the HDLC header.
+		 */
+		if (NutNetBufAlloc(nb, NBAF_DATALINK, sizeof(PPPHDR)) == 0)
+			return -1;
 
-    ph = (PPPHDR *) nb->nb_dl.vp;
-    ph->address = AHDLC_ALLSTATIONS;
-    ph->control = AHDLC_UI;
-    ph->prot_type = htons(type);
+		ph = (PPPHDR *) nb->nb_dl.vp;
+		ph->address = AHDLC_ALLSTATIONS;
+		ph->control = AHDLC_UI;
+		ph->prot_type = htons(type);
 
 #ifdef NUTDEBUG
-    if (__ppp_trf) {
-        fputs("\nPPP<", __ppp_trs);
-        NutDumpPpp(__ppp_trs, nb);
-    }
+	if (__ppp_trf) {
+		fputs("\nPPP<", __ppp_trs);
+		NutDumpPpp(__ppp_trs, nb);
+	}
 #elif defined(__IMAGECRAFT__)
-    /*
-     * No idea what this is, but ICCAVR fails if this call isn't there.
-     */
-    NutSleep(100);
+	/*
+	 * No idea what this is, but ICCAVR fails if this call isn't there.
+	 */
+	NutSleep(100);
 #endif
 
-    /*
-     * Call the physical device output routine.
-     */
-    if (nif->if_send && (*nif->if_send) ((((NUTFILE *) (uintptr_t) (dcb->dcb_fd)))->nf_dev, nb) == 0) {
-        return 0;
+		/*
+		 * Call the physical device output routine.
+		 */
+		if (nif->if_send && (*nif->if_send) ((((NUTFILE *) (uintptr_t) (dcb->dcb_fd)))->nf_dev, nb) == 0) {
+			return 0;
+		}
     }
     NutNetBufFree(nb);
     return -1;

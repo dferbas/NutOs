@@ -92,12 +92,15 @@ static HANDLE pppThread;
 
 typedef enum {
 	pscSynchronize,
-	pscHdlcExit
+	pscHdlcExit,
+	pscProcess
 } EPppSmEvent;
+
 typedef struct {
 //	q		queue;
 	EPppSmEvent	event;				// requested event
 } TPppSmEvent;
+
 //static TQueue		PppSmEventQueue;
 static TPppSmEvent	PppSmEvent;
 
@@ -106,7 +109,6 @@ static TPppSmEvent	PppSmEvent;
  */
 static int echo_enable = 0;
 static int echo_timeout = 0;
-static int echo_test = 0;
 
 
 /*! \fn NutPppSm(void *arg)
@@ -119,6 +121,7 @@ THREAD(NutPppSm, arg)
     NUTDEVICE *dev = arg;
     PPPDCB *dcb = dev->dev_dcb;
     uint_fast8_t retries, lcp_echo_counter = 0;
+    int echo_test = 0;
 
 //    Queue_Init(&PppSmEventQueue, 5);	// max 5 events pending
 
@@ -130,19 +133,27 @@ THREAD(NutPppSm, arg)
         {
 //        	TPppSmEvent	*event = Queue_RemoveItem(&PppSmEventQueue);
         	if (PppSmEvent.event == pscSynchronize)
-        		continue;		//event occured, restart timer
-        	else /*if (PppSmEvent.event == pscHdlcExit)*/
+        		continue;		//event occurred, restart timer
+        	else if (PppSmEvent.event == pscHdlcExit)
         	{
         		NUTDEVICE *dev_null = NULL;
 
         		//Signal hdlc thread its termination and wait up to 2 sec for its exit and LCP_LOWERDOWN
         		_ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
         	}
+//        	else if (PppSmEvent.event == pscProcess)
+//        	{}	// proceed immediately
         }
 #endif
         new_magic++;
 
         retries = dcb->dcb_retries;
+
+#ifdef NUTDEBUG
+		if (__ppp_trf && dcb->dcb_ipcp_state < PPPS_OPENED) {
+			fprintf(__ppp_trs, "ppp_sm(%u)-%u", dcb->dcb_ipcp_state, retries);
+		}
+#endif
 
         /*
          * LCP timeouts.
@@ -224,7 +235,7 @@ THREAD(NutPppSm, arg)
 			{
 				if (echo_test)
 				{
-					if (dcb->dcb_echo)
+					if (dcb->dcb_echo_req_pending)
 					{
 						LcpClose(dev);		// close ppp connection
 						echo_timeout = 1;	// timeout occurred
@@ -234,13 +245,10 @@ THREAD(NutPppSm, arg)
 
 					echo_test = 0;
 				}
-
-				if (++lcp_echo_counter >= echo_enable)
+				else if (++lcp_echo_counter >= echo_enable)
 				{
 					lcp_echo_counter = 0;
-					LcpTxEchoReq(dev);
-
-					echo_test = 1;
+					echo_test = LcpTxEchoReq(dev);	// echo_test = 1 if packet was sent
 				}
 			}
 			break;
@@ -267,7 +275,18 @@ int NutPppInitStateMachine(NUTDEVICE * dev)
 }
 
 /*!
- * \brief request hdlc exit (works also from other thread)
+ * \brief Process automaton immediately.
+ * Do not wait until PPP_SM_PERIOD elapsed.
+ */
+void PppSmProcessImmediately(PPPDCB * dcb)
+{
+	PppSmEvent.event = pscProcess;
+//	Queue_AddItem(&PppSmEventQueue, &PppSmEvent);
+	NutEventPost/*Async*/(&dcb->dcb_timer_event);
+}
+
+/*!
+ * \brief Request hdlc exit (works also from other thread).
  */
 static inline void PppRequestHdlcExit(PPPDCB * dcb)
 {
@@ -473,7 +492,7 @@ void IpcpTlu(NUTDEVICE * dev)
 	 * Signal application, it can start using established PPP.
 	 */
 	if (dcb->dcb_callback)
-		(*dcb->dcb_callback)(dcb, 1);
+		(*dcb->dcb_callback)(dcb, PPP_EVENT_IPCP_UP);
 }
 
 /*!
@@ -495,7 +514,7 @@ void IpcpTld(NUTDEVICE * dev)
 	 * Signal application, PPP is no more available.
 	 */
 	if (dcb->dcb_callback)
-		(void)(*dcb->dcb_callback)(dcb, 0);
+		(void)(*dcb->dcb_callback)(dcb, PPP_EVENT_IPCP_DOWN);
 }
 
 #ifdef NUTDEBUG
@@ -543,7 +562,7 @@ void LcpOpen(NUTDEVICE * dev)
 #ifdef NUTDEBUG
     if (__ppp_trf) {
 //        fputs("\n[LCP-OPEN]", __ppp_trs);
-    	fprintf(__ppp_trs, "\n[LCP-UP](%u)", dcb->dcb_lcp_state);
+    	fprintf(__ppp_trs, "\n[LCP-OPEN](%u)", dcb->dcb_lcp_state);
     }
 #endif
 
@@ -642,10 +661,10 @@ void LcpClose(NUTDEVICE * dev)
     	 * Signal hdlc thread its termination and wait up to 2 sec for its exit.
     	 */
         _ioctl(dcb->dcb_fd, HDLC_SETIFNET, &dev_null);
-        /*
-         * Wait until hdlc thread exits.
-         */
-//***   NutEventWait(&dcb->dcb_state_chg, 5000);
+//        /*
+//         * Wait until hdlc thread exits.
+//         */
+//        NutEventWait(&dcb->dcb_state_chg, 5000);
 
 //        dcb->dcb_lcp_state = PPPS_INITIAL;
         break;
@@ -669,7 +688,13 @@ void LcpLowerUp(NUTDEVICE * dev)
     }
 #endif
 
-    switch (dcb->dcb_lcp_state) {
+	/*
+	 * Signal application, PPP initialization started (hdlc started).
+	 */
+//	if (dcb->dcb_callback)
+//		(void)(*dcb->dcb_callback)(dcb, PPP_EVENT_HDLC_UP);
+
+   switch (dcb->dcb_lcp_state) {
     case PPPS_INITIAL:
         /*
          * The LCP layer is still disabled.
@@ -705,10 +730,17 @@ void LcpLowerDown(NUTDEVICE * dev)
     }
 #endif
 
+	/*
+	 * Signal application, PPP is no more available (hdlc exited).
+	 */
+	if (dcb->dcb_callback)
+		(void)(*dcb->dcb_callback)(dcb, PPP_EVENT_HDLC_DOWN);
+
     switch (dcb->dcb_lcp_state) {
     case PPPS_CLOSED:
 		/*
 		 * Here we comes (hdlc thread context) when TERM ACK was received to a TERM REQ, issued from LcpClose (application context).
+		 * This happens when we actively close PPP via ioctl(LCP_CLOSE) from application.
 		 */
 
         /*
@@ -730,16 +762,15 @@ void LcpLowerDown(NUTDEVICE * dev)
     case PPPS_STOPPING:
 		/*
 		 * We will arrive here when hdlc thread is exiting (hdlc thread context).
-		 * This happens when we actively close PPP via ioctl(LCP_CLOSE) from application
-		 *  or when NO CARRIER was detected and hdlc is now terminating itself.
+		 * This happens when NO CARRIER was detected and hdlc is now terminating itself.
 		 */
 
-        /*
-         * Wake up the LCP_CLOSE ioctl (application thread) and proceed with hdlc thread exit.
-         * (see above)
-         */
-        NutEventPostAsync(&dcb->dcb_state_chg); // flk: the event is expected; it has to stay uncommented df proposal: comment on
-//df        break; // df proposal: comment on
+//        /*
+//         * Wake up the LCP_CLOSE ioctl (application thread) and proceed with hdlc thread exit.
+//         * (see above)
+//         */
+//        NutEventPostAsync(&dcb->dcb_state_chg); // flk: the event is expected; it has to stay uncommented df proposal: comment on
+
     case PPPS_REQSENT:
     case PPPS_ACKRCVD:
     case PPPS_ACKSENT:
