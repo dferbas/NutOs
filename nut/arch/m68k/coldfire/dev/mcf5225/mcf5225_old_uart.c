@@ -79,8 +79,15 @@
         PREVENT_SPURIOUS_INTERRUPT(MCF_UARTn_UIMR = usartControlRegister.uimr;)\
     }
 
+/* Enable Transmit Ready Interrupt. */
+#define SET_TXRXRDY_INTERRUPTS() \
+    {   \
+        usartControlRegister.uimr |= MCF_UART_UIMR_TXRDY | MCF_UART_UIMR_FFULL_RXRDY;\
+        PREVENT_SPURIOUS_INTERRUPT(MCF_UARTn_UIMR = usartControlRegister.uimr;)\
+    }
+
 /* Disable All Interrupt. */
-#define CLR_ALL_INTERRUPT() \
+#define CLR_ALL_INTERRUPTS() \
     {   \
         usartControlRegister.uimr = 0;\
         PREVENT_SPURIOUS_INTERRUPT(MCF_UARTn_UIMR = 0;)\
@@ -447,7 +454,7 @@ static void McfUsartInterrupts(void *arg)
 	}
 
 #if defined(UART_HDX_BIT) || defined(UART_HDB_FDX_BIT)
-	if(hdx_control && (p_dcb->dcb_tx_rbf.rbf_cnt == 0) && (MCF_UARTn_USR & MCF_UART_USR_TXEMP))
+	if (hdx_control && (p_dcb->dcb_tx_rbf.rbf_cnt == 0) && (MCF_UARTn_USR & MCF_UART_USR_TXEMP))
 	{
 		McfUsartTxEmpty(&p_dcb->dcb_tx_rbf);
 	}
@@ -470,10 +477,7 @@ static void McfUsartEnable(void)
 	MCF_UARTn_UCR = MCF_UART_UCR_TX_ENABLED;
 	MCF_UARTn_UCR = MCF_UART_UCR_RX_ENABLED;
 
-	SET_TXRDY_INTERRUPT()
-	;
-	SET_RXRDY_INTERRUPT()
-	;
+	SET_TXRXRDY_INTERRUPTS();
 
 	NutExitCritical();
 }
@@ -483,7 +487,7 @@ static void McfUsartEnable(void)
  */
 static void McfUsartDisable(void)
 {
-	CLR_ALL_INTERRUPT();
+	CLR_ALL_INTERRUPTS();
 	/*
 	 * Allow incoming or outgoing character to finish.
 	 */
@@ -657,12 +661,14 @@ static int McfUsartSetParity(uint8_t mode)
 			usartControlRegister.umr1 |= MCF_UART_UMR_PM_EVEN;
 			break;
 	}
+
 	McfUsartDisable();
 
 	/* Reset Mode Register */
 	MCF_UARTn_UCR = MCF_UART_UCR_RESET_MR;
 
 	MCF_UARTn_UMR1 = usartControlRegister.umr1;
+
 	McfUsartEnable();
 
 	/*
@@ -726,6 +732,7 @@ static int McfUsartSetStopBits(uint8_t bits)
 	{
 		usartControlRegister.umr2 |= MCF_UART_UMR_SB_STOP_BITS_15;
 	}
+
 	McfUsartDisable();
 	MCF_UARTn_UMR2 = usartControlRegister.umr2;
 	McfUsartEnable();
@@ -1196,7 +1203,7 @@ static void McfUsartRxStart(void)
 	/*
 	 * Do any required software flow control.
 	 */
-	if (flow_control && (flow_control & XOFF_SENT) != 0)
+	if (flow_control & XOFF_SENT)
 	{
 		NutUseCritical();
 		NutEnterCriticalLevel(IH_USART_LEVEL);
@@ -1269,7 +1276,7 @@ static int McfUsartInit(void)
 	MCF_UARTn_UCSR = MCF_UART_UCSR_RCS_SYS_CLK | MCF_UART_UCSR_TCS_SYS_CLK;
 
 	/* Disable all interrupts */
-	CLR_ALL_INTERRUPT();
+	CLR_ALL_INTERRUPTS();
 
 	if (NutRegisterIrqHandler(&sig_UART, McfUsartInterrupts, &dcb_usart))
 		return -1;

@@ -74,7 +74,7 @@
     }
 
 /* Disable All Interrupt. */
-#define CLR_ALL_INTERRUPT() \
+#define CLR_ALL_INTERRUPTS() \
     {   \
         reg_uart.uimr = 0;\
         PREVENT_SPURIOUS_INTERRUPT(MCF_UART_UIMR(BASE) = 0;)\
@@ -505,7 +505,7 @@ static void Mcf5UsartEnable(void)
  */
 static void Mcf5UsartDisable(void)
 {
-	CLR_ALL_INTERRUPT()
+	CLR_ALL_INTERRUPTS()
 	;
 
 	/*
@@ -1171,7 +1171,7 @@ static int Mcf5UsartInit(void)
 	/*
 	 * Disable UART's interrupts
 	 */
-	CLR_ALL_INTERRUPT()
+	CLR_ALL_INTERRUPTS()
 	;
 
 	/*
@@ -1234,7 +1234,7 @@ static int Mcf5UsartInit(void)
 	/*
 	 * Disable UART's interrupts
 	 */
-	CLR_ALL_INTERRUPT()
+	CLR_ALL_INTERRUPTS()
 	;
 
 	/*
