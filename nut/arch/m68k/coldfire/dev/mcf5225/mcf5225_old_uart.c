@@ -1074,7 +1074,7 @@ static int McfUsartSetFlowControl(uint32_t flags)
 		/* Half duplex, komunikace pres porty YZ */
 		if (flags & USART_MF_HALFDUPLEX_YZ)
 		{
-			// Disable Half duplex on first chip
+			// Disable first chip
 			MCF_GPIO_PORT_CHIP1 |= MCF_GPIO_PORT_RE1;	/* RE1 = 1 Disable Receiver */
 			MCF_GPIO_PORT_CHIP1 &= ~MCF_GPIO_PORT_DE1;	/* DE1 = 0 Disable Transmitter */
 
@@ -1120,14 +1120,17 @@ static int McfUsartSetFlowControl(uint32_t flags)
 	/*
 	 * Set full duplex mode
 	 */
-	else if (hdx_control)
+	else
 	{
-		//TODO: conditionally not compile?
-		/*
-		 * If this mode is selected on REV_D boards with RS232 piggy-back,
-		 * it enables RS232 transceiver to Tx to YZ which can be of no care?
-		 */
-		hdx_control = 0;
+		if (hdx_control)
+		{
+			//TODO: conditionally not compile?
+			/*
+			 * If this mode is selected on REV_D boards with RS232 piggy-back,
+			 * it enables RS232 transceiver to Tx to YZ which can be of no care?
+			 */
+			hdx_control = 0;
+		}
 
 		/* RE1 = 0 Enable Receiver, DE1 = 0 Disable Transmitter */
 		MCF_GPIO_PORT_CHIP1 &= ~(MCF_GPIO_PORT_RE1 | MCF_GPIO_PORT_DE1);
